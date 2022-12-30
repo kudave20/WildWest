@@ -9,7 +9,8 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"Engine"
+				"Engine",
+				"UMG"
 			]
 		}
 	],
@@ -28,6 +29,6 @@
 		{
 			"Name": "EnhancedInput",
 			"Enabled": true
-		},
+		}
 	]
 }

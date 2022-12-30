@@ -16,6 +16,7 @@ public:
 	AGunman();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -34,7 +35,20 @@ protected:
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class UCameraComponent* Camera;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+	TSubclassOf<class UUserWidget> CharacterSelectWidget;
+
+	class UCharacterSelect* CharacterSelect;
+
+	UPROPERTY(ReplicatedUsing = OnRep_bIsLobbyFull)
+	bool bIsLobbyFull{ false };
+
+	UFUNCTION()
+	void OnRep_bIsLobbyFull();
+
 public:	
-	
+	void SetbIsLobbyFull(bool bIsFull);
+
 
 };

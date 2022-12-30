@@ -4,6 +4,8 @@
 #include "Gunman.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "WildWest/HUD/CharacterSelect.h"
+#include "Net/UnrealNetwork.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -16,6 +18,13 @@ AGunman::AGunman()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(GetMesh());
 	Camera->bUsePawnControlRotation = true;
+}
+
+void AGunman::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGunman, bIsLobbyFull);
 }
 
 void AGunman::BeginPlay()
@@ -86,4 +95,42 @@ void AGunman::Turn(const FInputActionValue& Value)
 void AGunman::LookUp(const FInputActionValue& Value)
 {
 	AddControllerPitchInput(Value.Get<float>());
+}
+
+void AGunman::OnRep_bIsLobbyFull()
+{
+	if (bIsLobbyFull)
+	{
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			APlayerController* PlayerController = Cast<APlayerController>(World->GetFirstPlayerController());
+			if (PlayerController)
+			{
+				CharacterSelect = CreateWidget<UCharacterSelect>(PlayerController, CharacterSelectWidget);
+				if (CharacterSelect)
+				{
+					CharacterSelect->CharacterSelectSetup();
+				}
+			}
+		}
+	}
+}
+
+void AGunman::SetbIsLobbyFull(bool bIsFull)
+{
+	bIsLobbyFull = bIsFull;
+
+	if (bIsLobbyFull && IsLocallyControlled())
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+		if (PlayerController)
+		{
+			CharacterSelect = CreateWidget<UCharacterSelect>(PlayerController, CharacterSelectWidget);
+			if (CharacterSelect)
+			{
+				CharacterSelect->CharacterSelectSetup();
+			}
+		}
+	}
 }
