@@ -4,6 +4,7 @@
 #include "GunmanAnimInstance.h"
 #include "Gunman.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UGunmanAnimInstance::NativeInitializeAnimation()
 {
@@ -22,7 +23,11 @@ void UGunmanAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	}
 	if (Gunman == nullptr) return;
 
+	FTransform T = Gunman->GetActorTransform();
 	FVector Velocity = Gunman->GetVelocity();
+	FRotator Rotation = UKismetMathLibrary::InverseTransformDirection(T, Velocity).Rotation();
+
+	Angle = Rotation.Yaw;
 	Velocity.Z = 0.f;
 	Speed = Velocity.Size();
 
