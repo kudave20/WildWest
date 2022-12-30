@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Gunman.h"
+#include "Sheriff.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
@@ -9,7 +9,7 @@
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
 #include "WildWest/Input/InputConfigData.h"
 
-AGunman::AGunman()
+ASheriff::ASheriff()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -18,19 +18,19 @@ AGunman::AGunman()
 	Camera->bUsePawnControlRotation = true;
 }
 
-void AGunman::BeginPlay()
+void ASheriff::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
-void AGunman::Tick(float DeltaTime)
+void ASheriff::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-void AGunman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ASheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
@@ -42,13 +42,13 @@ void AGunman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	EnhancedInputComponent->BindAction(InputActions->InputJump, ETriggerEvent::Triggered, this, &ACharacter::Jump);
-	EnhancedInputComponent->BindAction(InputActions->InputMoveForward, ETriggerEvent::Triggered, this, &AGunman::MoveForward);
-	EnhancedInputComponent->BindAction(InputActions->InputMoveRight, ETriggerEvent::Triggered, this, &AGunman::MoveRight);
-	EnhancedInputComponent->BindAction(InputActions->InputTurn, ETriggerEvent::Triggered, this, &AGunman::Turn);
-	EnhancedInputComponent->BindAction(InputActions->InputLookUp, ETriggerEvent::Triggered, this, &AGunman::LookUp);
+	EnhancedInputComponent->BindAction(InputActions->InputMoveForward, ETriggerEvent::Triggered, this, &ASheriff::MoveForward);
+	EnhancedInputComponent->BindAction(InputActions->InputMoveRight, ETriggerEvent::Triggered, this, &ASheriff::MoveRight);
+	EnhancedInputComponent->BindAction(InputActions->InputTurn, ETriggerEvent::Triggered, this, &ASheriff::Turn);
+	EnhancedInputComponent->BindAction(InputActions->InputLookUp, ETriggerEvent::Triggered, this, &ASheriff::LookUp);
 }
 
-void AGunman::MoveForward(const FInputActionValue& Value)
+void ASheriff::MoveForward(const FInputActionValue& Value)
 {
 	if (Controller != nullptr)
 	{
@@ -63,7 +63,7 @@ void AGunman::MoveForward(const FInputActionValue& Value)
 	}
 }
 
-void AGunman::MoveRight(const FInputActionValue& Value)
+void ASheriff::MoveRight(const FInputActionValue& Value)
 {
 	if (Controller != nullptr)
 	{
@@ -78,12 +78,13 @@ void AGunman::MoveRight(const FInputActionValue& Value)
 	}
 }
 
-void AGunman::Turn(const FInputActionValue& Value)
+void ASheriff::Turn(const FInputActionValue& Value)
 {
 	AddControllerYawInput(Value.Get<float>());
 }
 
-void AGunman::LookUp(const FInputActionValue& Value)
+void ASheriff::LookUp(const FInputActionValue& Value)
 {
 	AddControllerPitchInput(Value.Get<float>());
 }
+
