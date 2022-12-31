@@ -3,9 +3,7 @@
 
 #include "LobbyGameMode.h"
 #include "GameFramework/GameStateBase.h"
-#include "WildWest/HUD/CharacterSelect.h"
-#include "Kismet/GameplayStatics.h"
-#include "WildWest/Character/Gunman.h"
+#include "WildWest/GameState/LobbyGameState.h"
 
 void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
@@ -17,11 +15,21 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 		UWorld* World = GetWorld();
 		if (World)
 		{
-			AGunman* Gunman = Cast<AGunman>(UGameplayStatics::GetPlayerPawn(World, 0));
-			if (Gunman)
+			ALobbyGameState* LobbyGameState = Cast<ALobbyGameState>(GameState);
+			if (LobbyGameState)
 			{
-				Gunman->SetbIsLobbyFull(true);
+				LobbyGameState->SetbIsLobbyFull(true);
 			}
 		}
+	}
+}
+
+void ALobbyGameMode::TravelToTown()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		bUseSeamlessTravel = true;
+		World->ServerTravel(FString("/Game/Maps/Town?listen"));
 	}
 }

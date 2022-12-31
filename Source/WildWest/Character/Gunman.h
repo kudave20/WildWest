@@ -16,7 +16,15 @@ public:
 	AGunman();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	void GunmanButtonClicked();
+	void SheriffButtonClicked();
+
+	UFUNCTION(Server, Reliable)
+	void ServerGunmanButtonClicked();
+
+	UFUNCTION(Server, Reliable)
+	void ServerSheriffButtonClicked();
 
 protected:
 	virtual void BeginPlay() override;
@@ -36,19 +44,8 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class UCameraComponent* Camera;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
-	TSubclassOf<class UUserWidget> CharacterSelectWidget;
+	bool bIsSelectingCharacter{ false };
 
-	class UCharacterSelect* CharacterSelect;
-
-	UPROPERTY(ReplicatedUsing = OnRep_bIsLobbyFull)
-	bool bIsLobbyFull{ false };
-
-	UFUNCTION()
-	void OnRep_bIsLobbyFull();
-
-public:	
-	void SetbIsLobbyFull(bool bIsFull);
-
+public:
 
 };

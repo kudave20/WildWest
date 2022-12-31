@@ -3,6 +3,8 @@
 
 #include "CharacterSelect.h"
 #include "Components/Button.h"
+#include "WildWest/GameState/LobbyGameState.h"
+#include "WildWest/Character/Gunman.h"
 
 void UCharacterSelect::CharacterSelectSetup()
 {
@@ -47,11 +49,27 @@ bool UCharacterSelect::Initialize()
 void UCharacterSelect::GunmanButtonClicked()
 {
 	GunmanButton->SetIsEnabled(false);
+
+	AGunman* Gunman = Cast<AGunman>(GetOwningPlayerPawn());
+	if (Gunman)
+	{
+		Gunman->GunmanButtonClicked();
+	}
+
+	SheriffButton->SetIsEnabled(true);
 }
 
 void UCharacterSelect::SheriffButtonClicked()
 {
 	SheriffButton->SetIsEnabled(false);
+
+	AGunman* Gunman = Cast<AGunman>(GetOwningPlayerPawn());
+	if (Gunman)
+	{
+		Gunman->SheriffButtonClicked();
+	}
+
+	GunmanButton->SetIsEnabled(true);
 }
 
 void UCharacterSelect::CharacterSelectTearDown()

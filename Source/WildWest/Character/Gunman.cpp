@@ -4,8 +4,7 @@
 #include "Gunman.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "WildWest/HUD/CharacterSelect.h"
-#include "Net/UnrealNetwork.h"
+#include "WildWest/GameState/LobbyGameState.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -20,12 +19,6 @@ AGunman::AGunman()
 	Camera->bUsePawnControlRotation = true;
 }
 
-void AGunman::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(AGunman, bIsLobbyFull);
-}
 
 void AGunman::BeginPlay()
 {
@@ -55,6 +48,104 @@ void AGunman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	EnhancedInputComponent->BindAction(InputActions->InputMoveRight, ETriggerEvent::Triggered, this, &AGunman::MoveRight);
 	EnhancedInputComponent->BindAction(InputActions->InputTurn, ETriggerEvent::Triggered, this, &AGunman::Turn);
 	EnhancedInputComponent->BindAction(InputActions->InputLookUp, ETriggerEvent::Triggered, this, &AGunman::LookUp);
+}
+
+void AGunman::GunmanButtonClicked()
+{
+	if (HasAuthority())
+	{
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
+			if (LobbyGameState)
+			{
+				if (LobbyGameState->GetbIsSheriffSelected())
+				{
+					LobbyGameState->SetbIsGunmanSelected(true);
+					return;
+				}
+
+				if (bIsSelectingCharacter) LobbyGameState->SetbIsSheriffSelected(false);
+				LobbyGameState->SetbIsGunmanSelected(true);
+				bIsSelectingCharacter = true;
+			}
+		}
+	}
+	else
+	{
+		ServerGunmanButtonClicked();
+	}
+}
+
+void AGunman::SheriffButtonClicked()
+{
+	if (HasAuthority())
+	{
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
+			if (LobbyGameState)
+			{
+				if (LobbyGameState->GetbIsGunmanSelected())
+				{
+					LobbyGameState->SetbIsSheriffSelected(true);
+					return;
+				}
+
+				if (bIsSelectingCharacter) LobbyGameState->SetbIsGunmanSelected(false);
+				LobbyGameState->SetbIsSheriffSelected(true);
+				bIsSelectingCharacter = true;
+			}
+		}
+	}
+	else
+	{
+		ServerSheriffButtonClicked();
+	}
+}
+
+void AGunman::ServerGunmanButtonClicked_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
+		if (LobbyGameState)
+		{
+			if (LobbyGameState->GetbIsSheriffSelected())
+			{
+				LobbyGameState->SetbIsGunmanSelected(true);
+				return;
+			}
+
+			if (bIsSelectingCharacter) LobbyGameState->SetbIsSheriffSelected(false);
+			LobbyGameState->SetbIsGunmanSelected(true);
+			bIsSelectingCharacter = true;
+		}
+	}
+}
+
+void AGunman::ServerSheriffButtonClicked_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
+		if (LobbyGameState)
+		{
+			if (LobbyGameState->GetbIsGunmanSelected())
+			{
+				LobbyGameState->SetbIsSheriffSelected(true);
+				return;
+			}
+
+			if (bIsSelectingCharacter) LobbyGameState->SetbIsGunmanSelected(false);
+			LobbyGameState->SetbIsSheriffSelected(true);
+			bIsSelectingCharacter = true;
+		}
+	}
 }
 
 void AGunman::MoveForward(const FInputActionValue& Value)
@@ -95,42 +186,4 @@ void AGunman::Turn(const FInputActionValue& Value)
 void AGunman::LookUp(const FInputActionValue& Value)
 {
 	AddControllerPitchInput(Value.Get<float>());
-}
-
-void AGunman::OnRep_bIsLobbyFull()
-{
-	if (bIsLobbyFull)
-	{
-		UWorld* World = GetWorld();
-		if (World)
-		{
-			APlayerController* PlayerController = Cast<APlayerController>(World->GetFirstPlayerController());
-			if (PlayerController)
-			{
-				CharacterSelect = CreateWidget<UCharacterSelect>(PlayerController, CharacterSelectWidget);
-				if (CharacterSelect)
-				{
-					CharacterSelect->CharacterSelectSetup();
-				}
-			}
-		}
-	}
-}
-
-void AGunman::SetbIsLobbyFull(bool bIsFull)
-{
-	bIsLobbyFull = bIsFull;
-
-	if (bIsLobbyFull && IsLocallyControlled())
-	{
-		APlayerController* PlayerController = Cast<APlayerController>(GetController());
-		if (PlayerController)
-		{
-			CharacterSelect = CreateWidget<UCharacterSelect>(PlayerController, CharacterSelectWidget);
-			if (CharacterSelect)
-			{
-				CharacterSelect->CharacterSelectSetup();
-			}
-		}
-	}
 }
