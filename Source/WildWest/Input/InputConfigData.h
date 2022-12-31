@@ -30,4 +30,16 @@ public:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
     UInputAction* InputLookUp;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    UInputAction* InputSwitchToFirst;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    UInputAction* InputSwitchToSecond;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    UInputAction* InputSwitchToThird;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+    UInputAction* InputSwitchToFourth;
 };

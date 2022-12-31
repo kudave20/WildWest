@@ -4,6 +4,8 @@
 #include "Sheriff.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "EngineUtils.h"
+#include "Kismet/GameplayStatics.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -22,6 +24,15 @@ void ASheriff::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		for (TActorIterator<ASheriff> Iter(World); Iter; ++Iter)
+		{
+			ASheriff* Sheriff = *Iter;
+			SheriffList.Add(Sheriff);
+		}
+	}
 }
 
 void ASheriff::Tick(float DeltaTime)
@@ -46,6 +57,10 @@ void ASheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	EnhancedInputComponent->BindAction(InputActions->InputMoveRight, ETriggerEvent::Triggered, this, &ASheriff::MoveRight);
 	EnhancedInputComponent->BindAction(InputActions->InputTurn, ETriggerEvent::Triggered, this, &ASheriff::Turn);
 	EnhancedInputComponent->BindAction(InputActions->InputLookUp, ETriggerEvent::Triggered, this, &ASheriff::LookUp);
+	EnhancedInputComponent->BindAction(InputActions->InputSwitchToFirst, ETriggerEvent::Triggered, this, &ASheriff::SwitchToFirst);
+	EnhancedInputComponent->BindAction(InputActions->InputSwitchToSecond, ETriggerEvent::Triggered, this, &ASheriff::SwitchToSecond);
+	EnhancedInputComponent->BindAction(InputActions->InputSwitchToThird, ETriggerEvent::Triggered, this, &ASheriff::SwitchToThird);
+	EnhancedInputComponent->BindAction(InputActions->InputSwitchToFourth, ETriggerEvent::Triggered, this, &ASheriff::SwitchToFourth);
 }
 
 void ASheriff::MoveForward(const FInputActionValue& Value)
@@ -88,3 +103,70 @@ void ASheriff::LookUp(const FInputActionValue& Value)
 	AddControllerPitchInput(Value.Get<float>());
 }
 
+void ASheriff::SwitchToFirst()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ASheriff* Sheriff = SheriffList[0];
+		if (Sheriff)
+		{
+			APlayerController* PlayerController = World->GetFirstPlayerController();
+			if (PlayerController)
+			{
+				PlayerController->Possess(Sheriff);
+			}
+		}
+	}
+}
+
+void ASheriff::SwitchToSecond()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ASheriff* Sheriff = SheriffList[1];
+		if (Sheriff)
+		{
+			APlayerController* PlayerController = World->GetFirstPlayerController();
+			if (PlayerController)
+			{
+				PlayerController->Possess(Sheriff);
+			}
+		}
+	}
+}
+
+void ASheriff::SwitchToThird()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ASheriff* Sheriff = SheriffList[2];
+		if (Sheriff)
+		{
+			APlayerController* PlayerController = World->GetFirstPlayerController();
+			if (PlayerController)
+			{
+				PlayerController->Possess(Sheriff);
+			}
+		}
+	}
+}
+
+void ASheriff::SwitchToFourth()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ASheriff* Sheriff = SheriffList[3];
+		if (Sheriff)
+		{
+			APlayerController* PlayerController = World->GetFirstPlayerController();
+			if (PlayerController)
+			{
+				PlayerController->Possess(Sheriff);
+			}
+		}
+	}
+}
