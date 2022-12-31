@@ -7,6 +7,8 @@
 #include "EnhancedInput/Public/InputActionValue.h"
 #include "Gunman.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCreateCharacterSelectComplete);
+
 UCLASS()
 class WILDWEST_API AGunman : public ACharacter
 {
@@ -25,6 +27,9 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerSheriffButtonClicked();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnCreateCharacterSelectComplete OnCreateCharacterSelectComplete;
 
 protected:
 	virtual void BeginPlay() override;

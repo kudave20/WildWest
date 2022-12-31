@@ -19,7 +19,6 @@ AGunman::AGunman()
 	Camera->bUsePawnControlRotation = true;
 }
 
-
 void AGunman::BeginPlay()
 {
 	Super::BeginPlay();

@@ -14,6 +14,7 @@ class WILDWEST_API UCharacterSelect : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+	UFUNCTION(BlueprintCallable)
 	void CharacterSelectSetup();
 
 protected:

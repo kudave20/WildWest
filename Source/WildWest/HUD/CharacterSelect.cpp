@@ -75,6 +75,7 @@ void UCharacterSelect::SheriffButtonClicked()
 void UCharacterSelect::CharacterSelectTearDown()
 {
 	RemoveFromParent();
+
 	UWorld* World = GetWorld();
 	if (World)
 	{

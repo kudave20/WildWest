@@ -4,7 +4,7 @@
 #include "LobbyGameState.h"
 #include "WildWest/GameMode/LobbyGameMode.h"
 #include "Kismet/GameplayStatics.h"
-#include "WildWest/Character/GunmanController.h"
+#include "WildWest/Character/Gunman.h"
 #include "Net/UnrealNetwork.h"
 
 void ALobbyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -21,10 +21,10 @@ void ALobbyGameState::OnRep_bIsLobbyFull()
 		UWorld* World = GetWorld();
 		if (World)
 		{
-			AGunmanController* GunmanController = Cast<AGunmanController>(World->GetFirstPlayerController());
-			if (GunmanController)
+			AGunman* Gunman = Cast<AGunman>(UGameplayStatics::GetPlayerPawn(World, 0));
+			if (Gunman)
 			{
-				GunmanController->CreateCharacterSelect();
+				Gunman->OnCreateCharacterSelectComplete.Broadcast();
 			}
 		}
 	}
@@ -37,17 +37,10 @@ void ALobbyGameState::SetbIsLobbyFull(bool bIsFull)
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		APawn* Pawn = UGameplayStatics::GetPlayerPawn(World, 0);
-		if (Pawn)
+		AGunman* Gunman = Cast<AGunman>(UGameplayStatics::GetPlayerPawn(World, 0));
+		if (Gunman)
 		{
-			if (bIsLobbyFull && Pawn->IsLocallyControlled())
-			{
-				AGunmanController* GunmanController = Cast<AGunmanController>(Pawn->GetController());
-				if (GunmanController)
-				{
-					GunmanController->CreateCharacterSelect();
-				}
-			}
+			Gunman->OnCreateCharacterSelectComplete.Broadcast();
 		}
 	}
 }
