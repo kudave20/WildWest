@@ -7,17 +7,6 @@
 #include "EnhancedInput/Public/InputActionValue.h"
 #include "Sheriff.generated.h"
 
-UENUM(BlueprintType)
-enum class EPlayerState : uint8
-{
-	EPS_First UMETA(DisplayName = "First State"),
-	EPS_Second UMETA(DisplayName = "Second State"),
-	EPS_Third UMETA(DisplayName = "Third State"),
-	EPS_Fourth UMETA(DisplayName = "Fourth State"),
-
-	EPS_MAX UMETA(DisplayName = "DefaultMAX")
-};
-
 UCLASS()
 class WILDWEST_API ASheriff : public ACharacter
 {
@@ -50,8 +39,21 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class UCameraComponent* Camera;
 
-	UPROPERTY()
-	TArray<ASheriff*> SheriffList;
+	UPROPERTY(VisibleAnywhere, Category = "Screen")
+	class USceneCaptureComponent2D* Screen;
+
+	UFUNCTION(Server, Reliable)
+	void ServerSwitchToFirst();
+
+	UFUNCTION(Server, Reliable)
+	void ServerSwitchToSecond();
+
+	UFUNCTION(Server, Reliable)
+	void ServerSwitchToThird();
+
+	UFUNCTION(Server, Reliable)
+	void ServerSwitchToFourth();
+
 public:
 
 };

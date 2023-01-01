@@ -19,17 +19,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void GunmanButtonClicked();
-	void SheriffButtonClicked();
-
-	UFUNCTION(Server, Reliable)
-	void ServerGunmanButtonClicked();
-
-	UFUNCTION(Server, Reliable)
-	void ServerSheriffButtonClicked();
-
 	UPROPERTY(BlueprintAssignable)
 	FOnCreateCharacterSelectComplete OnCreateCharacterSelectComplete;
+
+	void GunmanButtonClicked();
+	void SheriffButtonClicked();
 
 protected:
 	virtual void BeginPlay() override;
@@ -50,6 +44,12 @@ private:
 	class UCameraComponent* Camera;
 
 	bool bIsSelectingCharacter{ false };
+
+	UFUNCTION(Server, Reliable)
+	void ServerGunmanButtonClicked();
+
+	UFUNCTION(Server, Reliable)
+	void ServerSheriffButtonClicked();
 
 public:
 

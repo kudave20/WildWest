@@ -51,57 +51,55 @@ void AGunman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AGunman::GunmanButtonClicked()
 {
-	if (HasAuthority())
-	{
-		UWorld* World = GetWorld();
-		if (World)
-		{
-			ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
-			if (LobbyGameState)
-			{
-				if (LobbyGameState->GetbIsSheriffSelected())
-				{
-					LobbyGameState->SetbIsGunmanSelected(true);
-					return;
-				}
-
-				if (bIsSelectingCharacter) LobbyGameState->SetbIsSheriffSelected(false);
-				LobbyGameState->SetbIsGunmanSelected(true);
-				bIsSelectingCharacter = true;
-			}
-		}
-	}
-	else
+	if (!HasAuthority())
 	{
 		ServerGunmanButtonClicked();
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
+		if (LobbyGameState)
+		{
+			if (LobbyGameState->GetbIsSheriffSelected())
+			{
+				LobbyGameState->SetbIsGunmanSelected(true);
+				return;
+			}
+
+			if (bIsSelectingCharacter) LobbyGameState->SetbIsSheriffSelected(false);
+			LobbyGameState->SetbIsGunmanSelected(true);
+			bIsSelectingCharacter = true;
+		}
 	}
 }
 
 void AGunman::SheriffButtonClicked()
 {
-	if (HasAuthority())
-	{
-		UWorld* World = GetWorld();
-		if (World)
-		{
-			ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
-			if (LobbyGameState)
-			{
-				if (LobbyGameState->GetbIsGunmanSelected())
-				{
-					LobbyGameState->SetbIsSheriffSelected(true);
-					return;
-				}
-
-				if (bIsSelectingCharacter) LobbyGameState->SetbIsGunmanSelected(false);
-				LobbyGameState->SetbIsSheriffSelected(true);
-				bIsSelectingCharacter = true;
-			}
-		}
-	}
-	else
+	if (!HasAuthority())
 	{
 		ServerSheriffButtonClicked();
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
+		if (LobbyGameState)
+		{
+			if (LobbyGameState->GetbIsGunmanSelected())
+			{
+				LobbyGameState->SetbIsSheriffSelected(true);
+				return;
+			}
+
+			if (bIsSelectingCharacter) LobbyGameState->SetbIsGunmanSelected(false);
+			LobbyGameState->SetbIsSheriffSelected(true);
+			bIsSelectingCharacter = true;
+		}
 	}
 }
 

@@ -4,8 +4,10 @@
 #include "Sheriff.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
+#include "Components/SceneCaptureComponent2D.h"
+#include "WildWest/GameState/TownGameState.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -18,6 +20,9 @@ ASheriff::ASheriff()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(GetMesh());
 	Camera->bUsePawnControlRotation = true;
+
+	Screen = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("Screen"));
+	Screen->SetupAttachment(Camera);
 }
 
 void ASheriff::BeginPlay()
@@ -27,10 +32,10 @@ void ASheriff::BeginPlay()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		for (TActorIterator<ASheriff> Iter(World); Iter; ++Iter)
+		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+		if (TownGameState)
 		{
-			ASheriff* Sheriff = *Iter;
-			SheriffList.Add(Sheriff);
+			TownGameState->SheriffListSetup();
 		}
 	}
 }
@@ -105,16 +110,25 @@ void ASheriff::LookUp(const FInputActionValue& Value)
 
 void ASheriff::SwitchToFirst()
 {
+	if (!HasAuthority())
+	{
+		ServerSwitchToFirst();
+		return;
+	}
+
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		ASheriff* Sheriff = SheriffList[0];
-		if (Sheriff)
+		if (Controller != nullptr)
 		{
-			APlayerController* PlayerController = World->GetFirstPlayerController();
-			if (PlayerController)
+			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+			if (TownGameState)
 			{
-				PlayerController->Possess(Sheriff);
+				ASheriff* Sheriff = TownGameState->GetSheriffList()[3];
+				if (Sheriff)
+				{
+					Controller->Possess(Sheriff);
+				}
 			}
 		}
 	}
@@ -122,16 +136,25 @@ void ASheriff::SwitchToFirst()
 
 void ASheriff::SwitchToSecond()
 {
+	if (!HasAuthority())
+	{
+		ServerSwitchToSecond();
+		return;
+	}
+
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		ASheriff* Sheriff = SheriffList[1];
-		if (Sheriff)
+		if (Controller != nullptr)
 		{
-			APlayerController* PlayerController = World->GetFirstPlayerController();
-			if (PlayerController)
+			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+			if (TownGameState)
 			{
-				PlayerController->Possess(Sheriff);
+				ASheriff* Sheriff = TownGameState->GetSheriffList()[0];
+				if (Sheriff)
+				{
+					Controller->Possess(Sheriff);
+				}
 			}
 		}
 	}
@@ -139,16 +162,25 @@ void ASheriff::SwitchToSecond()
 
 void ASheriff::SwitchToThird()
 {
+	if (!HasAuthority())
+	{
+		ServerSwitchToThird();
+		return;
+	}
+
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		ASheriff* Sheriff = SheriffList[2];
-		if (Sheriff)
+		if (Controller != nullptr)
 		{
-			APlayerController* PlayerController = World->GetFirstPlayerController();
-			if (PlayerController)
+			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+			if (TownGameState)
 			{
-				PlayerController->Possess(Sheriff);
+				ASheriff* Sheriff = TownGameState->GetSheriffList()[1];
+				if (Sheriff)
+				{
+					Controller->Possess(Sheriff);
+				}
 			}
 		}
 	}
@@ -156,16 +188,105 @@ void ASheriff::SwitchToThird()
 
 void ASheriff::SwitchToFourth()
 {
+	if (!HasAuthority())
+	{
+		ServerSwitchToFourth();
+		return;
+	}
+
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		ASheriff* Sheriff = SheriffList[3];
-		if (Sheriff)
+		if (Controller != nullptr)
 		{
-			APlayerController* PlayerController = World->GetFirstPlayerController();
-			if (PlayerController)
+			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+			if (TownGameState)
 			{
-				PlayerController->Possess(Sheriff);
+				ASheriff* Sheriff = TownGameState->GetSheriffList()[2];
+				if (Sheriff)
+				{
+					Controller->Possess(Sheriff);
+				}
+			}
+		}
+	}
+}
+
+void ASheriff::ServerSwitchToFirst_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		if (Controller != nullptr)
+		{
+			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+			if (TownGameState)
+			{
+				ASheriff* Sheriff = TownGameState->GetSheriffList()[3];
+				if (Sheriff)
+				{
+					Controller->Possess(Sheriff);
+				}
+			}
+		}
+	}
+}
+
+void ASheriff::ServerSwitchToSecond_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		if (Controller != nullptr)
+		{
+			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+			if (TownGameState)
+			{
+				ASheriff* Sheriff = TownGameState->GetSheriffList()[0];
+				if (Sheriff)
+				{
+					Controller->Possess(Sheriff);
+				}
+			}
+		}
+	}
+}
+
+void ASheriff::ServerSwitchToThird_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		if (Controller != nullptr)
+		{
+			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+			if (TownGameState)
+			{
+				ASheriff* Sheriff = TownGameState->GetSheriffList()[1];
+				if (Sheriff)
+				{
+					Controller->Possess(Sheriff);
+				}
+			}
+		}
+	}
+}
+
+void ASheriff::ServerSwitchToFourth_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		if (Controller != nullptr)
+		{
+			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+			if (TownGameState)
+			{
+				ASheriff* Sheriff = TownGameState->GetSheriffList()[2];
+				if (Sheriff)
+				{
+					Controller->Possess(Sheriff);
+				}
 			}
 		}
 	}
