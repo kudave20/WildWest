@@ -4,7 +4,6 @@
 #include "Gunman.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "WildWest/GameState/LobbyGameState.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -49,102 +48,6 @@ void AGunman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	EnhancedInputComponent->BindAction(InputActions->InputLookUp, ETriggerEvent::Triggered, this, &AGunman::LookUp);
 }
 
-void AGunman::GunmanButtonClicked()
-{
-	if (!HasAuthority())
-	{
-		ServerGunmanButtonClicked();
-		return;
-	}
-
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
-		if (LobbyGameState)
-		{
-			if (LobbyGameState->GetbIsSheriffSelected())
-			{
-				LobbyGameState->SetbIsGunmanSelected(true);
-				return;
-			}
-
-			if (bIsSelectingCharacter) LobbyGameState->SetbIsSheriffSelected(false);
-			LobbyGameState->SetbIsGunmanSelected(true);
-			bIsSelectingCharacter = true;
-		}
-	}
-}
-
-void AGunman::SheriffButtonClicked()
-{
-	if (!HasAuthority())
-	{
-		ServerSheriffButtonClicked();
-		return;
-	}
-
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
-		if (LobbyGameState)
-		{
-			if (LobbyGameState->GetbIsGunmanSelected())
-			{
-				LobbyGameState->SetbIsSheriffSelected(true);
-				return;
-			}
-
-			if (bIsSelectingCharacter) LobbyGameState->SetbIsGunmanSelected(false);
-			LobbyGameState->SetbIsSheriffSelected(true);
-			bIsSelectingCharacter = true;
-		}
-	}
-}
-
-void AGunman::ServerGunmanButtonClicked_Implementation()
-{
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
-		if (LobbyGameState)
-		{
-			if (LobbyGameState->GetbIsSheriffSelected())
-			{
-				LobbyGameState->SetbIsGunmanSelected(true);
-				return;
-			}
-
-			if (bIsSelectingCharacter) LobbyGameState->SetbIsSheriffSelected(false);
-			LobbyGameState->SetbIsGunmanSelected(true);
-			bIsSelectingCharacter = true;
-		}
-	}
-}
-
-void AGunman::ServerSheriffButtonClicked_Implementation()
-{
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
-		if (LobbyGameState)
-		{
-			if (LobbyGameState->GetbIsGunmanSelected())
-			{
-				LobbyGameState->SetbIsSheriffSelected(true);
-				return;
-			}
-
-			if (bIsSelectingCharacter) LobbyGameState->SetbIsGunmanSelected(false);
-			LobbyGameState->SetbIsSheriffSelected(true);
-			bIsSelectingCharacter = true;
-		}
-	}
-}
-
 void AGunman::MoveForward(const FInputActionValue& Value)
 {
 	if (Controller != nullptr)
@@ -184,3 +87,4 @@ void AGunman::LookUp(const FInputActionValue& Value)
 {
 	AddControllerPitchInput(Value.Get<float>());
 }
+

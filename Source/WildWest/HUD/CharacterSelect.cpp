@@ -4,7 +4,7 @@
 #include "CharacterSelect.h"
 #include "Components/Button.h"
 #include "WildWest/GameState/LobbyGameState.h"
-#include "WildWest/Character/Gunman.h"
+#include "Kismet/GameplayStatics.h"
 
 void UCharacterSelect::CharacterSelectSetup()
 {
@@ -50,10 +50,14 @@ void UCharacterSelect::GunmanButtonClicked()
 {
 	GunmanButton->SetIsEnabled(false);
 
-	AGunman* Gunman = Cast<AGunman>(GetOwningPlayerPawn());
-	if (Gunman)
+	UWorld* World = GetWorld();
+	if (World)
 	{
-		Gunman->GunmanButtonClicked();
+		ALobbyGameState* LobbyGameState = Cast<ALobbyGameState>(UGameplayStatics::GetGameState(World));
+		if (LobbyGameState)
+		{
+			LobbyGameState->GunmanButtonClicked();
+		}
 	}
 
 	SheriffButton->SetIsEnabled(true);
@@ -63,10 +67,14 @@ void UCharacterSelect::SheriffButtonClicked()
 {
 	SheriffButton->SetIsEnabled(false);
 
-	AGunman* Gunman = Cast<AGunman>(GetOwningPlayerPawn());
-	if (Gunman)
+	UWorld* World = GetWorld();
+	if (World)
 	{
-		Gunman->SheriffButtonClicked();
+		ALobbyGameState* LobbyGameState = Cast<ALobbyGameState>(UGameplayStatics::GetGameState(World));
+		if (LobbyGameState)
+		{
+			LobbyGameState->SheriffButtonClicked();
+		}
 	}
 
 	GunmanButton->SetIsEnabled(true);

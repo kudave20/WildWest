@@ -4,8 +4,6 @@
 #include "Sheriff.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/GameplayStatics.h"
-#include "Net/UnrealNetwork.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "WildWest/GameState/TownGameState.h"
 #include "EnhancedInput/Public/InputMappingContext.h"

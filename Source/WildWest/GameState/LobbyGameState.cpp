@@ -3,7 +3,9 @@
 
 #include "LobbyGameState.h"
 #include "WildWest/GameMode/LobbyGameMode.h"
+#include "WildWest/GameInstance/WildWestGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "WildWest/Controller/LobbyPlayerController.h"
 #include "WildWest/Character/Gunman.h"
 #include "Net/UnrealNetwork.h"
 
@@ -14,6 +16,140 @@ void ALobbyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(ALobbyGameState, bIsLobbyFull);
 }
 
+void ALobbyGameState::GunmanButtonClicked()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		if (!HasAuthority())
+		{
+			FTransform SpawnTransform;
+			SpawnTransform.SetLocation(FVector(-50.f, -604.f, 77.3f));
+			SetupSpawnCharacter(ECharacterState::ECS_Gunman, SpawnTransform);
+
+			ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
+			if (LobbyPlayerController)
+			{
+				LobbyPlayerController->ServerGunmanButtonClicked();
+			}
+
+			return;
+		}
+
+		if (bIsSheriffSelected)
+		{
+			FTransform SpawnTransform;
+			SpawnTransform.SetLocation(FVector(-50.f, -604.f, 77.3f));
+			SetupSpawnCharacter(ECharacterState::ECS_Gunman, SpawnTransform);
+
+			bIsGunmanSelected = true;
+			CheckSelectedCharacter();
+			return;
+		}
+
+		FTransform SpawnTransform;
+		SpawnTransform.SetLocation(FVector(-50.f, -604.f, 77.3f));
+		SetupSpawnCharacter(ECharacterState::ECS_Gunman, SpawnTransform);
+
+		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
+		if (LobbyPlayerController)
+		{
+			if (LobbyPlayerController->GetbIsSelectingCharacter()) bIsSheriffSelected = false;
+			bIsGunmanSelected = true;
+			LobbyPlayerController->SetbIsSelectingCharacter(true);
+		}
+	}
+}
+
+void ALobbyGameState::SheriffButtonClicked()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		if (!HasAuthority())
+		{
+			FTransform SpawnTransform;
+			SpawnTransform.SetLocation(FVector(-50.f, -144.f, 77.3f));
+			SetupSpawnCharacter(ECharacterState::ECS_Sheriff, SpawnTransform);
+
+			ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
+			if (LobbyPlayerController)
+			{
+				LobbyPlayerController->ServerSheriffButtonClicked();
+			}
+
+			return;
+		}
+
+		if (bIsGunmanSelected)
+		{
+			FTransform SpawnTransform;
+			SpawnTransform.SetLocation(FVector(-50.f, -144.f, 77.3f));
+			SetupSpawnCharacter(ECharacterState::ECS_Sheriff, SpawnTransform);
+
+			bIsSheriffSelected = true;
+			CheckSelectedCharacter();
+			return;
+		}
+
+		FTransform SpawnTransform;
+		SpawnTransform.SetLocation(FVector(-50.f, -144.f, 77.3f));
+		SetupSpawnCharacter(ECharacterState::ECS_Sheriff, SpawnTransform);
+
+		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
+		if (LobbyPlayerController)
+		{
+			if (LobbyPlayerController->GetbIsSelectingCharacter()) bIsGunmanSelected = false;
+			bIsSheriffSelected = true;
+			LobbyPlayerController->SetbIsSelectingCharacter(true);
+		}
+	}
+}
+
+void ALobbyGameState::ServerGunmanButtonClicked()
+{
+	if (bIsSheriffSelected)
+	{
+		bIsGunmanSelected = true;
+		CheckSelectedCharacter();
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
+		if (LobbyPlayerController)
+		{
+			if (LobbyPlayerController->GetbIsSelectingCharacter()) bIsSheriffSelected = false;
+			bIsGunmanSelected = true;
+			LobbyPlayerController->SetbIsSelectingCharacter(true);
+		}
+	}
+}
+
+void ALobbyGameState::ServerSheriffButtonClicked()
+{
+	if (bIsGunmanSelected)
+	{
+		bIsSheriffSelected = true;
+		CheckSelectedCharacter();
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
+		if (LobbyPlayerController)
+		{
+			if (LobbyPlayerController->GetbIsSelectingCharacter()) bIsGunmanSelected = false;
+			bIsSheriffSelected = true;
+			LobbyPlayerController->SetbIsSelectingCharacter(true);
+		}
+	}
+}
+
 void ALobbyGameState::OnRep_bIsLobbyFull()
 {
 	if (bIsLobbyFull)
@@ -21,34 +157,17 @@ void ALobbyGameState::OnRep_bIsLobbyFull()
 		UWorld* World = GetWorld();
 		if (World)
 		{
-			AGunman* Gunman = Cast<AGunman>(UGameplayStatics::GetPlayerPawn(World, 0));
-			if (Gunman)
+			ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
+			if (LobbyPlayerController)
 			{
-				Gunman->OnCreateCharacterSelectComplete.Broadcast();
+				LobbyPlayerController->OnSelectCharacterComplete.Broadcast();
 			}
 		}
 	}
 }
 
-void ALobbyGameState::SetbIsLobbyFull(bool bIsFull)
+void ALobbyGameState::CheckSelectedCharacter()
 {
-	bIsLobbyFull = bIsFull;
-
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		AGunman* Gunman = Cast<AGunman>(UGameplayStatics::GetPlayerPawn(World, 0));
-		if (Gunman)
-		{
-			Gunman->OnCreateCharacterSelectComplete.Broadcast();
-		}
-	}
-}
-
-void ALobbyGameState::SetbIsGunmanSelected(bool bIsSelected)
-{
-	bIsGunmanSelected = bIsSelected;
-
 	if (bIsGunmanSelected && bIsSheriffSelected)
 	{
 		UWorld* World = GetWorld();
@@ -60,17 +179,26 @@ void ALobbyGameState::SetbIsGunmanSelected(bool bIsSelected)
 	}
 }
 
-void ALobbyGameState::SetbIsSheriffSelected(bool bIsSelected)
+void ALobbyGameState::SetupSpawnCharacter(ECharacterState CharacterState, FTransform Transform)
 {
-	bIsSheriffSelected = bIsSelected;
-
-	if (bIsSheriffSelected && bIsGunmanSelected)
+	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+	if (WildWestGameInstance)
 	{
-		UWorld* World = GetWorld();
-		if (World)
+		WildWestGameInstance->SetupSpawn(CharacterState, Transform);
+	}
+}
+
+void ALobbyGameState::SetbIsLobbyFull(bool bIsFull)
+{
+	bIsLobbyFull = bIsFull;
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
+		if (LobbyPlayerController)
 		{
-			ALobbyGameMode* LobbyGameMode = World->GetAuthGameMode<ALobbyGameMode>();
-			LobbyGameMode->TravelToTown();
+			LobbyPlayerController->OnSelectCharacterComplete.Broadcast();
 		}
 	}
 }

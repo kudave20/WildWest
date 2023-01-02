@@ -7,8 +7,6 @@
 #include "EnhancedInput/Public/InputActionValue.h"
 #include "Gunman.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCreateCharacterSelectComplete);
-
 UCLASS()
 class WILDWEST_API AGunman : public ACharacter
 {
@@ -18,12 +16,6 @@ public:
 	AGunman();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnCreateCharacterSelectComplete OnCreateCharacterSelectComplete;
-
-	void GunmanButtonClicked();
-	void SheriffButtonClicked();
 
 protected:
 	virtual void BeginPlay() override;
@@ -42,14 +34,6 @@ protected:
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class UCameraComponent* Camera;
-
-	bool bIsSelectingCharacter{ false };
-
-	UFUNCTION(Server, Reliable)
-	void ServerGunmanButtonClicked();
-
-	UFUNCTION(Server, Reliable)
-	void ServerSheriffButtonClicked();
 
 public:
 
