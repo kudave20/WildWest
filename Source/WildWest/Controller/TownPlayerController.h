@@ -15,7 +15,15 @@ class WILDWEST_API ATownPlayerController : public APlayerController
 	GENERATED_BODY()
 
 private:
+	APawn* SpawnedCharacter;
+
+	UPROPERTY()
+	TArray<class ASheriff*> SheriffList;
+
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ServerCharacterSpawn(TSubclassOf<AActor> SelectedCharacter, ECharacterState CharacterState);
+
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ServerSheriffListSetup();
 	
 };

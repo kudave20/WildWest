@@ -6,7 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "LobbyPlayerController.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSelectCharacterComplete);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSelectCharacterCompleteDelegate);
 
 /**
  * 
@@ -18,7 +18,7 @@ class WILDWEST_API ALobbyPlayerController : public APlayerController
 
 public:
 	UPROPERTY(BlueprintAssignable)
-	FOnSelectCharacterComplete OnSelectCharacterComplete;
+	FOnSelectCharacterCompleteDelegate SelectCharacterCompleteDelegate;
 
 	UFUNCTION(Server, Reliable)
 	void ServerGunmanButtonClicked();

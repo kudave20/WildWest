@@ -5,11 +5,12 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
-#include "WildWest/GameState/TownGameState.h"
+#include "Net/UnrealNetwork.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
 #include "WildWest/Input/InputConfigData.h"
+#include "WildWest/Controller/TownPlayerController.h"
 
 ASheriff::ASheriff()
 {
@@ -21,6 +22,9 @@ ASheriff::ASheriff()
 
 	Screen = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("Screen"));
 	Screen->SetupAttachment(Camera);
+	Screen->SetIsReplicated(true);
+
+	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
 }
 
 void ASheriff::BeginPlay()
@@ -30,18 +34,23 @@ void ASheriff::BeginPlay()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-		if (TownGameState)
-		{
-			TownGameState->SheriffListSetup();
-		}
+		FTimerHandle TrembleTimerHandle;
+		World->GetTimerManager().SetTimer(TrembleTimerHandle, this, &ASheriff::TrembleCharacter, 0.1f, true);
+	}
+
+	if (HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Authority!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Not Authority!"));
 	}
 }
 
 void ASheriff::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void ASheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -49,21 +58,41 @@ void ASheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+	{
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+		if (Subsystem)
+		{
+			Subsystem->ClearAllMappings();
+			Subsystem->AddMappingContext(InputMapping, 0);
 
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-	Subsystem->ClearAllMappings();
-	Subsystem->AddMappingContext(InputMapping, 0);
+			UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+			if (EnhancedInputComponent)
+			{
+				EnhancedInputComponent->BindAction(InputActions->InputJump, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+				EnhancedInputComponent->BindAction(InputActions->InputMoveForward, ETriggerEvent::Triggered, this, &ASheriff::MoveForward);
+				EnhancedInputComponent->BindAction(InputActions->InputMoveRight, ETriggerEvent::Triggered, this, &ASheriff::MoveRight);
+				EnhancedInputComponent->BindAction(InputActions->InputTurn, ETriggerEvent::Triggered, this, &ASheriff::Turn);
+				EnhancedInputComponent->BindAction(InputActions->InputLookUp, ETriggerEvent::Triggered, this, &ASheriff::LookUp);
+				EnhancedInputComponent->BindAction(InputActions->InputSwitchToFirst, ETriggerEvent::Triggered, this, &ASheriff::SwitchToFirst);
+				EnhancedInputComponent->BindAction(InputActions->InputSwitchToSecond, ETriggerEvent::Triggered, this, &ASheriff::SwitchToSecond);
+				EnhancedInputComponent->BindAction(InputActions->InputSwitchToThird, ETriggerEvent::Triggered, this, &ASheriff::SwitchToThird);
+				EnhancedInputComponent->BindAction(InputActions->InputSwitchToFourth, ETriggerEvent::Triggered, this, &ASheriff::SwitchToFourth);
+			}
+		}
+	}
+}
 
-	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	EnhancedInputComponent->BindAction(InputActions->InputJump, ETriggerEvent::Triggered, this, &ACharacter::Jump);
-	EnhancedInputComponent->BindAction(InputActions->InputMoveForward, ETriggerEvent::Triggered, this, &ASheriff::MoveForward);
-	EnhancedInputComponent->BindAction(InputActions->InputMoveRight, ETriggerEvent::Triggered, this, &ASheriff::MoveRight);
-	EnhancedInputComponent->BindAction(InputActions->InputTurn, ETriggerEvent::Triggered, this, &ASheriff::Turn);
-	EnhancedInputComponent->BindAction(InputActions->InputLookUp, ETriggerEvent::Triggered, this, &ASheriff::LookUp);
-	EnhancedInputComponent->BindAction(InputActions->InputSwitchToFirst, ETriggerEvent::Triggered, this, &ASheriff::SwitchToFirst);
-	EnhancedInputComponent->BindAction(InputActions->InputSwitchToSecond, ETriggerEvent::Triggered, this, &ASheriff::SwitchToSecond);
-	EnhancedInputComponent->BindAction(InputActions->InputSwitchToThird, ETriggerEvent::Triggered, this, &ASheriff::SwitchToThird);
-	EnhancedInputComponent->BindAction(InputActions->InputSwitchToFourth, ETriggerEvent::Triggered, this, &ASheriff::SwitchToFourth);
+void ASheriff::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASheriff, ControllerDirection);
+}
+
+void ASheriff::SetScreenVisibility(bool bNewVisibility)
+{
+	Screen->SetVisibility(bNewVisibility);
 }
 
 void ASheriff::MoveForward(const FInputActionValue& Value)
@@ -108,24 +137,43 @@ void ASheriff::LookUp(const FInputActionValue& Value)
 
 void ASheriff::SwitchToFirst()
 {
-	if (!HasAuthority())
-	{
-		ServerSwitchToFirst();
-		return;
-	}
-
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		if (Controller != nullptr)
+		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+		if (TownGameState)
 		{
-			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-			if (TownGameState)
+			if (!HasAuthority())
 			{
-				ASheriff* Sheriff = TownGameState->GetSheriffList()[3];
+				ServerSwitchToFirst();
+				return;
+			}
+
+			EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+
+			if (ScreenIndex == EScreenIndex::ECI_First)
+			{
+				return;
+			}
+
+			if (Controller != nullptr)
+			{
+				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[3]);
 				if (Sheriff)
 				{
+					Sheriff->SetScreenVisibility(false);
+					Screen->SetVisibility(true);
+					SelectFirstScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_First);
+					TownGameState->SetScreenIndex(EScreenIndex::ECI_First);
+					ControllerDirection = Controller->GetControlRotation();
+					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
+
+					AController* NewController = Sheriff->GetController();
+					if (NewController)
+					{
+						NewController->SetControlRotation(Sheriff->GetControllerDirection());
+					}
 				}
 			}
 		}
@@ -134,24 +182,43 @@ void ASheriff::SwitchToFirst()
 
 void ASheriff::SwitchToSecond()
 {
-	if (!HasAuthority())
-	{
-		ServerSwitchToSecond();
-		return;
-	}
-
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		if (Controller != nullptr)
+		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+		if (TownGameState)
 		{
-			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-			if (TownGameState)
+			if (!HasAuthority())
 			{
-				ASheriff* Sheriff = TownGameState->GetSheriffList()[0];
+				ServerSwitchToSecond();
+				return;
+			}
+
+			EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+
+			if (ScreenIndex == EScreenIndex::ECI_Second)
+			{
+				return;
+			}
+
+			if (Controller != nullptr)
+			{
+				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[0]);
 				if (Sheriff)
 				{
+					Sheriff->SetScreenVisibility(false);
+					Screen->SetVisibility(true);
+					SelectSecondScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Second);
+					TownGameState->SetScreenIndex(EScreenIndex::ECI_Second);
+					ControllerDirection = Controller->GetControlRotation();
+					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
+
+					AController* NewController = Sheriff->GetController();
+					if (NewController)
+					{
+						NewController->SetControlRotation(Sheriff->GetControllerDirection());
+					}
 				}
 			}
 		}
@@ -160,24 +227,43 @@ void ASheriff::SwitchToSecond()
 
 void ASheriff::SwitchToThird()
 {
-	if (!HasAuthority())
-	{
-		ServerSwitchToThird();
-		return;
-	}
-
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		if (Controller != nullptr)
+		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+		if (TownGameState)
 		{
-			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-			if (TownGameState)
+			if (!HasAuthority())
 			{
-				ASheriff* Sheriff = TownGameState->GetSheriffList()[1];
+				ServerSwitchToThird();
+				return;
+			}
+
+			EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+
+			if (ScreenIndex == EScreenIndex::ECI_Third)
+			{
+				return;
+			}
+
+			if (Controller != nullptr)
+			{
+				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[1]);
 				if (Sheriff)
 				{
+					Sheriff->SetScreenVisibility(false);
+					Screen->SetVisibility(true);
+					SelectThirdScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Third);
+					TownGameState->SetScreenIndex(EScreenIndex::ECI_Third);
+					ControllerDirection = Controller->GetControlRotation();
+					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
+
+					AController* NewController = Sheriff->GetController();
+					if (NewController)
+					{
+						NewController->SetControlRotation(Sheriff->GetControllerDirection());
+					}
 				}
 			}
 		}
@@ -186,28 +272,53 @@ void ASheriff::SwitchToThird()
 
 void ASheriff::SwitchToFourth()
 {
-	if (!HasAuthority())
-	{
-		ServerSwitchToFourth();
-		return;
-	}
-
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		if (Controller != nullptr)
+		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+		if (TownGameState)
 		{
-			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-			if (TownGameState)
+			if (!HasAuthority())
 			{
-				ASheriff* Sheriff = TownGameState->GetSheriffList()[2];
+				ServerSwitchToFourth();
+				return;
+			}
+
+			EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+
+			if (ScreenIndex == EScreenIndex::ECI_Fourth)
+			{
+				return;
+			}
+
+			if (Controller != nullptr)
+			{
+				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[2]);
 				if (Sheriff)
 				{
+					Sheriff->SetScreenVisibility(false);
+					Screen->SetVisibility(true);
+					SelectFourthScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Fourth);
+					TownGameState->SetScreenIndex(EScreenIndex::ECI_Fourth);
+					ControllerDirection = Controller->GetControlRotation();
+					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
+
+					AController* NewController = Sheriff->GetController();
+					if (NewController)
+					{
+						NewController->SetControlRotation(Sheriff->GetControllerDirection());
+					}
 				}
 			}
 		}
 	}
+}
+
+void ASheriff::TrembleCharacter()
+{
+	AddActorLocalOffset(FVector(0.01f, 0.f, 0.f));
+	AddActorLocalOffset(FVector(-0.01f, 0.f, 0.f));
 }
 
 void ASheriff::ServerSwitchToFirst_Implementation()
@@ -220,10 +331,29 @@ void ASheriff::ServerSwitchToFirst_Implementation()
 			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 			if (TownGameState)
 			{
-				ASheriff* Sheriff = TownGameState->GetSheriffList()[3];
+				EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+
+				if (ScreenIndex == EScreenIndex::ECI_First)
+				{
+					return;
+				}
+
+				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[3]);
 				if (Sheriff)
 				{
+					Sheriff->SetScreenVisibility(false);
+					Screen->SetVisibility(true);
+					SelectFirstScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_First);
+					TownGameState->SetScreenIndex(EScreenIndex::ECI_First);
+					ControllerDirection = Controller->GetControlRotation();
+					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
+
+					AController* NewController = Sheriff->GetController();
+					if (NewController)
+					{
+						NewController->SetControlRotation(Sheriff->GetControllerDirection());
+					}
 				}
 			}
 		}
@@ -240,10 +370,29 @@ void ASheriff::ServerSwitchToSecond_Implementation()
 			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 			if (TownGameState)
 			{
-				ASheriff* Sheriff = TownGameState->GetSheriffList()[0];
+				EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+
+				if (ScreenIndex == EScreenIndex::ECI_Second)
+				{
+					return;
+				}
+
+				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[0]);
 				if (Sheriff)
 				{
+					Sheriff->SetScreenVisibility(false);
+					Screen->SetVisibility(true);
+					SelectSecondScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Second);
+					TownGameState->SetScreenIndex(EScreenIndex::ECI_Second);
+					ControllerDirection = Controller->GetControlRotation();
+					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
+
+					AController* NewController = Sheriff->GetController();
+					if (NewController)
+					{
+						NewController->SetControlRotation(Sheriff->GetControllerDirection());
+					}
 				}
 			}
 		}
@@ -260,10 +409,29 @@ void ASheriff::ServerSwitchToThird_Implementation()
 			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 			if (TownGameState)
 			{
-				ASheriff* Sheriff = TownGameState->GetSheriffList()[1];
+				EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+
+				if (ScreenIndex == EScreenIndex::ECI_Third)
+				{
+					return;
+				}
+
+				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[1]);
 				if (Sheriff)
 				{
+					Sheriff->SetScreenVisibility(false);
+					Screen->SetVisibility(true);
+					SelectThirdScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Third);
+					TownGameState->SetScreenIndex(EScreenIndex::ECI_Third);
+					ControllerDirection = Controller->GetControlRotation();
+					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
+
+					AController* NewController = Sheriff->GetController();
+					if (NewController)
+					{
+						NewController->SetControlRotation(Sheriff->GetControllerDirection());
+					}
 				}
 			}
 		}
@@ -280,10 +448,29 @@ void ASheriff::ServerSwitchToFourth_Implementation()
 			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 			if (TownGameState)
 			{
-				ASheriff* Sheriff = TownGameState->GetSheriffList()[2];
+				EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+
+				if (ScreenIndex == EScreenIndex::ECI_Fourth)
+				{
+					return;
+				}
+
+				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[2]);
 				if (Sheriff)
 				{
+					Sheriff->SetScreenVisibility(false);
+					Screen->SetVisibility(true);
+					SelectFourthScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Fourth);
+					TownGameState->SetScreenIndex(EScreenIndex::ECI_Fourth);
+					ControllerDirection = Controller->GetControlRotation();
+					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
+
+					AController* NewController = Sheriff->GetController();
+					if (NewController)
+					{
+						NewController->SetControlRotation(Sheriff->GetControllerDirection());
+					}
 				}
 			}
 		}

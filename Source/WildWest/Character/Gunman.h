@@ -35,6 +35,8 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class UCameraComponent* Camera;
 
+	void RotateCharacterComplete();
+
 public:
 
 };

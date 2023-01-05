@@ -160,7 +160,7 @@ void ALobbyGameState::OnRep_bIsLobbyFull()
 			ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
 			if (LobbyPlayerController)
 			{
-				LobbyPlayerController->OnSelectCharacterComplete.Broadcast();
+				LobbyPlayerController->SelectCharacterCompleteDelegate.Broadcast();
 			}
 		}
 	}
@@ -198,7 +198,7 @@ void ALobbyGameState::SetbIsLobbyFull(bool bIsFull)
 		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
 		if (LobbyPlayerController)
 		{
-			LobbyPlayerController->OnSelectCharacterComplete.Broadcast();
+			LobbyPlayerController->SelectCharacterCompleteDelegate.Broadcast();
 		}
 	}
 }

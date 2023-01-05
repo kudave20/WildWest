@@ -10,9 +10,8 @@ void ATownGameState::SheriffListSetup()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		for (TActorIterator<ASheriff> Iter(World); Iter; ++Iter)
+		for (ASheriff* Sheriff : TActorRange<ASheriff>(World))
 		{
-			ASheriff* Sheriff = *Iter;
 			SheriffList.Add(Sheriff);
 		}
 	}
