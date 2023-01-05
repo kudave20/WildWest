@@ -19,12 +19,11 @@ ASheriff::ASheriff()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(GetMesh());
 	Camera->bUsePawnControlRotation = true;
+	Camera->SetIsReplicated(true);
 
 	Screen = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("Screen"));
 	Screen->SetupAttachment(Camera);
 	Screen->SetIsReplicated(true);
-
-	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
 }
 
 void ASheriff::BeginPlay()
@@ -36,15 +35,6 @@ void ASheriff::BeginPlay()
 	{
 		FTimerHandle TrembleTimerHandle;
 		World->GetTimerManager().SetTimer(TrembleTimerHandle, this, &ASheriff::TrembleCharacter, 0.1f, true);
-	}
-
-	if (HasAuthority())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Authority!"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Not Authority!"));
 	}
 }
 
@@ -165,9 +155,10 @@ void ASheriff::SwitchToFirst()
 					Screen->SetVisibility(true);
 					SelectFirstScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_First);
 					TownGameState->SetScreenIndex(EScreenIndex::ECI_First);
+					Sheriff->SetCurrentController(Sheriff->GetController());
 					ControllerDirection = Controller->GetControlRotation();
-					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
+					Controller = Sheriff->GetCurrentController();
 
 					AController* NewController = Sheriff->GetController();
 					if (NewController)
@@ -210,9 +201,10 @@ void ASheriff::SwitchToSecond()
 					Screen->SetVisibility(true);
 					SelectSecondScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Second);
 					TownGameState->SetScreenIndex(EScreenIndex::ECI_Second);
+					Sheriff->SetCurrentController(Sheriff->GetController());
 					ControllerDirection = Controller->GetControlRotation();
-					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
+					Controller = Sheriff->GetCurrentController();
 
 					AController* NewController = Sheriff->GetController();
 					if (NewController)
@@ -255,9 +247,10 @@ void ASheriff::SwitchToThird()
 					Screen->SetVisibility(true);
 					SelectThirdScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Third);
 					TownGameState->SetScreenIndex(EScreenIndex::ECI_Third);
+					Sheriff->SetCurrentController(Sheriff->GetController());
 					ControllerDirection = Controller->GetControlRotation();
-					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
+					Controller = Sheriff->GetCurrentController();
 
 					AController* NewController = Sheriff->GetController();
 					if (NewController)
@@ -300,9 +293,10 @@ void ASheriff::SwitchToFourth()
 					Screen->SetVisibility(true);
 					SelectFourthScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Fourth);
 					TownGameState->SetScreenIndex(EScreenIndex::ECI_Fourth);
+					Sheriff->SetCurrentController(Sheriff->GetController());
 					ControllerDirection = Controller->GetControlRotation();
-					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
+					Controller = Sheriff->GetCurrentController();
 
 					AController* NewController = Sheriff->GetController();
 					if (NewController)
@@ -317,8 +311,25 @@ void ASheriff::SwitchToFourth()
 
 void ASheriff::TrembleCharacter()
 {
-	AddActorLocalOffset(FVector(0.01f, 0.f, 0.f));
-	AddActorLocalOffset(FVector(-0.01f, 0.f, 0.f));
+	ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
+	if (TownPlayerController == nullptr)
+	{
+		//AddActorLocalOffset(FVector(0.01f, 0.f, 0.f));
+		//AddActorLocalOffset(FVector(-0.01f, 0.f, 0.f));
+		//AddActorLocalRotation(FRotator(0.01f, 0.f, 0.f));
+		//AddActorLocalRotation(FRotator(-0.01f, 0.f, 0.f));
+		FVector Direction(0.01f, 0.f, 0.f);
+		if (bToggle)
+		{
+			AddMovementInput(Direction, -1);
+			bToggle = false;
+		}
+		else
+		{
+			AddMovementInput(Direction, 1);
+			bToggle = true;
+		}
+	}
 }
 
 void ASheriff::ServerSwitchToFirst_Implementation()
@@ -346,7 +357,6 @@ void ASheriff::ServerSwitchToFirst_Implementation()
 					SelectFirstScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_First);
 					TownGameState->SetScreenIndex(EScreenIndex::ECI_First);
 					ControllerDirection = Controller->GetControlRotation();
-					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
 
 					AController* NewController = Sheriff->GetController();
@@ -354,6 +364,11 @@ void ASheriff::ServerSwitchToFirst_Implementation()
 					{
 						NewController->SetControlRotation(Sheriff->GetControllerDirection());
 					}
+
+					UE_LOG(LogTemp, Warning, TEXT("%f, %f, %f"),
+						Screen->GetComponentRotation().Roll,
+						Screen->GetComponentRotation().Pitch,
+						Screen->GetComponentRotation().Yaw);
 				}
 			}
 		}
@@ -385,7 +400,6 @@ void ASheriff::ServerSwitchToSecond_Implementation()
 					SelectSecondScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Second);
 					TownGameState->SetScreenIndex(EScreenIndex::ECI_Second);
 					ControllerDirection = Controller->GetControlRotation();
-					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
 
 					AController* NewController = Sheriff->GetController();
@@ -393,6 +407,11 @@ void ASheriff::ServerSwitchToSecond_Implementation()
 					{
 						NewController->SetControlRotation(Sheriff->GetControllerDirection());
 					}
+
+					UE_LOG(LogTemp, Warning, TEXT("%f, %f, %f"),
+						Screen->GetComponentRotation().Roll,
+						Screen->GetComponentRotation().Pitch,
+						Screen->GetComponentRotation().Yaw);
 				}
 			}
 		}
@@ -424,7 +443,6 @@ void ASheriff::ServerSwitchToThird_Implementation()
 					SelectThirdScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Third);
 					TownGameState->SetScreenIndex(EScreenIndex::ECI_Third);
 					ControllerDirection = Controller->GetControlRotation();
-					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
 
 					AController* NewController = Sheriff->GetController();
@@ -432,6 +450,11 @@ void ASheriff::ServerSwitchToThird_Implementation()
 					{
 						NewController->SetControlRotation(Sheriff->GetControllerDirection());
 					}
+
+					UE_LOG(LogTemp, Warning, TEXT("%f, %f, %f"),
+						Screen->GetComponentRotation().Roll,
+						Screen->GetComponentRotation().Pitch,
+						Screen->GetComponentRotation().Yaw);
 				}
 			}
 		}
@@ -463,7 +486,6 @@ void ASheriff::ServerSwitchToFourth_Implementation()
 					SelectFourthScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Fourth);
 					TownGameState->SetScreenIndex(EScreenIndex::ECI_Fourth);
 					ControllerDirection = Controller->GetControlRotation();
-					Screen->SetWorldRotation(ControllerDirection);
 					Controller->Possess(Sheriff);
 
 					AController* NewController = Sheriff->GetController();
@@ -471,6 +493,11 @@ void ASheriff::ServerSwitchToFourth_Implementation()
 					{
 						NewController->SetControlRotation(Sheriff->GetControllerDirection());
 					}
+
+					UE_LOG(LogTemp, Warning, TEXT("%f, %f, %f"),
+						Screen->GetComponentRotation().Roll,
+						Screen->GetComponentRotation().Pitch,
+						Screen->GetComponentRotation().Yaw);
 				}
 			}
 		}

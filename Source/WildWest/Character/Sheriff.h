@@ -79,6 +79,13 @@ private:
 
 	void TrembleCharacter();
 
+	AController* CurrentController;
+
+	bool bToggle{ false };
+
 public:
 	FORCEINLINE FRotator GetControllerDirection() { return ControllerDirection; }
+
+	FORCEINLINE AController* GetCurrentController() { return CurrentController; }
+	FORCEINLINE void SetCurrentController(AController* NewController) { CurrentController = NewController; }
 };
