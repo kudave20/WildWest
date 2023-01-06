@@ -62,8 +62,6 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Screen")
 	class USceneCaptureComponent2D* Screen;
 
-	FRotator ControllerDirection;
-
 	UFUNCTION(Server, Reliable)
 	void ServerSwitchToFirst();
 
@@ -77,6 +75,15 @@ private:
 	void ServerSwitchToFourth();
 
 	void TrembleCharacter();
+
+	/*template <class T>
+	UFUNCTION(Client, Reliable)
+	void ClientBroadcast(T DelegateToBroadcast, EScreenIndex LastScreenIndex, EScreenIndex CurrentScreenIndex)
+	{
+		DelegateToBroadcast.Broadcast(LastScreenIndex, CurrentScreenIndex);
+	}*/
+
+	FRotator ControllerDirection;
 
 	AController* CurrentController;
 

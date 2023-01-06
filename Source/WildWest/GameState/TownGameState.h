@@ -17,6 +17,8 @@ enum class EScreenIndex : uint8
 	ECI_MAX UMETA(DisplayName = "DefaultMAX")
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSheriffListReplicateComplete)
+
 /**
  * 
  */
@@ -26,19 +28,36 @@ class WILDWEST_API ATownGameState : public AGameState
 	GENERATED_BODY()
 	
 public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UFUNCTION(BlueprintCallable)
 	void SheriffListSetup();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnSheriffListReplicateComplete SheriffListReplicateCompleteDelegate;
 	
 private:
-	UPROPERTY(BlueprintReadOnly, Category = "Sheriff", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(ReplicatedUsing = OnRep_SheriffList, BlueprintReadOnly, Category = "Sheriff", meta = (AllowPrivateAccess = "true"))
 	TArray<class ASheriff*> SheriffList;
 
-	EScreenIndex ScreenIndex{ EScreenIndex::ECI_First };
+	UFUNCTION()
+	void OnRep_SheriffList();
+
+	UPROPERTY(Replicated)
+	EScreenIndex LastScreenIndex;
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentScreenIndex)
+	EScreenIndex CurrentScreenIndex;
+
+	UFUNCTION()
+	void OnRep_CurrentScreenIndex();
 
 public:
 	FORCEINLINE TArray<ASheriff*>& GetSheriffList() { return SheriffList; }
 	FORCEINLINE void SetSheriffList(TArray<ASheriff*> List) { SheriffList = List; }
 
-	FORCEINLINE EScreenIndex GetScreenIndex() { return ScreenIndex; }
-	FORCEINLINE void SetScreenIndex(EScreenIndex NewScreenIndex) { ScreenIndex = NewScreenIndex; }
+	FORCEINLINE EScreenIndex GetLastScreenIndex() { return LastScreenIndex; }
+	FORCEINLINE void SetLastScreenIndex(EScreenIndex NewScreenIndex) { LastScreenIndex = NewScreenIndex; }
+
+	FORCEINLINE EScreenIndex GetCurrentScreenIndex() { return CurrentScreenIndex; }
+	FORCEINLINE void SetCurrentScreenIndex(EScreenIndex NewScreenIndex) { CurrentScreenIndex = NewScreenIndex; }
 };

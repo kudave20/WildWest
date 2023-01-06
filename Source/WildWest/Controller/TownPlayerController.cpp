@@ -3,6 +3,7 @@
 
 #include "TownPlayerController.h"
 #include "WildWest/GameState/LobbyGameState.h"
+#include "WildWest/Character/Gunman.h"
 #include "WildWest/Character/Sheriff.h"
 #include "EngineUtils.h"
 
@@ -13,36 +14,31 @@ void ATownPlayerController::ServerCharacterSpawn_Implementation(TSubclassOf<AAct
 	{
 		FVector Location = FVector(-80, 0, 72);
 		FRotator Rotation = FRotator();
+		AGunman* Gunman = nullptr;
+		ASheriff* Sheriff = nullptr;
 
 		switch (CharacterState)
 		{
 		case ECharacterState::ECS_Gunman:
 			Location.Y = -604;
-			SpawnedCharacter = World->SpawnActor<APawn>(SelectedCharacter, Location, Rotation);
-			if (SpawnedCharacter)
+			Gunman = World->SpawnActor<AGunman>(SelectedCharacter, Location, Rotation);
+			if (Gunman)
 			{
-				ASheriff* Sheriff = Cast<ASheriff>(SpawnedCharacter);
-				if (Sheriff)
-				{
-					Sheriff->SetScreenVisibility(false);
-				}
-
-				Possess(SpawnedCharacter);
+				Possess(Gunman);
 			}
 
 			break;
 		case ECharacterState::ECS_Sheriff:
 			Location.Y = -144;
-			SpawnedCharacter = World->SpawnActor<APawn>(SelectedCharacter, Location, Rotation);
-			if (SpawnedCharacter)
+			Sheriff = World->SpawnActor<ASheriff>(SelectedCharacter, Location, Rotation);
+			if (Sheriff)
 			{
-				ASheriff* Sheriff = Cast<ASheriff>(SpawnedCharacter);
 				if (Sheriff)
 				{
 					Sheriff->SetScreenVisibility(false);
 				}
 
-				Possess(SpawnedCharacter);
+				Possess(Sheriff);
 			}
 
 			break;

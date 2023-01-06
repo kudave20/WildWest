@@ -5,12 +5,11 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
-#include "Net/UnrealNetwork.h"
+#include "WildWest/Controller/TownPlayerController.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
 #include "WildWest/Input/InputConfigData.h"
-#include "WildWest/Controller/TownPlayerController.h"
 
 ASheriff::ASheriff()
 {
@@ -24,8 +23,6 @@ ASheriff::ASheriff()
 	Screen = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("Screen"));
 	Screen->SetupAttachment(Camera);
 	Screen->SetIsReplicated(true);
-
-	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 }
 
 void ASheriff::BeginPlay()
@@ -131,19 +128,19 @@ void ASheriff::LookUp(const FInputActionValue& Value)
 
 void ASheriff::SwitchToFirst()
 {
+	if (!HasAuthority())
+	{
+		ServerSwitchToFirst();
+		return;
+	}
+
 	UWorld* World = GetWorld();
 	if (World)
 	{
 		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 		if (TownGameState)
 		{
-			if (!HasAuthority())
-			{
-				ServerSwitchToFirst();
-				return;
-			}
-
-			EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+			EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
 
 			if (ScreenIndex == EScreenIndex::ECI_First)
 			{
@@ -166,7 +163,7 @@ void ASheriff::SwitchToFirst()
 					Sheriff->SetScreenVisibility(false);
 					Screen->SetVisibility(true);
 					SelectFirstScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_First);
-					TownGameState->SetScreenIndex(EScreenIndex::ECI_First);
+					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_First);
 					Controller->Possess(Sheriff);
 					Controller = Sheriff->GetCurrentController();
 					Sheriff->SetCurrentController(Sheriff->GetController());
@@ -185,19 +182,20 @@ void ASheriff::SwitchToFirst()
 
 void ASheriff::SwitchToSecond()
 {
+	if (!HasAuthority())
+	{
+		ServerSwitchToSecond();
+		return;
+	}
+
 	UWorld* World = GetWorld();
 	if (World)
 	{
 		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 		if (TownGameState)
 		{
-			if (!HasAuthority())
-			{
-				ServerSwitchToSecond();
-				return;
-			}
 
-			EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+			EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
 
 			if (ScreenIndex == EScreenIndex::ECI_Second)
 			{
@@ -220,7 +218,7 @@ void ASheriff::SwitchToSecond()
 					Sheriff->SetScreenVisibility(false);
 					Screen->SetVisibility(true);
 					SelectSecondScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Second);
-					TownGameState->SetScreenIndex(EScreenIndex::ECI_Second);
+					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_Second);
 					Controller->Possess(Sheriff);
 					Controller = Sheriff->GetCurrentController();
 					Sheriff->SetCurrentController(Sheriff->GetController());
@@ -239,19 +237,19 @@ void ASheriff::SwitchToSecond()
 
 void ASheriff::SwitchToThird()
 {
+	if (!HasAuthority())
+	{
+		ServerSwitchToThird();
+		return;
+	}
+
 	UWorld* World = GetWorld();
 	if (World)
 	{
 		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 		if (TownGameState)
 		{
-			if (!HasAuthority())
-			{
-				ServerSwitchToThird();
-				return;
-			}
-
-			EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+			EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
 
 			if (ScreenIndex == EScreenIndex::ECI_Third)
 			{
@@ -274,7 +272,7 @@ void ASheriff::SwitchToThird()
 					Sheriff->SetScreenVisibility(false);
 					Screen->SetVisibility(true);
 					SelectThirdScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Third);
-					TownGameState->SetScreenIndex(EScreenIndex::ECI_Third);
+					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_Third);
 					Controller->Possess(Sheriff);
 					Controller = Sheriff->GetCurrentController();
 					Sheriff->SetCurrentController(Sheriff->GetController());
@@ -293,19 +291,19 @@ void ASheriff::SwitchToThird()
 
 void ASheriff::SwitchToFourth()
 {
+	if (!HasAuthority())
+	{
+		ServerSwitchToFourth();
+		return;
+	}
+
 	UWorld* World = GetWorld();
 	if (World)
 	{
 		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 		if (TownGameState)
 		{
-			if (!HasAuthority())
-			{
-				ServerSwitchToFourth();
-				return;
-			}
-
-			EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+			EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
 
 			if (ScreenIndex == EScreenIndex::ECI_Fourth)
 			{
@@ -328,7 +326,7 @@ void ASheriff::SwitchToFourth()
 					Sheriff->SetScreenVisibility(false);
 					Screen->SetVisibility(true);
 					SelectFourthScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Fourth);
-					TownGameState->SetScreenIndex(EScreenIndex::ECI_Fourth);
+					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_Fourth);
 					Controller->Possess(Sheriff);
 					Controller = Sheriff->GetCurrentController();
 					Sheriff->SetCurrentController(Sheriff->GetController());
@@ -374,7 +372,7 @@ void ASheriff::ServerSwitchToFirst_Implementation()
 			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 			if (TownGameState)
 			{
-				EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+				EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
 
 				if (ScreenIndex == EScreenIndex::ECI_First)
 				{
@@ -392,8 +390,8 @@ void ASheriff::ServerSwitchToFirst_Implementation()
 					}
 
 					ControllerDirection = Controller->GetControlRotation();
-					SelectFourthScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Fourth);
-					TownGameState->SetScreenIndex(EScreenIndex::ECI_Fourth);
+					TownGameState->SetLastScreenIndex(TownGameState->GetCurrentScreenIndex());
+					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_First);
 					Controller->Possess(Sheriff);
 					Controller = Sheriff->GetCurrentController();
 					Sheriff->SetCurrentController(Sheriff->GetController());
@@ -425,7 +423,7 @@ void ASheriff::ServerSwitchToSecond_Implementation()
 			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 			if (TownGameState)
 			{
-				EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+				EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
 
 				if (ScreenIndex == EScreenIndex::ECI_Second)
 				{
@@ -443,8 +441,8 @@ void ASheriff::ServerSwitchToSecond_Implementation()
 					}
 
 					ControllerDirection = Controller->GetControlRotation();
-					SelectSecondScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Second);
-					TownGameState->SetScreenIndex(EScreenIndex::ECI_Second);
+					TownGameState->SetLastScreenIndex(TownGameState->GetCurrentScreenIndex());
+					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_Second);
 					Controller->Possess(Sheriff);
 					Controller = Sheriff->GetCurrentController();
 					Sheriff->SetCurrentController(Sheriff->GetController());
@@ -476,7 +474,7 @@ void ASheriff::ServerSwitchToThird_Implementation()
 			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 			if (TownGameState)
 			{
-				EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+				EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
 
 				if (ScreenIndex == EScreenIndex::ECI_Third)
 				{
@@ -494,8 +492,8 @@ void ASheriff::ServerSwitchToThird_Implementation()
 					}
 
 					ControllerDirection = Controller->GetControlRotation();
-					SelectThirdScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Third);
-					TownGameState->SetScreenIndex(EScreenIndex::ECI_Third);
+					TownGameState->SetLastScreenIndex(TownGameState->GetCurrentScreenIndex());
+					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_Third);
 					Controller->Possess(Sheriff);
 					Controller = Sheriff->GetCurrentController();
 					Sheriff->SetCurrentController(Sheriff->GetController());
@@ -527,7 +525,7 @@ void ASheriff::ServerSwitchToFourth_Implementation()
 			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 			if (TownGameState)
 			{
-				EScreenIndex ScreenIndex = TownGameState->GetScreenIndex();
+				EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
 
 				if (ScreenIndex == EScreenIndex::ECI_Fourth)
 				{
@@ -545,8 +543,8 @@ void ASheriff::ServerSwitchToFourth_Implementation()
 					}
 
 					ControllerDirection = Controller->GetControlRotation();
-					SelectFourthScreenCompleteDelegate.Broadcast(ScreenIndex, EScreenIndex::ECI_Fourth);
-					TownGameState->SetScreenIndex(EScreenIndex::ECI_Fourth);
+					TownGameState->SetLastScreenIndex(TownGameState->GetCurrentScreenIndex());
+					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_Fourth);
 					Controller->Possess(Sheriff);
 					Controller = Sheriff->GetCurrentController();
 					Sheriff->SetCurrentController(Sheriff->GetController());
