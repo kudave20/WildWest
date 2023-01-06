@@ -22,10 +22,11 @@ public:
 	ASheriff();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION(BlueprintCallable)
 	void SetScreenVisibility(bool bNewVisibility);
+
+	void SetCameraPitchRotation(float PitchValue);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnSelectFirstScreenComplete SelectFirstScreenCompleteDelegate;
@@ -47,7 +48,6 @@ protected:
 	void SwitchToSecond();
 	void SwitchToThird();
 	void SwitchToFourth();
-	void SetbIsRotatingFalse();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
 	class UInputMappingContext* InputMapping;
@@ -62,7 +62,6 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Screen")
 	class USceneCaptureComponent2D* Screen;
 
-	UPROPERTY(Replicated)
 	FRotator ControllerDirection;
 
 	UFUNCTION(Server, Reliable)
@@ -81,11 +80,12 @@ private:
 
 	AController* CurrentController;
 
-	bool bToggle{ false };
+	bool bTrembleToggle{ false };
 
 public:
 	FORCEINLINE FRotator GetControllerDirection() { return ControllerDirection; }
+	FORCEINLINE void SetControllerDirection(FRotator NewControllerDirection) { ControllerDirection = NewControllerDirection; }
 
 	FORCEINLINE AController* GetCurrentController() { return CurrentController; }
-	FORCEINLINE void SetCurrentController(AController* NewController) { CurrentController = NewController; }
+	FORCEINLINE void SetCurrentController(AController* NewCurrentController) { CurrentController = NewCurrentController; }
 };
