@@ -64,12 +64,6 @@ void ASheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	}
 }
 
-void ASheriff::SetCameraPitchRotation(float PitchValue)
-{
-	float YawValue = Camera->GetRelativeRotation().Yaw;
-	Camera->SetRelativeRotation(FRotator(PitchValue, YawValue, 0.f));
-}
-
 void ASheriff::MoveForward(const FInputActionValue& Value)
 {
 	if (Controller != nullptr)
@@ -124,37 +118,41 @@ void ASheriff::SwitchToFirst()
 		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 		if (TownGameState)
 		{
-			EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
-
-			if (ScreenIndex == EScreenIndex::ECI_First)
+			ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
+			if (TownPlayerController)
 			{
-				return;
-			}
+				EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
 
-			if (Controller != nullptr)
-			{
-				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[0]);
-				if (Sheriff)
+				if (ScreenIndex == EScreenIndex::ECI_First)
 				{
-					AController* NewController = Sheriff->GetController();
-					if (NewController)
-					{
-						Sheriff->SetCurrentController(NewController);
-						Sheriff->SetControllerDirection(NewController->GetControlRotation());
-					}
+					return;
+				}
 
-					ControllerDirection = Controller->GetControlRotation();
-					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_First);
-					Controller->Possess(Sheriff);
-					Controller = Sheriff->GetCurrentController();
-					Controller->Possess(this);
-					Sheriff->SetCurrentController(Sheriff->GetController());
-					Controller->SetControlRotation(ControllerDirection);
-
-					NewController = Sheriff->GetController();
-					if (NewController)
+				if (Controller != nullptr)
+				{
+					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[0]);
+					if (Sheriff)
 					{
-						NewController->SetControlRotation(Sheriff->GetControllerDirection());
+						AController* NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							Sheriff->SetCurrentController(NewController);
+							Sheriff->SetControllerDirection(NewController->GetControlRotation());
+						}
+
+						ControllerDirection = Controller->GetControlRotation();
+						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_First);
+						Controller->Possess(Sheriff);
+						Controller = Sheriff->GetCurrentController();
+						Controller->Possess(this);
+						Sheriff->SetCurrentController(Sheriff->GetController());
+						Controller->SetControlRotation(ControllerDirection);
+
+						NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							NewController->SetControlRotation(Sheriff->GetControllerDirection());
+						}
 					}
 				}
 			}
@@ -176,38 +174,41 @@ void ASheriff::SwitchToSecond()
 		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 		if (TownGameState)
 		{
-
-			EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
-
-			if (ScreenIndex == EScreenIndex::ECI_Second)
+			ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
+			if (TownPlayerController)
 			{
-				return;
-			}
+				EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
 
-			if (Controller != nullptr)
-			{
-				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[1]);
-				if (Sheriff)
+				if (ScreenIndex == EScreenIndex::ECI_Second)
 				{
-					AController* NewController = Sheriff->GetController();
-					if (NewController)
-					{
-						Sheriff->SetCurrentController(NewController);
-						Sheriff->SetControllerDirection(NewController->GetControlRotation());
-					}
+					return;
+				}
 
-					ControllerDirection = Controller->GetControlRotation();
-					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_Second);
-					Controller->Possess(Sheriff);
-					Controller = Sheriff->GetCurrentController();
-					Controller->Possess(this);
-					Sheriff->SetCurrentController(Sheriff->GetController());
-					Controller->SetControlRotation(ControllerDirection);
-
-					NewController = Sheriff->GetController();
-					if (NewController)
+				if (Controller != nullptr)
+				{
+					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[1]);
+					if (Sheriff)
 					{
-						NewController->SetControlRotation(Sheriff->GetControllerDirection());
+						AController* NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							Sheriff->SetCurrentController(NewController);
+							Sheriff->SetControllerDirection(NewController->GetControlRotation());
+						}
+
+						ControllerDirection = Controller->GetControlRotation();
+						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_Second);
+						Controller->Possess(Sheriff);
+						Controller = Sheriff->GetCurrentController();
+						Controller->Possess(this);
+						Sheriff->SetCurrentController(Sheriff->GetController());
+						Controller->SetControlRotation(ControllerDirection);
+
+						NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							NewController->SetControlRotation(Sheriff->GetControllerDirection());
+						}
 					}
 				}
 			}
@@ -229,37 +230,41 @@ void ASheriff::SwitchToThird()
 		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 		if (TownGameState)
 		{
-			EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
-
-			if (ScreenIndex == EScreenIndex::ECI_Third)
+			ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
+			if (TownPlayerController)
 			{
-				return;
-			}
+				EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
 
-			if (Controller != nullptr)
-			{
-				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[2]);
-				if (Sheriff)
+				if (ScreenIndex == EScreenIndex::ECI_Third)
 				{
-					AController* NewController = Sheriff->GetController();
-					if (NewController)
-					{
-						Sheriff->SetCurrentController(NewController);
-						Sheriff->SetControllerDirection(NewController->GetControlRotation());
-					}
-					
-					ControllerDirection = Controller->GetControlRotation();
-					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_Third);
-					Controller->Possess(Sheriff);
-					Controller = Sheriff->GetCurrentController();
-					Controller->Possess(this);
-					Sheriff->SetCurrentController(Sheriff->GetController());
-					Controller->SetControlRotation(ControllerDirection);
+					return;
+				}
 
-					NewController = Sheriff->GetController();
-					if (NewController)
+				if (Controller != nullptr)
+				{
+					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[2]);
+					if (Sheriff)
 					{
-						NewController->SetControlRotation(Sheriff->GetControllerDirection());
+						AController* NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							Sheriff->SetCurrentController(NewController);
+							Sheriff->SetControllerDirection(NewController->GetControlRotation());
+						}
+
+						ControllerDirection = Controller->GetControlRotation();
+						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_Third);
+						Controller->Possess(Sheriff);
+						Controller = Sheriff->GetCurrentController();
+						Controller->Possess(this);
+						Sheriff->SetCurrentController(Sheriff->GetController());
+						Controller->SetControlRotation(ControllerDirection);
+
+						NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							NewController->SetControlRotation(Sheriff->GetControllerDirection());
+						}
 					}
 				}
 			}
@@ -281,37 +286,41 @@ void ASheriff::SwitchToFourth()
 		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 		if (TownGameState)
 		{
-			EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
-
-			if (ScreenIndex == EScreenIndex::ECI_Fourth)
+			ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
+			if (TownPlayerController)
 			{
-				return;
-			}
+				EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
 
-			if (Controller != nullptr)
-			{
-				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[3]);
-				if (Sheriff)
+				if (ScreenIndex == EScreenIndex::ECI_Fourth)
 				{
-					AController* NewController = Sheriff->GetController();
-					if (NewController)
-					{
-						Sheriff->SetCurrentController(NewController);
-						Sheriff->SetControllerDirection(NewController->GetControlRotation());
-					}
+					return;
+				}
 
-					ControllerDirection = Controller->GetControlRotation();
-					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_Fourth);
-					Controller->Possess(Sheriff);
-					Controller = Sheriff->GetCurrentController();
-					Controller->Possess(this);
-					Sheriff->SetCurrentController(Sheriff->GetController());
-					Controller->SetControlRotation(ControllerDirection);
-
-					NewController = Sheriff->GetController();
-					if (NewController)
+				if (Controller != nullptr)
+				{
+					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[3]);
+					if (Sheriff)
 					{
-						NewController->SetControlRotation(Sheriff->GetControllerDirection());
+						AController* NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							Sheriff->SetCurrentController(NewController);
+							Sheriff->SetControllerDirection(NewController->GetControlRotation());
+						}
+
+						ControllerDirection = Controller->GetControlRotation();
+						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_Fourth);
+						Controller->Possess(Sheriff);
+						Controller = Sheriff->GetCurrentController();
+						Controller->Possess(this);
+						Sheriff->SetCurrentController(Sheriff->GetController());
+						Controller->SetControlRotation(ControllerDirection);
+
+						NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							NewController->SetControlRotation(Sheriff->GetControllerDirection());
+						}
 					}
 				}
 			}
@@ -329,38 +338,42 @@ void ASheriff::ServerSwitchToFirst_Implementation()
 			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 			if (TownGameState)
 			{
-				EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
-
-				if (ScreenIndex == EScreenIndex::ECI_First)
+				ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
+				if (TownPlayerController)
 				{
-					return;
-				}
+					EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
 
-				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[0]);
-				if (Sheriff)
-				{
-					AController* NewController = Sheriff->GetController();
-					if (NewController)
+					if (ScreenIndex == EScreenIndex::ECI_First)
 					{
-						Sheriff->SetCurrentController(NewController);
-						Sheriff->SetControllerDirection(NewController->GetControlRotation());
+						return;
 					}
 
-					ControllerDirection = Controller->GetControlRotation();
-					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_First);
-					Controller->Possess(Sheriff);
-					Controller = Sheriff->GetCurrentController();
-					Controller->Possess(this);
-					Sheriff->SetCurrentController(Sheriff->GetController());
-					Controller->SetControlRotation(ControllerDirection);
-					Controller->ClientSetRotation(ControllerDirection);
-
-					NewController = Sheriff->GetController();
-					if (NewController)
+					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[0]);
+					if (Sheriff)
 					{
-						FRotator NewDirection = Sheriff->GetControllerDirection();
-						NewController->SetControlRotation(NewDirection);
-						NewController->ClientSetRotation(NewDirection);
+						AController* NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							Sheriff->SetCurrentController(NewController);
+							Sheriff->SetControllerDirection(NewController->GetControlRotation());
+						}
+
+						ControllerDirection = Controller->GetControlRotation();
+						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_First);
+						Controller->Possess(Sheriff);
+						Controller = Sheriff->GetCurrentController();
+						Controller->Possess(this);
+						Sheriff->SetCurrentController(Sheriff->GetController());
+						Controller->SetControlRotation(ControllerDirection);
+						Controller->ClientSetRotation(ControllerDirection);
+
+						NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							FRotator NewDirection = Sheriff->GetControllerDirection();
+							NewController->SetControlRotation(NewDirection);
+							NewController->ClientSetRotation(NewDirection);
+						}
 					}
 				}
 			}
@@ -378,38 +391,42 @@ void ASheriff::ServerSwitchToSecond_Implementation()
 			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 			if (TownGameState)
 			{
-				EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
-
-				if (ScreenIndex == EScreenIndex::ECI_Second)
+				ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
+				if (TownPlayerController)
 				{
-					return;
-				}
+					EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
 
-				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[1]);
-				if (Sheriff)
-				{
-					AController* NewController = Sheriff->GetController();
-					if (NewController)
+					if (ScreenIndex == EScreenIndex::ECI_Second)
 					{
-						Sheriff->SetCurrentController(NewController);
-						Sheriff->SetControllerDirection(NewController->GetControlRotation());
+						return;
 					}
 
-					ControllerDirection = Controller->GetControlRotation();
-					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_Second);
-					Controller->Possess(Sheriff);
-					Controller = Sheriff->GetCurrentController();
-					Controller->Possess(this);
-					Sheriff->SetCurrentController(Sheriff->GetController());
-					Controller->SetControlRotation(ControllerDirection);
-					Controller->ClientSetRotation(ControllerDirection);
-
-					NewController = Sheriff->GetController();
-					if (NewController)
+					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[1]);
+					if (Sheriff)
 					{
-						FRotator NewDirection = Sheriff->GetControllerDirection();
-						NewController->SetControlRotation(NewDirection);
-						NewController->ClientSetRotation(NewDirection);
+						AController* NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							Sheriff->SetCurrentController(NewController);
+							Sheriff->SetControllerDirection(NewController->GetControlRotation());
+						}
+
+						ControllerDirection = Controller->GetControlRotation();
+						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_Second);
+						Controller->Possess(Sheriff);
+						Controller = Sheriff->GetCurrentController();
+						Controller->Possess(this);
+						Sheriff->SetCurrentController(Sheriff->GetController());
+						Controller->SetControlRotation(ControllerDirection);
+						Controller->ClientSetRotation(ControllerDirection);
+
+						NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							FRotator NewDirection = Sheriff->GetControllerDirection();
+							NewController->SetControlRotation(NewDirection);
+							NewController->ClientSetRotation(NewDirection);
+						}
 					}
 				}
 			}
@@ -427,38 +444,42 @@ void ASheriff::ServerSwitchToThird_Implementation()
 			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 			if (TownGameState)
 			{
-				EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
-
-				if (ScreenIndex == EScreenIndex::ECI_Third)
+				ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
+				if (TownPlayerController)
 				{
-					return;
-				}
+					EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
 
-				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[2]);
-				if (Sheriff)
-				{
-					AController* NewController = Sheriff->GetController();
-					if (NewController)
+					if (ScreenIndex == EScreenIndex::ECI_Third)
 					{
-						Sheriff->SetCurrentController(NewController);
-						Sheriff->SetControllerDirection(NewController->GetControlRotation());
+						return;
 					}
 
-					ControllerDirection = Controller->GetControlRotation();
-					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_Third);
-					Controller->Possess(Sheriff);
-					Controller = Sheriff->GetCurrentController();
-					Controller->Possess(this);
-					Sheriff->SetCurrentController(Sheriff->GetController());
-					Controller->SetControlRotation(ControllerDirection);
-					Controller->ClientSetRotation(ControllerDirection);
-
-					NewController = Sheriff->GetController();
-					if (NewController)
+					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[2]);
+					if (Sheriff)
 					{
-						FRotator NewDirection = Sheriff->GetControllerDirection();
-						NewController->SetControlRotation(NewDirection);
-						NewController->ClientSetRotation(NewDirection);
+						AController* NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							Sheriff->SetCurrentController(NewController);
+							Sheriff->SetControllerDirection(NewController->GetControlRotation());
+						}
+
+						ControllerDirection = Controller->GetControlRotation();
+						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_Third);
+						Controller->Possess(Sheriff);
+						Controller = Sheriff->GetCurrentController();
+						Controller->Possess(this);
+						Sheriff->SetCurrentController(Sheriff->GetController());
+						Controller->SetControlRotation(ControllerDirection);
+						Controller->ClientSetRotation(ControllerDirection);
+
+						NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							FRotator NewDirection = Sheriff->GetControllerDirection();
+							NewController->SetControlRotation(NewDirection);
+							NewController->ClientSetRotation(NewDirection);
+						}
 					}
 				}
 			}
@@ -476,38 +497,42 @@ void ASheriff::ServerSwitchToFourth_Implementation()
 			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 			if (TownGameState)
 			{
-				EScreenIndex ScreenIndex = TownGameState->GetCurrentScreenIndex();
-
-				if (ScreenIndex == EScreenIndex::ECI_Fourth)
+				ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
+				if (TownPlayerController)
 				{
-					return;
-				}
+					EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
 
-				ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[3]);
-				if (Sheriff)
-				{
-					AController* NewController = Sheriff->GetController();
-					if (NewController)
+					if (ScreenIndex == EScreenIndex::ECI_Fourth)
 					{
-						Sheriff->SetCurrentController(NewController);
-						Sheriff->SetControllerDirection(NewController->GetControlRotation());
+						return;
 					}
 
-					ControllerDirection = Controller->GetControlRotation();
-					TownGameState->SetCurrentScreenIndex(EScreenIndex::ECI_Fourth);
-					Controller->Possess(Sheriff);
-					Controller = Sheriff->GetCurrentController();
-					Controller->Possess(this);
-					Sheriff->SetCurrentController(Sheriff->GetController());
-					Controller->SetControlRotation(ControllerDirection);
-					Controller->ClientSetRotation(ControllerDirection);
-
-					NewController = Sheriff->GetController();
-					if (NewController)
+					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[3]);
+					if (Sheriff)
 					{
-						FRotator NewDirection = Sheriff->GetControllerDirection();
-						NewController->SetControlRotation(NewDirection);
-						NewController->ClientSetRotation(NewDirection);
+						AController* NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							Sheriff->SetCurrentController(NewController);
+							Sheriff->SetControllerDirection(NewController->GetControlRotation());
+						}
+
+						ControllerDirection = Controller->GetControlRotation();
+						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_Fourth);
+						Controller->Possess(Sheriff);
+						Controller = Sheriff->GetCurrentController();
+						Controller->Possess(this);
+						Sheriff->SetCurrentController(Sheriff->GetController());
+						Controller->SetControlRotation(ControllerDirection);
+						Controller->ClientSetRotation(ControllerDirection);
+
+						NewController = Sheriff->GetController();
+						if (NewController)
+						{
+							FRotator NewDirection = Sheriff->GetControllerDirection();
+							NewController->SetControlRotation(NewDirection);
+							NewController->ClientSetRotation(NewDirection);
+						}
 					}
 				}
 			}

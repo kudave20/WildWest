@@ -17,8 +17,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void SetCameraPitchRotation(float PitchValue);
-
 protected:
 	virtual void BeginPlay() override;
 
@@ -56,11 +54,6 @@ private:
 	FRotator ControllerDirection;
 
 	AController* CurrentController;
-
-	struct FSplitscreenData SplitscreenData;
-
-	UPROPERTY()
-	TArray<class ULocalPlayer*> PlayerList;
 
 public:
 	FORCEINLINE FRotator GetControllerDirection() { return ControllerDirection; }
