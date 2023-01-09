@@ -3,8 +3,22 @@
 
 #include "WildWestGameInstance.h"
 
-void UWildWestGameInstance::SetupSpawn(ECharacterState NewState, FTransform Transform)
+void UWildWestGameInstance::SetupServer(ECharacterState NewServerState)
 {
-	CharacterState = NewState;
-	SpawnTransform = Transform;
+	ServerCharacterState = NewServerState;
+}
+
+void UWildWestGameInstance::SetupClient(ECharacterState NewClientState)
+{
+	ClientCharacterState = NewClientState;
+
+	switch (NewClientState)
+	{
+	case ECharacterState::ECS_Gunman:
+		UE_LOG(LogTemp, Warning, TEXT("Client Gunman Setup!"));
+		break;
+	case ECharacterState::ECS_Sheriff:
+		UE_LOG(LogTemp, Warning, TEXT("Client Sheriff Setup!"));
+		break;
+	}
 }

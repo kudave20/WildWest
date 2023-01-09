@@ -45,7 +45,8 @@ private:
 
 	void CheckSelectedCharacter();
 
-	void SetupSpawnCharacter(ECharacterState CharacterState, FTransform Transform);
+	void SetupServer(ECharacterState NewServerState);
+	void SetupClient(ECharacterState NewClientState);
 
 	bool bIsGunmanSelected{ false };
 	bool bIsSheriffSelected{ false };

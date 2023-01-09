@@ -16,16 +16,16 @@ class WILDWEST_API UWildWestGameInstance : public UGameInstance
 	GENERATED_BODY()
 	
 public:
-	void SetupSpawn(ECharacterState NewState, FTransform Transform);
+	void SetupServer(ECharacterState NewServerState);
+	void SetupClient(ECharacterState NewClientState);
 
 private:
 	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
-	ECharacterState CharacterState;
+	ECharacterState ServerCharacterState;
 
 	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
-	FTransform SpawnTransform;
+	ECharacterState ClientCharacterState;
 
 public:
-	FORCEINLINE ECharacterState GetCharacterState() { return CharacterState; }
 
 };

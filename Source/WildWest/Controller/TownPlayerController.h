@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "TownPlayerController.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPossessCompleteDelegate);
+
 /**
  * 
  */
@@ -14,16 +16,17 @@ class WILDWEST_API ATownPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
-private:
-	class ASheriff* SpawnedCharacter;
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void OnPossess(APawn* InPawn) override;
 
-	UPROPERTY()
-	TArray<ASheriff*> SheriffList;
-
-	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void ServerCharacterSpawn(TSubclassOf<AActor> SelectedCharacter, ECharacterState CharacterState);
-
-	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void ServerSheriffListSetup();
+	UPROPERTY(BlueprintAssignable)
+	FOnPossessCompleteDelegate PossessCompleteDelegate;
 	
+private:
+	UPROPERTY(ReplicatedUsing = OnRep_bIsPossessed)
+	bool bIsPossessed{ false };
+
+	UFUNCTION()
+	void OnRep_bIsPossessed();
 };

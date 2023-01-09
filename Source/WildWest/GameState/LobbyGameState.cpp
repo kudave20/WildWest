@@ -23,10 +23,6 @@ void ALobbyGameState::GunmanButtonClicked()
 	{
 		if (!HasAuthority())
 		{
-			FTransform SpawnTransform;
-			SpawnTransform.SetLocation(FVector(-50.f, -604.f, 77.3f));
-			SetupSpawnCharacter(ECharacterState::ECS_Gunman, SpawnTransform);
-
 			ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
 			if (LobbyPlayerController)
 			{
@@ -38,18 +34,14 @@ void ALobbyGameState::GunmanButtonClicked()
 
 		if (bIsSheriffSelected)
 		{
-			FTransform SpawnTransform;
-			SpawnTransform.SetLocation(FVector(-50.f, -604.f, 77.3f));
-			SetupSpawnCharacter(ECharacterState::ECS_Gunman, SpawnTransform);
+			SetupServer(ECharacterState::ECS_Gunman);
 
 			bIsGunmanSelected = true;
 			CheckSelectedCharacter();
 			return;
 		}
 
-		FTransform SpawnTransform;
-		SpawnTransform.SetLocation(FVector(-50.f, -604.f, 77.3f));
-		SetupSpawnCharacter(ECharacterState::ECS_Gunman, SpawnTransform);
+		SetupServer(ECharacterState::ECS_Gunman);
 
 		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
 		if (LobbyPlayerController)
@@ -68,10 +60,6 @@ void ALobbyGameState::SheriffButtonClicked()
 	{
 		if (!HasAuthority())
 		{
-			FTransform SpawnTransform;
-			SpawnTransform.SetLocation(FVector(-50.f, -144.f, 77.3f));
-			SetupSpawnCharacter(ECharacterState::ECS_Sheriff, SpawnTransform);
-
 			ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
 			if (LobbyPlayerController)
 			{
@@ -83,18 +71,14 @@ void ALobbyGameState::SheriffButtonClicked()
 
 		if (bIsGunmanSelected)
 		{
-			FTransform SpawnTransform;
-			SpawnTransform.SetLocation(FVector(-50.f, -144.f, 77.3f));
-			SetupSpawnCharacter(ECharacterState::ECS_Sheriff, SpawnTransform);
+			SetupServer(ECharacterState::ECS_Sheriff);
 
 			bIsSheriffSelected = true;
 			CheckSelectedCharacter();
 			return;
 		}
 
-		FTransform SpawnTransform;
-		SpawnTransform.SetLocation(FVector(-50.f, -144.f, 77.3f));
-		SetupSpawnCharacter(ECharacterState::ECS_Sheriff, SpawnTransform);
+		SetupServer(ECharacterState::ECS_Sheriff);
 
 		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
 		if (LobbyPlayerController)
@@ -111,9 +95,12 @@ void ALobbyGameState::ServerGunmanButtonClicked()
 	if (bIsSheriffSelected)
 	{
 		bIsGunmanSelected = true;
+		SetupClient(ECharacterState::ECS_Gunman);
 		CheckSelectedCharacter();
 		return;
 	}
+
+	SetupClient(ECharacterState::ECS_Gunman);
 
 	UWorld* World = GetWorld();
 	if (World)
@@ -133,9 +120,12 @@ void ALobbyGameState::ServerSheriffButtonClicked()
 	if (bIsGunmanSelected)
 	{
 		bIsSheriffSelected = true;
+		SetupClient(ECharacterState::ECS_Sheriff);
 		CheckSelectedCharacter();
 		return;
 	}
+
+	SetupClient(ECharacterState::ECS_Sheriff);
 
 	UWorld* World = GetWorld();
 	if (World)
@@ -179,12 +169,21 @@ void ALobbyGameState::CheckSelectedCharacter()
 	}
 }
 
-void ALobbyGameState::SetupSpawnCharacter(ECharacterState CharacterState, FTransform Transform)
+void ALobbyGameState::SetupServer(ECharacterState NewServerState)
 {
 	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
 	if (WildWestGameInstance)
 	{
-		WildWestGameInstance->SetupSpawn(CharacterState, Transform);
+		WildWestGameInstance->SetupServer(NewServerState);
+	}
+}
+
+void ALobbyGameState::SetupClient(ECharacterState NewClientState)
+{
+	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+	if (WildWestGameInstance)
+	{
+		WildWestGameInstance->SetupClient(NewClientState);
 	}
 }
 
