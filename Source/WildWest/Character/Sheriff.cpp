@@ -6,11 +6,11 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "WildWest/Controller/TownPlayerController.h"
 #include "WildWest/GameState/TownGameState.h"
+#include "Net/UnrealNetwork.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
 #include "WildWest/Input/InputConfigData.h"
-#include "Engine/GameEngine.h"
 
 ASheriff::ASheriff()
 {
@@ -62,6 +62,13 @@ void ASheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 			}
 		}
 	}
+}
+
+void ASheriff::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASheriff, CharacterIndex);
 }
 
 void ASheriff::MoveForward(const FInputActionValue& Value)

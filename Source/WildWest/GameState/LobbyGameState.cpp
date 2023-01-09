@@ -4,9 +4,7 @@
 #include "LobbyGameState.h"
 #include "WildWest/GameMode/LobbyGameMode.h"
 #include "WildWest/GameInstance/WildWestGameInstance.h"
-#include "Kismet/GameplayStatics.h"
 #include "WildWest/Controller/LobbyPlayerController.h"
-#include "WildWest/Character/Gunman.h"
 #include "Net/UnrealNetwork.h"
 
 void ALobbyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

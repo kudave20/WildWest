@@ -16,6 +16,7 @@ public:
 	ASheriff();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -55,10 +56,15 @@ private:
 
 	AController* CurrentController;
 
+	UPROPERTY(Replicated, BlueprintReadWrite, Category = Character, meta = (AllowPrivateAccess = "true"))
+	int32 CharacterIndex;
+
 public:
 	FORCEINLINE FRotator GetControllerDirection() { return ControllerDirection; }
 	FORCEINLINE void SetControllerDirection(FRotator NewControllerDirection) { ControllerDirection = NewControllerDirection; }
 
 	FORCEINLINE AController* GetCurrentController() { return CurrentController; }
 	FORCEINLINE void SetCurrentController(AController* NewCurrentController) { CurrentController = NewCurrentController; }
+
+	FORCEINLINE int32 GetCharacterIndex() { return CharacterIndex; }
 };
