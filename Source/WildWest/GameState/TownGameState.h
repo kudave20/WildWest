@@ -29,14 +29,10 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = "Sheriff", meta = (AllowPrivateAccess = "true"))
 	TArray<class ASheriff*> SheriffList;
 
-	EScreenIndex LastScreenIndex;
 	EScreenIndex CurrentScreenIndex;
 
 public:
 	FORCEINLINE TArray<ASheriff*>& GetSheriffList() { return SheriffList; }
-
-	FORCEINLINE EScreenIndex GetLastScreenIndex() { return LastScreenIndex; }
-	FORCEINLINE void SetLastScreenIndex(EScreenIndex NewScreenIndex) { LastScreenIndex = NewScreenIndex; }
 
 	FORCEINLINE EScreenIndex GetCurrentScreenIndex() { return CurrentScreenIndex; }
 	FORCEINLINE void SetCurrentScreenIndex(EScreenIndex NewScreenIndex) { CurrentScreenIndex = NewScreenIndex; }

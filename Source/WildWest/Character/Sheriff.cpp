@@ -26,69 +26,12 @@ void ASheriff::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		/*SplitscreenData.PlayerData.Add(FPerPlayerSplitscreenData(0.125f, 0.125f, 0.75f, 0.f));
-		SplitscreenData.PlayerData.Add(FPerPlayerSplitscreenData(0.125f, 0.125f, 0.875f, 0.f));
-		SplitscreenData.PlayerData.Add(FPerPlayerSplitscreenData(0.125f, 0.125f, 0.75f, 0.125f));
-		SplitscreenData.PlayerData.Add(FPerPlayerSplitscreenData(0.125f, 0.125f, 0.875f, 0.125f));
-
-		if (GEngine)
-		{
-			UGameEngine* GameEngine = Cast<UGameEngine>(GEngine);
-			if (GameEngine)
-			{
-				//UGameViewportClient* GameViewportClient = World->GetGameViewport();
-				UGameViewportClient* GameViewportClient = NewObject<UGameViewportClient>(GEngine, UGameViewportClient::StaticClass());
-				if (GameViewportClient)
-				{
-					UGameInstance* GameInstance = GetGameInstance();
-					if (GameInstance)
-					{
-						GameViewportClient->Init(*GameInstance->GetWorldContext(), GameInstance);
-						GameEngine->GameViewport = GameViewportClient;
-						GameInstance->GetWorldContext()->GameViewport = GameViewportClient;
-
-
-
-						//PlayerList = GetOuterUEngine()->GetGamePlayers(GameViewportClient);
-
-						for (int32 PlayerIdx = 0; PlayerIdx < PlayerList.Num(); PlayerIdx++)
-						{
-							PlayerList[PlayerIdx]->Size.X = SplitscreenData.PlayerData[PlayerIdx].SizeX;
-							PlayerList[PlayerIdx]->Size.Y = SplitscreenData.PlayerData[PlayerIdx].SizeY;
-							PlayerList[PlayerIdx]->Origin.X = SplitscreenData.PlayerData[PlayerIdx].OriginX;
-							PlayerList[PlayerIdx]->Origin.Y = SplitscreenData.PlayerData[PlayerIdx].OriginY;
-
-							UE_LOG(LogTemp, Warning, TEXT("Test!"));
-						}
-					}
-				}
-
-				GEngine->AddOnScreenDebugMessage(
-					-1,
-					15.f,
-					FColor::Yellow,
-					TEXT("Yes!")
-				);
-			}
-			else
-			{
-				GEngine->AddOnScreenDebugMessage(
-					-1,
-					15.f,
-					FColor::Red,
-					TEXT("No!")
-				);
-			}
-		}*/
-	}
 }
 
 void ASheriff::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 }
 
 void ASheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
