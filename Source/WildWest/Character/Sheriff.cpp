@@ -7,6 +7,7 @@
 #include "WildWest/Controller/TownPlayerController.h"
 #include "WildWest/GameState/TownGameState.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -59,6 +60,7 @@ void ASheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 				EnhancedInputComponent->BindAction(InputActions->InputSwitchToSecond, ETriggerEvent::Triggered, this, &ASheriff::SwitchToSecond);
 				EnhancedInputComponent->BindAction(InputActions->InputSwitchToThird, ETriggerEvent::Triggered, this, &ASheriff::SwitchToThird);
 				EnhancedInputComponent->BindAction(InputActions->InputSwitchToFourth, ETriggerEvent::Triggered, this, &ASheriff::SwitchToFourth);
+				EnhancedInputComponent->BindAction(InputActions->InputEnterDuel, ETriggerEvent::Triggered, this, &ASheriff::EnterDuel);
 			}
 		}
 	}
@@ -331,6 +333,72 @@ void ASheriff::SwitchToFourth()
 					}
 				}
 			}
+		}
+	}
+}
+
+void ASheriff::EnterDuel()
+{
+	if (!HasAuthority())
+	{
+		ServerEnterDuel();
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+		if (TownGameState)
+		{
+			TArray<ASheriff*> SheriffList = TownGameState->GetSheriffList();
+
+			for (ASheriff* Sheriff : SheriffList)
+			{
+				if (Sheriff == this)
+				{
+					continue;
+				}
+
+				APlayerController* PlayerController = Cast<APlayerController>(Sheriff->GetController());
+				if (PlayerController)
+				{
+					UGameplayStatics::RemovePlayer(PlayerController, true);
+				}
+			}
+
+			// bUseSeamlessTravel = true;
+			World->ServerTravel(FString("/Game/Maps/Duel?listen"));
+		}
+	}
+}
+
+void ASheriff::ServerEnterDuel_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+		if (TownGameState)
+		{
+			TArray<ASheriff*> SheriffList = TownGameState->GetSheriffList();
+
+			for (ASheriff* Sheriff : SheriffList)
+			{
+				if (Sheriff == this)
+				{
+					continue;
+				}
+
+				APlayerController* PlayerController = Cast<APlayerController>(Sheriff->GetController());
+				if (PlayerController)
+				{
+					UGameplayStatics::RemovePlayer(PlayerController, true);
+				}
+			}
+
+			// bUseSeamlessTravel = true;
+			World->ServerTravel(FString("/Game/Maps/Duel?listen"));
 		}
 	}
 }

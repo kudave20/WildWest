@@ -29,6 +29,7 @@ protected:
 	void SwitchToSecond();
 	void SwitchToThird();
 	void SwitchToFourth();
+	void EnterDuel();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
 	class UInputMappingContext* InputMapping;
@@ -51,6 +52,9 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void ServerSwitchToFourth();
+
+	UFUNCTION(Server, Reliable)
+	void ServerEnterDuel();
 
 	FRotator ControllerDirection;
 
