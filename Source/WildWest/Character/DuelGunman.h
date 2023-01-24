@@ -19,6 +19,25 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	void ShootLeft();
+	void ShootMiddle();
+	void ShootRight();
+
+	UFUNCTION(Server, Reliable)
+	void ServerShootLeft();
+
+	UFUNCTION(Server, Reliable)
+	void ServerShootMiddle();
+
+	UFUNCTION(Server, Reliable)
+	void ServerShootRight();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
+	class UInputMappingContext* InputMapping;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
+	class UInputConfigData* InputActions;
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class UCameraComponent* Camera;

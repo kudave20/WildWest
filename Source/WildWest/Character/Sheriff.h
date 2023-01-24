@@ -30,17 +30,7 @@ protected:
 	void SwitchToThird();
 	void SwitchToFourth();
 	void EnterDuel();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
-	class UInputMappingContext* InputMapping;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
-	class UInputConfigData* InputActions;
-
-private:
-	UPROPERTY(VisibleAnywhere, Category = Camera)
-	class UCameraComponent* Camera;
-
+	
 	UFUNCTION(Server, Reliable)
 	void ServerSwitchToFirst();
 
@@ -55,6 +45,16 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void ServerEnterDuel();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
+	class UInputMappingContext* InputMapping;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
+	class UInputConfigData* InputActions;
+
+private:
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	class UCameraComponent* Camera;
 
 	FRotator ControllerDirection;
 

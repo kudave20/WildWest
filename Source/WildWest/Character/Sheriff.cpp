@@ -373,36 +373,6 @@ void ASheriff::EnterDuel()
 	}
 }
 
-void ASheriff::ServerEnterDuel_Implementation()
-{
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-		if (TownGameState)
-		{
-			TArray<ASheriff*> SheriffList = TownGameState->GetSheriffList();
-
-			for (ASheriff* Sheriff : SheriffList)
-			{
-				if (Sheriff == this)
-				{
-					continue;
-				}
-
-				APlayerController* PlayerController = Cast<APlayerController>(Sheriff->GetController());
-				if (PlayerController)
-				{
-					UGameplayStatics::RemovePlayer(PlayerController, true);
-				}
-			}
-
-			// bUseSeamlessTravel = true;
-			World->ServerTravel(FString("/Game/Maps/Duel?listen"));
-		}
-	}
-}
-
 void ASheriff::ServerSwitchToFirst_Implementation()
 {
 	UWorld* World = GetWorld();
@@ -611,6 +581,36 @@ void ASheriff::ServerSwitchToFourth_Implementation()
 					}
 				}
 			}
+		}
+	}
+}
+
+void ASheriff::ServerEnterDuel_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+		if (TownGameState)
+		{
+			TArray<ASheriff*> SheriffList = TownGameState->GetSheriffList();
+
+			for (ASheriff* Sheriff : SheriffList)
+			{
+				if (Sheriff == this)
+				{
+					continue;
+				}
+
+				APlayerController* PlayerController = Cast<APlayerController>(Sheriff->GetController());
+				if (PlayerController)
+				{
+					UGameplayStatics::RemovePlayer(PlayerController, true);
+				}
+			}
+
+			// bUseSeamlessTravel = true;
+			World->ServerTravel(FString("/Game/Maps/Duel?listen"));
 		}
 	}
 }
