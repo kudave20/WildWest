@@ -4,7 +4,6 @@
 #include "CharacterSelect.h"
 #include "Components/Button.h"
 #include "WildWest/GameState/LobbyGameState.h"
-#include "Kismet/GameplayStatics.h"
 
 void UCharacterSelect::CharacterSelectSetup()
 {
@@ -53,7 +52,7 @@ void UCharacterSelect::GunmanButtonClicked()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		ALobbyGameState* LobbyGameState = Cast<ALobbyGameState>(UGameplayStatics::GetGameState(World));
+		ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
 		if (LobbyGameState)
 		{
 			LobbyGameState->GunmanButtonClicked();
@@ -70,7 +69,7 @@ void UCharacterSelect::SheriffButtonClicked()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		ALobbyGameState* LobbyGameState = Cast<ALobbyGameState>(UGameplayStatics::GetGameState(World));
+		ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
 		if (LobbyGameState)
 		{
 			LobbyGameState->SheriffButtonClicked();

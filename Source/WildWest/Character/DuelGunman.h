@@ -16,12 +16,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-protected:
-	virtual void BeginPlay() override;
-
 	void ShootLeft();
 	void ShootMiddle();
 	void ShootRight();
+
+protected:
+	virtual void BeginPlay() override;
 
 	UFUNCTION(Server, Reliable)
 	void ServerShootLeft();
@@ -31,12 +31,6 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void ServerShootRight();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
-	class UInputMappingContext* InputMapping;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
-	class UInputConfigData* InputActions;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)

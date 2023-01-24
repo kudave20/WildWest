@@ -34,24 +34,6 @@ void ADuelGunman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController)
-	{
-		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-		if (Subsystem)
-		{
-			Subsystem->ClearAllMappings();
-			Subsystem->AddMappingContext(InputMapping, 0);
-
-			UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-			if (EnhancedInputComponent)
-			{
-				EnhancedInputComponent->BindAction(InputActions->InputDuelLeft, ETriggerEvent::Triggered, this, &ADuelGunman::ShootLeft);
-				EnhancedInputComponent->BindAction(InputActions->InputDuelMiddle, ETriggerEvent::Triggered, this, &ADuelGunman::ShootMiddle);
-				EnhancedInputComponent->BindAction(InputActions->InputDuelRight, ETriggerEvent::Triggered, this, &ADuelGunman::ShootRight);
-			}
-		}
-	}
 }
 
 void ADuelGunman::ShootLeft()
