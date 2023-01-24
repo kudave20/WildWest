@@ -29,11 +29,13 @@ class WILDWEST_API ATownPlayerController : public APlayerController
 
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	virtual void OnPossess(APawn* InPawn) override;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnPossessCompleteDelegate PossessCompleteDelegate;
 	
+protected:
+	virtual void OnPossess(APawn* InPawn) override;
+
 private:
 	EScreenIndex CurrentScreenIndex;
 
