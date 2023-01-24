@@ -33,5 +33,5 @@ void UGunmanAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	bIsInAir = Gunman->GetCharacterMovement()->IsFalling();
 
-	bIsAccelerating = Gunman->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
+	// bIsAccelerating = Gunman->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
 }
