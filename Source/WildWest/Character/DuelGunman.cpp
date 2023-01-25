@@ -4,6 +4,7 @@
 #include "DuelGunman.h"
 #include "Camera/CameraComponent.h"
 #include "WildWest/GameState/DuelGameState.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -21,7 +22,18 @@ ADuelGunman::ADuelGunman()
 void ADuelGunman::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		Revolver = World->SpawnActor<AActor>(RevolverClass);
+
+		const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("LeftHandSocket"));
+		if (HandSocket)
+		{
+			HandSocket->AttachActor(Revolver, GetMesh());
+		}
+	}
 }
 
 void ADuelGunman::Tick(float DeltaTime)
