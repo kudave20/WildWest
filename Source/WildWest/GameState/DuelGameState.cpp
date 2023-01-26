@@ -2,19 +2,23 @@
 
 
 #include "DuelGameState.h"
+#include "WildWest/Controller/DuelPlayerController.h"
+#include "Kismet/GameplayStatics.h"
 
 void ADuelGameState::StartDuel()
 {
 	if (GunmanDuelState == SheriffDuelState)
 	{
-		if (GEngine)
+		UWorld* World = GetWorld();
+		if (World)
 		{
-			GEngine->AddOnScreenDebugMessage(
-				-1,
-				15.f,
-				FColor::Cyan,
-				FString(TEXT("Success!"))
-			);
+			ADuelPlayerController* ServerPlayerController = Cast<ADuelPlayerController>(World->GetFirstPlayerController());
+			ADuelPlayerController* ClientPlayerController = Cast<ADuelPlayerController>(UGameplayStatics::GetPlayerController(World, 1));
+			if (ServerPlayerController && ClientPlayerController)
+			{
+				ServerPlayerController->MulticastBroadcast();
+				ClientPlayerController->MulticastBroadcast();
+			}
 		}
 	}
 	else

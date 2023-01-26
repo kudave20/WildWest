@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "DuelPlayerController.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartDuelDelegate);
+
 /**
  * 
  */
@@ -17,7 +19,17 @@ class WILDWEST_API ADuelPlayerController : public APlayerController
 public:
 	ADuelPlayerController();
 
+	UPROPERTY(BlueprintAssignable)
+	FOnStartDuelDelegate StartDuelDelegate;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastBroadcast();
+
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Cutscene")
+	class ULevelSequence* MasterSequence;
 	
 };
