@@ -15,7 +15,7 @@ class WILDWEST_API UDuelGunmanAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 	
 public:
-	void PlayShootMontage();
+	void PlayShootMontage(float PlayRate);
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Shoot")

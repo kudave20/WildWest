@@ -3,18 +3,18 @@
 
 #include "DuelSheriffAnimInstance.h"
 
-void UDuelSheriffAnimInstance::PlayDodgeLeftMontage()
+void UDuelSheriffAnimInstance::PlayDodgeLeftMontage(float PlayRate)
 {
 	if (!Montage_IsPlaying(DodgeLeftMontage))
 	{
-		Montage_Play(DodgeLeftMontage, 1.0f);
+		Montage_Play(DodgeLeftMontage, PlayRate);
 	}
 }
 
-void UDuelSheriffAnimInstance::PlayDodgeRightMontage()
+void UDuelSheriffAnimInstance::PlayDodgeRightMontage(float PlayRate)
 {
 	if (!Montage_IsPlaying(DodgeRightMontage))
 	{
-		Montage_Play(DodgeRightMontage, 1.0f);
+		Montage_Play(DodgeRightMontage, PlayRate);
 	}
 }

@@ -32,6 +32,9 @@ private:
 	EDuelState GunmanDuelState{ EDuelState::EDS_Initial };
 	EDuelState SheriffDuelState{ EDuelState::EDS_Initial };
 
+	void DodgeLeftSlow();
+	void DodgeRightSlow();
+
 public:
 	FORCEINLINE EDuelState GetGunmanDuelState() { return GunmanDuelState; }
 	FORCEINLINE EDuelState GetSheriffDuelState() { return SheriffDuelState; }

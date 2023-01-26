@@ -3,10 +3,10 @@
 
 #include "DuelGunmanAnimInstance.h"
 
-void UDuelGunmanAnimInstance::PlayShootMontage()
+void UDuelGunmanAnimInstance::PlayShootMontage(float PlayRate)
 {
 	if (!Montage_IsPlaying(ShootMontage))
 	{
-		Montage_Play(ShootMontage, 1.0f);
+		Montage_Play(ShootMontage, PlayRate);
 	}
 }

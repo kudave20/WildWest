@@ -15,8 +15,8 @@ class WILDWEST_API UDuelSheriffAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 	
 public:
-	void PlayDodgeLeftMontage();
-	void PlayDodgeRightMontage();
+	void PlayDodgeLeftMontage(float PlayRate);
+	void PlayDodgeRightMontage(float PlayRate);
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Dodge")

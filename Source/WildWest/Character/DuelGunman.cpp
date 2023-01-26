@@ -118,12 +118,12 @@ void ADuelGunman::ShootRight()
 	}
 }
 
-void ADuelGunman::PlayShootMontage()
+void ADuelGunman::PlayShootMontage(float PlayRate)
 {
 	UDuelGunmanAnimInstance* AnimInstance = Cast<UDuelGunmanAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance)
 	{
-		AnimInstance->PlayShootMontage();
+		AnimInstance->PlayShootMontage(PlayRate);
 	}
 }
 

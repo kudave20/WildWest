@@ -20,8 +20,8 @@ public:
 	void Reload();
 	void DodgeRight();
 
-	void PlayDodgeLeftMontage();
-	void PlayDodgeRightMontage();
+	void PlayDodgeLeftMontage(float PlayRate);
+	void PlayDodgeRightMontage(float PlayRate);
 
 protected:
 	virtual void BeginPlay() override;

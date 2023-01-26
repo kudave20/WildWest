@@ -20,7 +20,7 @@ public:
 	void ShootMiddle();
 	void ShootRight();
 
-	void PlayShootMontage();
+	void PlayShootMontage(float PlayRate);
 
 protected:
 	virtual void BeginPlay() override;
