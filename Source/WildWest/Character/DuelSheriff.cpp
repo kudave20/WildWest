@@ -4,6 +4,7 @@
 #include "DuelSheriff.h"
 #include "Camera/CameraComponent.h"
 #include "WildWest/GameState/DuelGameState.h"
+#include "DuelSheriffAnimInstance.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -104,6 +105,25 @@ void ADuelSheriff::DodgeRight()
 		}
 	}
 }
+
+void ADuelSheriff::PlayDodgeLeftMontage()
+{
+	UDuelSheriffAnimInstance* AnimInstance = Cast<UDuelSheriffAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->PlayDodgeLeftMontage();
+	}
+}
+
+void ADuelSheriff::PlayDodgeRightMontage()
+{
+	UDuelSheriffAnimInstance* AnimInstance = Cast<UDuelSheriffAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->PlayDodgeRightMontage();
+	}
+}
+
 
 void ADuelSheriff::ServerDodgeLeft_Implementation()
 {

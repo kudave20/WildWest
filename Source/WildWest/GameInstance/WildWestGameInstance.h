@@ -27,5 +27,6 @@ private:
 	ECharacterState ClientCharacterState;
 
 public:
-
+	FORCEINLINE ECharacterState GetServerCharacterState() { return ServerCharacterState; }
+	FORCEINLINE ECharacterState GetClientCharacterState() { return ClientCharacterState; }
 };

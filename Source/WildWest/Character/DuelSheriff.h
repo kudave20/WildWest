@@ -20,6 +20,9 @@ public:
 	void Reload();
 	void DodgeRight();
 
+	void PlayDodgeLeftMontage();
+	void PlayDodgeRightMontage();
+
 protected:
 	virtual void BeginPlay() override;
 

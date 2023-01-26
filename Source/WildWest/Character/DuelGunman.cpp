@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "WildWest/GameState/DuelGameState.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "DuelGunmanAnimInstance.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -114,6 +115,15 @@ void ADuelGunman::ShootRight()
 				DuelGameState->StartDuel();
 			}
 		}
+	}
+}
+
+void ADuelGunman::PlayShootMontage()
+{
+	UDuelGunmanAnimInstance* AnimInstance = Cast<UDuelGunmanAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->PlayShootMontage();
 	}
 }
 

@@ -20,6 +20,8 @@ public:
 	void ShootMiddle();
 	void ShootRight();
 
+	void PlayShootMontage();
+
 protected:
 	virtual void BeginPlay() override;
 
