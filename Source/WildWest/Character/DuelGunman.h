@@ -20,7 +20,8 @@ public:
 	void ShootMiddle();
 	void ShootRight();
 
-	void PlayShootMontage(float PlayRate);
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastPlayShootMontage(float PlayRate);
 
 protected:
 	virtual void BeginPlay() override;

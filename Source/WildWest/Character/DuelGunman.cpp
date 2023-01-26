@@ -118,7 +118,7 @@ void ADuelGunman::ShootRight()
 	}
 }
 
-void ADuelGunman::PlayShootMontage(float PlayRate)
+void ADuelGunman::MulticastPlayShootMontage_Implementation(float PlayRate)
 {
 	UDuelGunmanAnimInstance* AnimInstance = Cast<UDuelGunmanAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance)

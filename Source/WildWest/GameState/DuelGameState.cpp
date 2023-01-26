@@ -30,7 +30,7 @@ void ADuelGameState::StartDuel()
 					DuelGunman = Cast<ADuelGunman>(ServerPlayerController->GetPawn());
 					if (DuelGunman)
 					{
-						DuelGunman->PlayShootMontage(0.5f);
+						DuelGunman->MulticastPlayShootMontage(0.5f);
 
 						if (SheriffDuelState == EDuelState::EDS_Left)
 						{
@@ -46,7 +46,7 @@ void ADuelGameState::StartDuel()
 											ADuelSheriff* DuelSheriff = Cast<ADuelSheriff>(ClientPlayerController->GetPawn());
 											if (DuelSheriff)
 											{
-												DuelSheriff->PlayDodgeLeftMontage(0.25f);
+												DuelSheriff->MulticastPlayDodgeLeftMontage(0.25f);
 											}
 										}
 									}
@@ -66,7 +66,7 @@ void ADuelGameState::StartDuel()
 											ADuelSheriff* DuelSheriff = Cast<ADuelSheriff>(ClientPlayerController->GetPawn());
 											if (DuelSheriff)
 											{
-												DuelSheriff->PlayDodgeRightMontage(0.25f);
+												DuelSheriff->MulticastPlayDodgeRightMontage(0.25f);
 											}
 										}
 									}
@@ -83,7 +83,7 @@ void ADuelGameState::StartDuel()
 					DuelGunman = Cast<ADuelGunman>(ClientPlayerController->GetPawn());
 					if (DuelGunman)
 					{
-						DuelGunman->PlayShootMontage(0.5f);
+						DuelGunman->MulticastPlayShootMontage(0.5f);
 
 						if (SheriffDuelState == EDuelState::EDS_Left)
 						{
@@ -99,7 +99,7 @@ void ADuelGameState::StartDuel()
 											ADuelSheriff* DuelSheriff = Cast<ADuelSheriff>(ServerPlayerController->GetPawn());
 											if (DuelSheriff)
 											{
-												DuelSheriff->PlayDodgeLeftMontage(0.25f);
+												DuelSheriff->MulticastPlayDodgeLeftMontage(0.25f);
 											}
 										}
 									}
@@ -119,7 +119,7 @@ void ADuelGameState::StartDuel()
 											ADuelSheriff* DuelSheriff = Cast<ADuelSheriff>(ServerPlayerController->GetPawn());
 											if (DuelSheriff)
 											{
-												DuelSheriff->PlayDodgeRightMontage(0.25f);
+												DuelSheriff->MulticastPlayDodgeRightMontage(0.25f);
 											}
 										}
 									}
@@ -144,7 +144,7 @@ void ADuelGameState::StartDuel()
 					DuelGunman = Cast<ADuelGunman>(ServerPlayerController->GetPawn());
 					if (DuelGunman)
 					{
-						DuelGunman->PlayShootMontage(1.0f);
+						DuelGunman->MulticastPlayShootMontage(1.0f);
 					}
 
 					break;
@@ -154,11 +154,11 @@ void ADuelGameState::StartDuel()
 					{
 						if (SheriffDuelState == EDuelState::EDS_Left)
 						{
-							DuelSheriff->PlayDodgeLeftMontage(1.0f);
+							DuelSheriff->MulticastPlayDodgeLeftMontage(1.0f);
 						}
 						else if (SheriffDuelState == EDuelState::EDS_Right)
 						{
-							DuelSheriff->PlayDodgeRightMontage(1.0f);
+							DuelSheriff->MulticastPlayDodgeRightMontage(1.0f);
 						}
 					}
 
@@ -171,7 +171,7 @@ void ADuelGameState::StartDuel()
 					DuelGunman = Cast<ADuelGunman>(ClientPlayerController->GetPawn());
 					if (DuelGunman)
 					{
-						DuelGunman->PlayShootMontage(1.0f);
+						DuelGunman->MulticastPlayShootMontage(1.0f);
 					}
 
 					break;
@@ -181,11 +181,11 @@ void ADuelGameState::StartDuel()
 					{
 						if (SheriffDuelState == EDuelState::EDS_Left)
 						{
-							DuelSheriff->PlayDodgeLeftMontage(1.0f);
+							DuelSheriff->MulticastPlayDodgeLeftMontage(1.0f);
 						}
 						else if (SheriffDuelState == EDuelState::EDS_Right)
 						{
-							DuelSheriff->PlayDodgeRightMontage(1.0f);
+							DuelSheriff->MulticastPlayDodgeRightMontage(1.0f);
 						}
 					}
 
@@ -194,28 +194,6 @@ void ADuelGameState::StartDuel()
 
 				ServerPlayerController->MulticastDodgeBroadcast();
 				ClientPlayerController->MulticastDodgeBroadcast();
-			}
-		}
-	}
-}
-
-void ADuelGameState::DodgeLeftSlow()
-{
-	
-}
-
-void ADuelGameState::DodgeRightSlow()
-{
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		ADuelPlayerController* ClientPlayerController = Cast<ADuelPlayerController>(UGameplayStatics::GetPlayerController(World, 1));
-		if (ClientPlayerController)
-		{
-			ADuelSheriff* DuelSheriff = Cast<ADuelSheriff>(ClientPlayerController->GetPawn());
-			if (DuelSheriff)
-			{
-				DuelSheriff->PlayDodgeRightMontage(0.25f);
 			}
 		}
 	}

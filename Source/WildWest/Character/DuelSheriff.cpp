@@ -106,7 +106,7 @@ void ADuelSheriff::DodgeRight()
 	}
 }
 
-void ADuelSheriff::PlayDodgeLeftMontage(float PlayRate)
+void ADuelSheriff::MulticastPlayDodgeLeftMontage_Implementation(float PlayRate)
 {
 	UDuelSheriffAnimInstance* AnimInstance = Cast<UDuelSheriffAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance)
@@ -115,7 +115,7 @@ void ADuelSheriff::PlayDodgeLeftMontage(float PlayRate)
 	}
 }
 
-void ADuelSheriff::PlayDodgeRightMontage(float PlayRate)
+void ADuelSheriff::MulticastPlayDodgeRightMontage_Implementation(float PlayRate)
 {
 	UDuelSheriffAnimInstance* AnimInstance = Cast<UDuelSheriffAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance)
