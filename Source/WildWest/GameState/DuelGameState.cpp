@@ -81,9 +81,14 @@ void ADuelGameState::StartDuel()
 		{
 			if (ServerPlayerController && ClientPlayerController)
 			{
-				ServerPlayerController->MulticastBroadcast();
-				ClientPlayerController->MulticastBroadcast();
+				ServerPlayerController->MulticastStartDuelBroadcast();
+				ClientPlayerController->MulticastStartDuelBroadcast();
 			}
+		}
+		else
+		{
+			ServerPlayerController->MulticastDodgeBroadcast();
+			ClientPlayerController->MulticastDodgeBroadcast();
 		}
 	}
 }

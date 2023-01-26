@@ -4,18 +4,20 @@
 #include "DuelPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraActor.h"
-//#include "LevelSequenceActor.h"
-//#include "LevelSequencePlayer.h"
-//#include "MovieSceneSequencePlayer.h"
 
 ADuelPlayerController::ADuelPlayerController()
 {
 	bAutoManageActiveCameraTarget = false;
 }
 
-void ADuelPlayerController::MulticastBroadcast_Implementation()
+void ADuelPlayerController::MulticastStartDuelBroadcast_Implementation()
 {
 	StartDuelDelegate.Broadcast();
+}
+
+void ADuelPlayerController::MulticastDodgeBroadcast_Implementation()
+{
+	DodgeDelegate.Broadcast();
 }
 
 void ADuelPlayerController::OnPossess(APawn* InPawn)

@@ -7,6 +7,7 @@
 #include "DuelPlayerController.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartDuelDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeDelegate);
 
 /**
  * 
@@ -22,8 +23,14 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnStartDuelDelegate StartDuelDelegate;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnDodgeDelegate DodgeDelegate;
+
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastBroadcast();
+	void MulticastStartDuelBroadcast();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastDodgeBroadcast();
 
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
