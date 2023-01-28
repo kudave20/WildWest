@@ -33,5 +33,5 @@ void USheriffAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	bIsInAir = Sheriff->GetCharacterMovement()->IsFalling();
 
-	bIsAccelerating = Sheriff->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
+	// bIsAccelerating = Sheriff->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
 }

@@ -20,6 +20,11 @@ void ADuelPlayerController::MulticastDodgeBroadcast_Implementation()
 	DodgeDelegate.Broadcast();
 }
 
+void ADuelPlayerController::MulticastFireBroadcast_Implementation()
+{
+	FireDelegate.Broadcast();
+}
+
 void ADuelPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);

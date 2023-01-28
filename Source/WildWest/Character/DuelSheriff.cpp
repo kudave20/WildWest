@@ -19,6 +19,15 @@ ADuelSheriff::ADuelSheriff()
 	Camera->bUsePawnControlRotation = true;
 }
 
+void ADuelSheriff::SetIsDead(bool bIsDead)
+{
+	UDuelSheriffAnimInstance* AnimInstance = Cast<UDuelSheriffAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->SetbIsDead(bIsDead);
+	}
+}
+
 void ADuelSheriff::BeginPlay()
 {
 	Super::BeginPlay();

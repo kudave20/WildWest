@@ -24,4 +24,11 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dodge")
 	UAnimMontage* DodgeRightMontage;
+	
+	UPROPERTY(BlueprintReadOnly, Category = "Death", meta = (AllowPrivateAccess = "true"))
+	bool bIsDead;
+
+public:
+	FORCEINLINE void SetbIsDead(bool bDead) { bIsDead = bDead; }
+
 };

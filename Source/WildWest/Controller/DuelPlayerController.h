@@ -8,6 +8,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartDuelDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFireDelegate);
 
 /**
  * 
@@ -26,11 +27,17 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnDodgeDelegate DodgeDelegate;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnFireDelegate FireDelegate;
+
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastStartDuelBroadcast();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastDodgeBroadcast();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastFireBroadcast();
 
 protected:
 	virtual void OnPossess(APawn* InPawn) override;

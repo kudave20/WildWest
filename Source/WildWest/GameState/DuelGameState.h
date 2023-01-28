@@ -26,11 +26,20 @@ class WILDWEST_API ADuelGameState : public AGameState
 	GENERATED_BODY()
 
 public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	void StartDuel();
 	
 private:
 	EDuelState GunmanDuelState{ EDuelState::EDS_Initial };
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Dodge", meta = (AllowPrivateAccess = "true"))
 	EDuelState SheriffDuelState{ EDuelState::EDS_Initial };
+
+	class ADuelGunman* DuelGunman;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
+	class ADuelSheriff* DuelSheriff;
 
 public:
 	FORCEINLINE EDuelState GetGunmanDuelState() { return GunmanDuelState; }
