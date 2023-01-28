@@ -15,9 +15,6 @@ ADuelGunman::ADuelGunman()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	Camera->SetupAttachment(GetMesh());
-	Camera->bUsePawnControlRotation = true;
 }
 
 void ADuelGunman::BeginPlay()

@@ -29,6 +29,9 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void StartDuel();
+
+	UFUNCTION(BlueprintCallable)
+	void StartDuelTimer();
 	
 private:
 	EDuelState GunmanDuelState{ EDuelState::EDS_Initial };
@@ -41,6 +44,11 @@ private:
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 	class ADuelSheriff* DuelSheriff;
 
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Timer")
+	int32 DuelTimer;
+
+	FTimerHandle TimerHandle;
+
 public:
 	FORCEINLINE EDuelState GetGunmanDuelState() { return GunmanDuelState; }
 	FORCEINLINE EDuelState GetSheriffDuelState() { return SheriffDuelState; }
@@ -48,4 +56,5 @@ public:
 	FORCEINLINE void SetGunmanDuelState(EDuelState NewDuelState) { GunmanDuelState = NewDuelState; }
 	FORCEINLINE void SetSheriffDuelState(EDuelState NewDuelState) { SheriffDuelState = NewDuelState; }
 
+	FORCEINLINE int32 GetDuelTimer() { return DuelTimer; }
 };

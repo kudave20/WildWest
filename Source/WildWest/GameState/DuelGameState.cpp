@@ -15,6 +15,7 @@ void ADuelGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 	DOREPLIFETIME(ADuelGameState, SheriffDuelState);
 	DOREPLIFETIME(ADuelGameState, DuelSheriff);
+	DOREPLIFETIME(ADuelGameState, DuelTimer);
 }
 
 void ADuelGameState::StartDuel()
@@ -22,6 +23,8 @@ void ADuelGameState::StartDuel()
 	UWorld* World = GetWorld();
 	if (World)
 	{
+		World->GetTimerManager().ClearTimer(TimerHandle);
+
 		ADuelPlayerController* ServerPlayerController = Cast<ADuelPlayerController>(World->GetFirstPlayerController());
 		ADuelPlayerController* ClientPlayerController = Cast<ADuelPlayerController>(UGameplayStatics::GetPlayerController(World, 1));
 
@@ -45,18 +48,9 @@ void ADuelGameState::StartDuel()
 								FTimerHandle WaitHandle;
 								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 									{
-										UWorld* World = GetWorld();
-										if (World)
+										if (DuelSheriff)
 										{
-											ADuelPlayerController* ClientPlayerController = Cast<ADuelPlayerController>(UGameplayStatics::GetPlayerController(World, 1));
-											if (ClientPlayerController)
-											{
-												ADuelSheriff* DuelSheriff = Cast<ADuelSheriff>(ClientPlayerController->GetPawn());
-												if (DuelSheriff)
-												{
-													DuelSheriff->MulticastPlayDodgeLeftMontage(0.25f);
-												}
-											}
+											DuelSheriff->MulticastPlayDodgeLeftMontage(0.25f);
 										}
 									}), 2.0f, false);
 							}
@@ -65,24 +59,16 @@ void ADuelGameState::StartDuel()
 								FTimerHandle WaitHandle;
 								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 									{
-										UWorld* World = GetWorld();
-										if (World)
+										if (DuelSheriff)
 										{
-											ADuelPlayerController* ClientPlayerController = Cast<ADuelPlayerController>(UGameplayStatics::GetPlayerController(World, 1));
-											if (ClientPlayerController)
-											{
-												ADuelSheriff* DuelSheriff = Cast<ADuelSheriff>(ClientPlayerController->GetPawn());
-												if (DuelSheriff)
-												{
-													DuelSheriff->MulticastPlayDodgeRightMontage(0.25f);
-												}
-											}
+											DuelSheriff->MulticastPlayDodgeRightMontage(0.25f);
 										}
 									}), 2.0f, false);
 							}
 						}
 
-						ServerPlayerController->MulticastFireBroadcast();
+						ServerPlayerController->FireDelegate.Broadcast();
+						ClientPlayerController->ClientHitBroadcast();
 					}
 					else if (WildWestGameInstance->GetClientCharacterState() == ECharacterState::ECS_Gunman)
 					{
@@ -97,18 +83,9 @@ void ADuelGameState::StartDuel()
 								FTimerHandle WaitHandle;
 								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 									{
-										UWorld* World = GetWorld();
-										if (World)
+										if (DuelSheriff)
 										{
-											ADuelPlayerController* ServerPlayerController = Cast<ADuelPlayerController>(World->GetFirstPlayerController());
-											if (ServerPlayerController)
-											{
-												ADuelSheriff* DuelSheriff = Cast<ADuelSheriff>(ServerPlayerController->GetPawn());
-												if (DuelSheriff)
-												{
-													DuelSheriff->MulticastPlayDodgeLeftMontage(0.25f);
-												}
-											}
+											DuelSheriff->MulticastPlayDodgeLeftMontage(0.25f);
 										}
 									}), 2.0f, false);
 							}
@@ -117,30 +94,22 @@ void ADuelGameState::StartDuel()
 								FTimerHandle WaitHandle;
 								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 									{
-										UWorld* World = GetWorld();
-										if (World)
+										if (DuelSheriff)
 										{
-											ADuelPlayerController* ServerPlayerController = Cast<ADuelPlayerController>(World->GetFirstPlayerController());
-											if (ServerPlayerController)
-											{
-												ADuelSheriff* DuelSheriff = Cast<ADuelSheriff>(ServerPlayerController->GetPawn());
-												if (DuelSheriff)
-												{
-													DuelSheriff->MulticastPlayDodgeRightMontage(0.25f);
-												}
-											}
+											DuelSheriff->MulticastPlayDodgeRightMontage(0.25f);
 										}
 									}), 2.0f, false);
 							}
 						}
 
-						ClientPlayerController->MulticastFireBroadcast();
+						ServerPlayerController->FireDelegate.Broadcast();
+						ClientPlayerController->ClientFireBroadcast();
 					}
 
 					if (ServerPlayerController && ClientPlayerController)
 					{
-						ServerPlayerController->MulticastStartDuelBroadcast();
-						ClientPlayerController->MulticastStartDuelBroadcast();
+						ServerPlayerController->HitDelegate.Broadcast();
+						ClientPlayerController->ClientHitBroadcast();
 					}
 				}
 				else
@@ -201,10 +170,38 @@ void ADuelGameState::StartDuel()
 						break;
 					}
 
-					ServerPlayerController->MulticastDodgeBroadcast();
-					ClientPlayerController->MulticastDodgeBroadcast();
+					ServerPlayerController->DodgeDelegate.Broadcast();
+					ClientPlayerController->ClientDodgeBroadcast();
 				}
+
+				ServerPlayerController->DuelSelectCompleteDelegate.Broadcast();
+				ClientPlayerController->ClientDuelSelectCompleteBroadcast();;
 			}
 		}
+	}
+}
+
+void ADuelGameState::StartDuelTimer()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		World->GetTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([&]()
+			{
+				DuelTimer--;
+				if (DuelTimer == 0)
+				{
+					if (GunmanDuelState == EDuelState::EDS_Initial)
+					{
+						GunmanDuelState = EDuelState::EDS_Middle;
+					}
+					if (SheriffDuelState == EDuelState::EDS_Initial)
+					{
+						SheriffDuelState = EDuelState::EDS_Middle;
+					}
+
+					StartDuel();
+				}
+			}), 1.0f, true);
 	}
 }

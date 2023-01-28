@@ -41,10 +41,6 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerDodgeRight();
 
-private:
-	UPROPERTY(VisibleAnywhere, Category = Camera)
-	class UCameraComponent* Camera;
-
 public:
 
 };

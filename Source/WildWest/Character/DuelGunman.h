@@ -36,9 +36,6 @@ protected:
 	void ServerShootRight();
 
 private:
-	UPROPERTY(VisibleAnywhere, Category = Camera)
-	class UCameraComponent* Camera;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Gun")
 	TSubclassOf<AActor> RevolverClass;
 

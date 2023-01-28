@@ -6,9 +6,10 @@
 #include "GameFramework/PlayerController.h"
 #include "DuelPlayerController.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartDuelDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHitDuelDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFireDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDuelSelectCompleteDelegate);
 
 /**
  * 
@@ -22,7 +23,7 @@ public:
 	ADuelPlayerController();
 
 	UPROPERTY(BlueprintAssignable)
-	FOnStartDuelDelegate StartDuelDelegate;
+	FOnHitDuelDelegate HitDelegate;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnDodgeDelegate DodgeDelegate;
@@ -30,14 +31,20 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnFireDelegate FireDelegate;
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastStartDuelBroadcast();
+	UPROPERTY(BlueprintAssignable)
+	FOnDuelSelectCompleteDelegate DuelSelectCompleteDelegate;
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastDodgeBroadcast();
+	UFUNCTION(Client, Reliable)
+	void ClientHitBroadcast();
+
+	UFUNCTION(Client, Reliable)
+	void ClientDodgeBroadcast();
 	
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastFireBroadcast();
+	UFUNCTION(Client, Reliable)
+	void ClientFireBroadcast();
+
+	UFUNCTION(Client, Reliable)
+	void ClientDuelSelectCompleteBroadcast();
 
 protected:
 	virtual void OnPossess(APawn* InPawn) override;

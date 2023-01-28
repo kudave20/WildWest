@@ -10,19 +10,24 @@ ADuelPlayerController::ADuelPlayerController()
 	bAutoManageActiveCameraTarget = false;
 }
 
-void ADuelPlayerController::MulticastStartDuelBroadcast_Implementation()
+void ADuelPlayerController::ClientHitBroadcast_Implementation()
 {
-	StartDuelDelegate.Broadcast();
+	HitDelegate.Broadcast();
 }
 
-void ADuelPlayerController::MulticastDodgeBroadcast_Implementation()
+void ADuelPlayerController::ClientDodgeBroadcast_Implementation()
 {
 	DodgeDelegate.Broadcast();
 }
 
-void ADuelPlayerController::MulticastFireBroadcast_Implementation()
+void ADuelPlayerController::ClientFireBroadcast_Implementation()
 {
 	FireDelegate.Broadcast();
+}
+
+void ADuelPlayerController::ClientDuelSelectCompleteBroadcast_Implementation()
+{
+	DuelSelectCompleteDelegate.Broadcast();
 }
 
 void ADuelPlayerController::OnPossess(APawn* InPawn)
