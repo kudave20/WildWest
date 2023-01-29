@@ -66,9 +66,6 @@ void ADuelGameState::StartDuel()
 									}), 2.0f, false);
 							}
 						}
-
-						ServerPlayerController->FireDelegate.Broadcast();
-						ClientPlayerController->ClientHitBroadcast();
 					}
 					else if (WildWestGameInstance->GetClientCharacterState() == ECharacterState::ECS_Gunman)
 					{
@@ -101,16 +98,13 @@ void ADuelGameState::StartDuel()
 									}), 2.0f, false);
 							}
 						}
-
-						ServerPlayerController->FireDelegate.Broadcast();
-						ClientPlayerController->ClientFireBroadcast();
 					}
 
-					if (ServerPlayerController && ClientPlayerController)
-					{
-						ServerPlayerController->HitDelegate.Broadcast();
-						ClientPlayerController->ClientHitBroadcast();
-					}
+					ServerPlayerController->FireDelegate.Broadcast();
+					ClientPlayerController->ClientFireBroadcast();
+
+					ServerPlayerController->HitDelegate.Broadcast();
+					ClientPlayerController->ClientHitBroadcast();
 				}
 				else
 				{
@@ -175,7 +169,14 @@ void ADuelGameState::StartDuel()
 				}
 
 				ServerPlayerController->DuelSelectCompleteDelegate.Broadcast();
-				ClientPlayerController->ClientDuelSelectCompleteBroadcast();;
+				ClientPlayerController->ClientDuelSelectCompleteBroadcast();
+
+				FInputModeGameOnly InputModeData;
+				ServerPlayerController->SetInputMode(InputModeData);
+				ServerPlayerController->SetShowMouseCursor(false);
+
+				ClientPlayerController->SetInputMode(InputModeData);
+				ClientPlayerController->SetShowMouseCursor(false);
 			}
 		}
 	}
@@ -186,6 +187,8 @@ void ADuelGameState::StartDuelTimer()
 	UWorld* World = GetWorld();
 	if (World)
 	{
+		DuelTimer = InitialDuelTimer;
+
 		World->GetTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([&]()
 			{
 				DuelTimer--;
@@ -203,5 +206,14 @@ void ADuelGameState::StartDuelTimer()
 					StartDuel();
 				}
 			}), 1.0f, true);
+	}
+}
+
+void ADuelGameState::ResetDuelState()
+{
+	if (HasAuthority())
+	{
+		GunmanDuelState = EDuelState::EDS_Initial;
+		SheriffDuelState = EDuelState::EDS_Initial;
 	}
 }

@@ -16,6 +16,9 @@ class WILDWEST_API UShoot : public UUserWidget
 public:
 	UFUNCTION(BlueprintCallable)
 	void ShootSetup();
+
+	UFUNCTION(BlueprintCallable)
+	void ShootButtonReset();
 	
 protected:
 	virtual bool Initialize() override;

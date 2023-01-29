@@ -4,6 +4,7 @@
 #include "Dodge.h"
 #include "Components/Button.h"
 #include "WildWest/Character/DuelSheriff.h"
+#include "WildWest/GameState/DuelGameState.h"
 
 void UDodge::DodgeSetup()
 {
@@ -23,6 +24,22 @@ void UDodge::DodgeSetup()
 			PlayerController->SetInputMode(InputModeData);
 			PlayerController->SetShowMouseCursor(true);
 		}
+	}
+}
+
+void UDodge::DodgeButtonReset()
+{
+	if (LeftButton && !LeftButton->GetIsEnabled())
+	{
+		LeftButton->SetIsEnabled(true);
+	}
+	if (MiddleButton && !MiddleButton->GetIsEnabled())
+	{
+		MiddleButton->SetIsEnabled(true);
+	}
+	if (RightButton && !RightButton->GetIsEnabled())
+	{
+		RightButton->SetIsEnabled(true);
 	}
 }
 

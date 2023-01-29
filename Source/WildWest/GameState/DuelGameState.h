@@ -32,6 +32,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void StartDuelTimer();
+
+	UFUNCTION(BlueprintCallable)
+	void ResetDuelState();
 	
 private:
 	EDuelState GunmanDuelState{ EDuelState::EDS_Initial };
@@ -44,7 +47,10 @@ private:
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 	class ADuelSheriff* DuelSheriff;
 
-	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Timer")
+	UPROPERTY(EditDefaultsOnly, Category = "Timer")
+	int32 InitialDuelTimer;
+
+	UPROPERTY(Replicated)
 	int32 DuelTimer;
 
 	FTimerHandle TimerHandle;

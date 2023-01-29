@@ -17,6 +17,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void DodgeSetup();
 
+	UFUNCTION(BlueprintCallable)
+	void DodgeButtonReset();
+
 protected:
 	virtual bool Initialize() override;
 

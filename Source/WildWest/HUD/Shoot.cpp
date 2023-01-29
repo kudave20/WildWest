@@ -4,6 +4,7 @@
 #include "Shoot.h"
 #include "Components/Button.h"
 #include "WildWest/Character/DuelGunman.h"
+#include "WildWest/GameState/DuelGameState.h"
 
 void UShoot::ShootSetup()
 {
@@ -23,6 +24,22 @@ void UShoot::ShootSetup()
 			PlayerController->SetInputMode(InputModeData);
 			PlayerController->SetShowMouseCursor(true);
 		}
+	}
+}
+
+void UShoot::ShootButtonReset()
+{
+	if (LeftButton && !LeftButton->GetIsEnabled())
+	{
+		LeftButton->SetIsEnabled(true);
+	}
+	if (MiddleButton && !MiddleButton->GetIsEnabled())
+	{
+		MiddleButton->SetIsEnabled(true);
+	}
+	if (RightButton && !RightButton->GetIsEnabled())
+	{
+		RightButton->SetIsEnabled(true);
 	}
 }
 
