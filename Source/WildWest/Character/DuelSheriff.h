@@ -26,6 +26,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastPlayDodgeRightMontage(float PlayRate);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastSetShoot(bool bShoot);
+
 	UFUNCTION(BlueprintCallable)
 	void SetIsDead(bool bIsDead);
 

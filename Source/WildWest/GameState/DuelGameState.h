@@ -53,6 +53,9 @@ private:
 	UPROPERTY(Replicated)
 	int32 DuelTimer;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Count", meta = (AllowPrivateAccess = "true"))
+	int32 BulletCount;
+
 	FTimerHandle TimerHandle;
 
 public:

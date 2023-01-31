@@ -43,9 +43,10 @@ void ADuelGameState::StartDuel()
 						{
 							DuelGunman->MulticastPlayShootMontage(0.5f);
 
-							if (SheriffDuelState == EDuelState::EDS_Left)
+							FTimerHandle WaitHandle;
+							switch (SheriffDuelState)
 							{
-								FTimerHandle WaitHandle;
+							case EDuelState::EDS_Left:
 								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 									{
 										if (DuelSheriff)
@@ -53,10 +54,25 @@ void ADuelGameState::StartDuel()
 											DuelSheriff->MulticastPlayDodgeLeftMontage(0.25f);
 										}
 									}), 2.0f, false);
-							}
-							else if (SheriffDuelState == EDuelState::EDS_Right)
-							{
-								FTimerHandle WaitHandle;
+
+								break;
+							case EDuelState::EDS_Middle:
+								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+									{
+										if (DuelSheriff)
+										{
+											AController* SheriffController = DuelSheriff->GetController();
+											if (SheriffController)
+											{
+												SheriffController->SetControlRotation(FRotator(0, 90, 0));
+											}
+
+											DuelSheriff->MulticastSetShoot(true);
+										}
+									}), 2.0f, false);
+
+								break;
+							case EDuelState::EDS_Right:
 								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 									{
 										if (DuelSheriff)
@@ -64,6 +80,8 @@ void ADuelGameState::StartDuel()
 											DuelSheriff->MulticastPlayDodgeRightMontage(0.25f);
 										}
 									}), 2.0f, false);
+
+								break;
 							}
 						}
 					}
@@ -75,9 +93,10 @@ void ADuelGameState::StartDuel()
 						{
 							DuelGunman->MulticastPlayShootMontage(0.5f);
 
-							if (SheriffDuelState == EDuelState::EDS_Left)
+							FTimerHandle WaitHandle;
+							switch (SheriffDuelState)
 							{
-								FTimerHandle WaitHandle;
+							case EDuelState::EDS_Left:
 								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 									{
 										if (DuelSheriff)
@@ -85,10 +104,25 @@ void ADuelGameState::StartDuel()
 											DuelSheriff->MulticastPlayDodgeLeftMontage(0.25f);
 										}
 									}), 2.0f, false);
-							}
-							else if (SheriffDuelState == EDuelState::EDS_Right)
-							{
-								FTimerHandle WaitHandle;
+
+								break;
+							case EDuelState::EDS_Middle:
+								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+									{
+										if (DuelSheriff)
+										{
+											AController* SheriffController = DuelSheriff->GetController();
+											if (SheriffController)
+											{
+												SheriffController->SetControlRotation(FRotator(0, 90, 0));
+											}
+
+											DuelSheriff->MulticastSetShoot(true);
+										}
+									}), 2.0f, false);
+
+								break;
+							case EDuelState::EDS_Right:
 								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 									{
 										if (DuelSheriff)
@@ -96,6 +130,8 @@ void ADuelGameState::StartDuel()
 											DuelSheriff->MulticastPlayDodgeRightMontage(0.25f);
 										}
 									}), 2.0f, false);
+
+								break;
 							}
 						}
 					}
@@ -121,15 +157,26 @@ void ADuelGameState::StartDuel()
 						break;
 					case ECharacterState::ECS_Sheriff:
 						DuelSheriff = Cast<ADuelSheriff>(ServerPlayerController->GetPawn());
+						AController* SheriffController = NULL;
 						if (DuelSheriff)
 						{
-							if (SheriffDuelState == EDuelState::EDS_Left)
+							switch (SheriffDuelState)
 							{
+							case EDuelState::EDS_Left:
 								DuelSheriff->MulticastPlayDodgeLeftMontage(1.0f);
-							}
-							else if (SheriffDuelState == EDuelState::EDS_Right)
-							{
+								break;
+							case EDuelState::EDS_Middle:
+								SheriffController = DuelSheriff->GetController();
+								if (SheriffController)
+								{
+									SheriffController->SetControlRotation(FRotator(0, 90, 0));
+								}
+
+								DuelSheriff->MulticastSetShoot(true);
+								break;
+							case EDuelState::EDS_Right:
 								DuelSheriff->MulticastPlayDodgeRightMontage(1.0f);
+								break;
 							}
 						}
 
@@ -149,15 +196,26 @@ void ADuelGameState::StartDuel()
 						break;
 					case ECharacterState::ECS_Sheriff:
 						DuelSheriff = Cast<ADuelSheriff>(ClientPlayerController->GetPawn());
+						AController* SheriffController = NULL;
 						if (DuelSheriff)
 						{
-							if (SheriffDuelState == EDuelState::EDS_Left)
+							switch (SheriffDuelState)
 							{
+							case EDuelState::EDS_Left:
 								DuelSheriff->MulticastPlayDodgeLeftMontage(1.0f);
-							}
-							else if (SheriffDuelState == EDuelState::EDS_Right)
-							{
+								break;
+							case EDuelState::EDS_Middle:
+								SheriffController = DuelSheriff->GetController();
+								if (SheriffController)
+								{
+									SheriffController->SetControlRotation(FRotator(0, 90, 0));
+								}
+
+								DuelSheriff->MulticastSetShoot(true);
+								break;
+							case EDuelState::EDS_Right:
 								DuelSheriff->MulticastPlayDodgeRightMontage(1.0f);
+								break;
 							}
 						}
 
@@ -166,6 +224,13 @@ void ADuelGameState::StartDuel()
 
 					ServerPlayerController->DodgeDelegate.Broadcast();
 					ClientPlayerController->ClientDodgeBroadcast();
+
+					BulletCount--;
+
+					if (BulletCount == 0)
+					{
+
+					}
 				}
 
 				ServerPlayerController->DuelSelectCompleteDelegate.Broadcast();

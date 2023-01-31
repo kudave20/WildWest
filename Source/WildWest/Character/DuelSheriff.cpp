@@ -16,15 +16,6 @@ ADuelSheriff::ADuelSheriff()
 
 }
 
-void ADuelSheriff::SetIsDead(bool bIsDead)
-{
-	UDuelSheriffAnimInstance* AnimInstance = Cast<UDuelSheriffAnimInstance>(GetMesh()->GetAnimInstance());
-	if (AnimInstance)
-	{
-		AnimInstance->SetbIsDead(bIsDead);
-	}
-}
-
 void ADuelSheriff::BeginPlay()
 {
 	Super::BeginPlay();
@@ -130,6 +121,28 @@ void ADuelSheriff::MulticastPlayDodgeRightMontage_Implementation(float PlayRate)
 	}
 }
 
+void ADuelSheriff::MulticastSetShoot_Implementation(bool bShoot)
+{
+	UDuelSheriffAnimInstance* AnimInstance = Cast<UDuelSheriffAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->SetbShoot(bShoot);
+	}
+}
+
+void ADuelSheriff::SetIsDead(bool bIsDead)
+{
+	if (Controller)
+	{
+		Controller->SetControlRotation(FRotator(0));
+	}
+
+	UDuelSheriffAnimInstance* AnimInstance = Cast<UDuelSheriffAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->SetbIsDead(bIsDead);
+	}
+}
 
 void ADuelSheriff::ServerDodgeLeft_Implementation()
 {

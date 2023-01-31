@@ -28,7 +28,11 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = "Death", meta = (AllowPrivateAccess = "true"))
 	bool bIsDead;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Shoot", meta = (AllowPrivateAccess = "true"))
+	bool bShoot;
+
 public:
 	FORCEINLINE void SetbIsDead(bool bDead) { bIsDead = bDead; }
+	FORCEINLINE void SetbShoot(bool bIsReady) { bShoot = bIsReady; }
 
 };
