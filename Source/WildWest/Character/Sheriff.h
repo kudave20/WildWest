@@ -20,6 +20,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Jump() override;
 
 	void MoveForward(const FInputActionValue& Value);
 	void MoveRight(const FInputActionValue& Value);
@@ -63,6 +64,19 @@ private:
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = Character, meta = (AllowPrivateAccess = "true"))
 	int32 CharacterIndex;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Control")
+	float InitialControlTimer;
+
+	float ControlTimer;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Control", meta = (AllowPrivateAccess = "true"))
+	bool bIsControlled;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Widget", meta = (AllowPrivateAccess = "true"))
+	class UControlGauge* ControlGauge;
+
+	bool bIsInputEnabled{ true };
+
 public:
 	FORCEINLINE FRotator GetControllerDirection() { return ControllerDirection; }
 	FORCEINLINE void SetControllerDirection(FRotator NewControllerDirection) { ControllerDirection = NewControllerDirection; }
@@ -71,4 +85,9 @@ public:
 	FORCEINLINE void SetCurrentController(AController* NewCurrentController) { CurrentController = NewCurrentController; }
 
 	FORCEINLINE int32 GetCharacterIndex() { return CharacterIndex; }
+
+	FORCEINLINE void SetbIsControlled(bool bControlled) { bIsControlled = bControlled; }
+
+	FORCEINLINE UControlGauge* GetControlGauge() { return ControlGauge; }
+	FORCEINLINE void SetControlGauge(UControlGauge* NewControlGauge) { ControlGauge = NewControlGauge; }
 };

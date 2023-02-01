@@ -7,6 +7,8 @@
 #include "WildWest/Controller/TownPlayerController.h"
 #include "WildWest/GameMode/TownGameMode.h"
 #include "WildWest/GameState/TownGameState.h"
+#include "WildWest/HUD/ControlGauge.h"
+#include "Components/Image.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
@@ -28,12 +30,58 @@ void ASheriff::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ControlTimer = InitialControlTimer;
+}
+
+void ASheriff::Jump()
+{
+	if (!bIsInputEnabled)
+	{
+		return;
+	}
+
+	Super::Jump();
 }
 
 void ASheriff::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (bIsControlled && bIsInputEnabled)
+	{
+		if (ControlTimer > 0)
+		{
+			ControlTimer -= DeltaTime;
+		}
+		else
+		{
+			bIsInputEnabled = false;
+		}
+	}
+	else if (!bIsControlled)
+	{
+		if (ControlTimer < InitialControlTimer)
+		{
+			ControlTimer += DeltaTime;
+		}
+		else
+		{
+			bIsInputEnabled = true;
+		}
+	}
+
+	if (ControlGauge)
+	{
+		UImage* Gauge = ControlGauge->GetGauge();
+		if (Gauge)
+		{
+			UMaterialInstanceDynamic* GaugeMaterialInstance = Gauge->GetDynamicMaterial();
+			if (GaugeMaterialInstance)
+			{
+				GaugeMaterialInstance->SetScalarParameterValue(FName("GaugePercent"), ControlTimer / InitialControlTimer);
+			}
+		}
+	}
 }
 
 void ASheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -76,6 +124,11 @@ void ASheriff::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 
 void ASheriff::MoveForward(const FInputActionValue& Value)
 {
+	if (!bIsInputEnabled)
+	{
+		return;
+	}
+
 	if (Controller != nullptr)
 	{
 		const float MoveValue = Value.Get<float>();
@@ -91,6 +144,11 @@ void ASheriff::MoveForward(const FInputActionValue& Value)
 
 void ASheriff::MoveRight(const FInputActionValue& Value)
 {
+	if (!bIsInputEnabled)
+	{
+		return;
+	}
+
 	if (Controller != nullptr)
 	{
 		const float MoveValue = Value.Get<float>();
@@ -106,11 +164,21 @@ void ASheriff::MoveRight(const FInputActionValue& Value)
 
 void ASheriff::Turn(const FInputActionValue& Value)
 {
+	if (!bIsInputEnabled)
+	{
+		return;
+	}
+
 	AddControllerYawInput(Value.Get<float>());
 }
 
 void ASheriff::LookUp(const FInputActionValue& Value)
 {
+	if (!bIsInputEnabled)
+	{
+		return;
+	}
+
 	AddControllerPitchInput(Value.Get<float>());
 }
 
@@ -138,11 +206,15 @@ void ASheriff::SwitchToFirst()
 					return;
 				}
 
+				bIsControlled = false;
+
 				if (Controller != nullptr)
 				{
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[0]);
 					if (Sheriff)
 					{
+						Sheriff->SetbIsControlled(true);
+
 						AController* NewController = Sheriff->GetController();
 						if (NewController)
 						{
@@ -163,6 +235,10 @@ void ASheriff::SwitchToFirst()
 						{
 							NewController->SetControlRotation(Sheriff->GetControllerDirection());
 						}
+
+						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
+						Sheriff->SetControlGauge(ControlGauge);
+						ControlGauge = NextControlGauge;
 					}
 				}
 			}
@@ -194,11 +270,15 @@ void ASheriff::SwitchToSecond()
 					return;
 				}
 
+				bIsControlled = false;
+
 				if (Controller != nullptr)
 				{
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[1]);
 					if (Sheriff)
 					{
+						Sheriff->SetbIsControlled(true);
+
 						AController* NewController = Sheriff->GetController();
 						if (NewController)
 						{
@@ -219,6 +299,10 @@ void ASheriff::SwitchToSecond()
 						{
 							NewController->SetControlRotation(Sheriff->GetControllerDirection());
 						}
+
+						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
+						Sheriff->SetControlGauge(ControlGauge);
+						ControlGauge = NextControlGauge;
 					}
 				}
 			}
@@ -250,11 +334,15 @@ void ASheriff::SwitchToThird()
 					return;
 				}
 
+				bIsControlled = false;
+
 				if (Controller != nullptr)
 				{
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[2]);
 					if (Sheriff)
 					{
+						Sheriff->SetbIsControlled(true);
+
 						AController* NewController = Sheriff->GetController();
 						if (NewController)
 						{
@@ -275,6 +363,10 @@ void ASheriff::SwitchToThird()
 						{
 							NewController->SetControlRotation(Sheriff->GetControllerDirection());
 						}
+
+						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
+						Sheriff->SetControlGauge(ControlGauge);
+						ControlGauge = NextControlGauge;
 					}
 				}
 			}
@@ -306,11 +398,15 @@ void ASheriff::SwitchToFourth()
 					return;
 				}
 
+				bIsControlled = false;
+
 				if (Controller != nullptr)
 				{
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[3]);
 					if (Sheriff)
 					{
+						Sheriff->SetbIsControlled(true);
+
 						AController* NewController = Sheriff->GetController();
 						if (NewController)
 						{
@@ -331,6 +427,10 @@ void ASheriff::SwitchToFourth()
 						{
 							NewController->SetControlRotation(Sheriff->GetControllerDirection());
 						}
+						
+						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
+						Sheriff->SetControlGauge(ControlGauge);
+						ControlGauge = NextControlGauge;
 					}
 				}
 			}
@@ -340,6 +440,11 @@ void ASheriff::SwitchToFourth()
 
 void ASheriff::EnterDuel()
 {
+	if (!bIsInputEnabled)
+	{
+		return;
+	}
+
 	if (!HasAuthority())
 	{
 		ServerEnterDuel();
@@ -397,9 +502,13 @@ void ASheriff::ServerSwitchToFirst_Implementation()
 						return;
 					}
 
+					bIsControlled = false;
+
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[0]);
 					if (Sheriff)
 					{
+						Sheriff->SetbIsControlled(true);
+
 						AController* NewController = Sheriff->GetController();
 						if (NewController)
 						{
@@ -423,6 +532,10 @@ void ASheriff::ServerSwitchToFirst_Implementation()
 							NewController->SetControlRotation(NewDirection);
 							NewController->ClientSetRotation(NewDirection);
 						}
+
+						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
+						Sheriff->SetControlGauge(ControlGauge);
+						ControlGauge = NextControlGauge;
 					}
 				}
 			}
@@ -450,9 +563,13 @@ void ASheriff::ServerSwitchToSecond_Implementation()
 						return;
 					}
 
+					bIsControlled = false;
+
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[1]);
 					if (Sheriff)
 					{
+						Sheriff->SetbIsControlled(true);
+
 						AController* NewController = Sheriff->GetController();
 						if (NewController)
 						{
@@ -476,6 +593,10 @@ void ASheriff::ServerSwitchToSecond_Implementation()
 							NewController->SetControlRotation(NewDirection);
 							NewController->ClientSetRotation(NewDirection);
 						}
+
+						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
+						Sheriff->SetControlGauge(ControlGauge);
+						ControlGauge = NextControlGauge;
 					}
 				}
 			}
@@ -503,9 +624,13 @@ void ASheriff::ServerSwitchToThird_Implementation()
 						return;
 					}
 
+					bIsControlled = false;
+
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[2]);
 					if (Sheriff)
 					{
+						Sheriff->SetbIsControlled(true);
+
 						AController* NewController = Sheriff->GetController();
 						if (NewController)
 						{
@@ -529,6 +654,10 @@ void ASheriff::ServerSwitchToThird_Implementation()
 							NewController->SetControlRotation(NewDirection);
 							NewController->ClientSetRotation(NewDirection);
 						}
+
+						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
+						Sheriff->SetControlGauge(ControlGauge);
+						ControlGauge = NextControlGauge;
 					}
 				}
 			}
@@ -556,9 +685,13 @@ void ASheriff::ServerSwitchToFourth_Implementation()
 						return;
 					}
 
+					bIsControlled = false;
+
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[3]);
 					if (Sheriff)
 					{
+						Sheriff->SetbIsControlled(true);
+
 						AController* NewController = Sheriff->GetController();
 						if (NewController)
 						{
@@ -582,6 +715,10 @@ void ASheriff::ServerSwitchToFourth_Implementation()
 							NewController->SetControlRotation(NewDirection);
 							NewController->ClientSetRotation(NewDirection);
 						}
+
+						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
+						Sheriff->SetControlGauge(ControlGauge);
+						ControlGauge = NextControlGauge;
 					}
 				}
 			}

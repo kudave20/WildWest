@@ -6,8 +6,6 @@
 #include "GameFramework/PlayerController.h"
 #include "TownPlayerController.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPossessCompleteDelegate);
-
 UENUM(BlueprintType)
 enum class EScreenIndex : uint8
 {
@@ -26,24 +24,8 @@ UCLASS()
 class WILDWEST_API ATownPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-
-public:
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnPossessCompleteDelegate PossessCompleteDelegate;
-	
-protected:
-	virtual void OnPossess(APawn* InPawn) override;
-
 private:
 	EScreenIndex CurrentScreenIndex;
-
-	UPROPERTY(ReplicatedUsing = OnRep_bIsPossessed)
-	bool bIsPossessed{ false };
-
-	UFUNCTION()
-	void OnRep_bIsPossessed();
 
 public:
 	FORCEINLINE EScreenIndex GetCurrentScreenIndex() { return CurrentScreenIndex; }
