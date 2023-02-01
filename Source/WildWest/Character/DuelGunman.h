@@ -23,6 +23,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastPlayShootMontage(float PlayRate);
 
+	UFUNCTION(BlueprintCallable)
+	void SetIsDead(bool bIsDead);
+
 protected:
 	virtual void BeginPlay() override;
 

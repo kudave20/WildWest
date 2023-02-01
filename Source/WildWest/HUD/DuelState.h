@@ -4,24 +4,30 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "DuelTimer.generated.h"
+#include "DuelState.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class WILDWEST_API UDuelTimer : public UUserWidget
+class WILDWEST_API UDuelState : public UUserWidget
 {
 	GENERATED_BODY()
-
+	
 protected:
 	virtual bool Initialize() override;
-	
+
 private:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* TimerText;
 
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* CountText;
+
 	UFUNCTION()
-	FText SetDuelTimer();
+	FText SetTimerText();
+
+	UFUNCTION()
+	FText SetCountText();
 
 };

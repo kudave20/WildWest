@@ -14,8 +14,11 @@ void ADuelGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ADuelGameState, SheriffDuelState);
+	DOREPLIFETIME(ADuelGameState, DuelGunman);
 	DOREPLIFETIME(ADuelGameState, DuelSheriff);
 	DOREPLIFETIME(ADuelGameState, DuelTimer);
+	DOREPLIFETIME(ADuelGameState, BulletCount);
+	DOREPLIFETIME(ADuelGameState, bIsDuelOver);
 }
 
 void ADuelGameState::StartDuel()
@@ -67,6 +70,7 @@ void ADuelGameState::StartDuel()
 												SheriffController->SetControlRotation(FRotator(0, 90, 0));
 											}
 
+											DuelSheriff->MulticastSetIsSlow(true);
 											DuelSheriff->MulticastSetShoot(true);
 										}
 									}), 2.0f, false);
@@ -117,6 +121,7 @@ void ADuelGameState::StartDuel()
 												SheriffController->SetControlRotation(FRotator(0, 90, 0));
 											}
 
+											DuelSheriff->MulticastSetIsSlow(true);
 											DuelSheriff->MulticastSetShoot(true);
 										}
 									}), 2.0f, false);
@@ -229,7 +234,11 @@ void ADuelGameState::StartDuel()
 
 					if (BulletCount == 0)
 					{
+						ServerPlayerController->FireCompleteDelegate.Broadcast();
+						ClientPlayerController->ClientFireCompleteBroadcast();
 
+						bIsDuelOver = true;
+						World->GetTimerManager().ClearTimer(TimerHandle);
 					}
 				}
 

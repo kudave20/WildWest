@@ -20,4 +20,11 @@ public:
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Shoot")
 	UAnimMontage* ShootMontage;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Death", meta = (AllowPrivateAccess = "true"))
+	bool bIsDead;
+
+public:
+	FORCEINLINE void SetbIsDead(bool bDead) { bIsDead = bDead; }
+
 };

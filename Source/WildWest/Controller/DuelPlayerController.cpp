@@ -30,6 +30,11 @@ void ADuelPlayerController::ClientDuelSelectCompleteBroadcast_Implementation()
 	DuelSelectCompleteDelegate.Broadcast();
 }
 
+void ADuelPlayerController::ClientFireCompleteBroadcast_Implementation()
+{
+	FireCompleteDelegate.Broadcast();
+}
+
 void ADuelPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);

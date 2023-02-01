@@ -42,6 +42,7 @@ private:
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Dodge", meta = (AllowPrivateAccess = "true"))
 	EDuelState SheriffDuelState{ EDuelState::EDS_Initial };
 
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 	class ADuelGunman* DuelGunman;
 
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
@@ -53,10 +54,13 @@ private:
 	UPROPERTY(Replicated)
 	int32 DuelTimer;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Count", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Count")
 	int32 BulletCount;
 
 	FTimerHandle TimerHandle;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Duel", meta = (AllowPrivateAccess = "true"))
+	bool bIsDuelOver;
 
 public:
 	FORCEINLINE EDuelState GetGunmanDuelState() { return GunmanDuelState; }
@@ -66,4 +70,5 @@ public:
 	FORCEINLINE void SetSheriffDuelState(EDuelState NewDuelState) { SheriffDuelState = NewDuelState; }
 
 	FORCEINLINE int32 GetDuelTimer() { return DuelTimer; }
+	FORCEINLINE int32 GetBulletCount() { return BulletCount; }
 };

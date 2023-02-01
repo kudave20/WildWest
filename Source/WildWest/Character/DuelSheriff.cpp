@@ -130,6 +130,15 @@ void ADuelSheriff::MulticastSetShoot_Implementation(bool bShoot)
 	}
 }
 
+void ADuelSheriff::MulticastSetIsSlow_Implementation(bool bIsSlow)
+{
+	UDuelSheriffAnimInstance* AnimInstance = Cast<UDuelSheriffAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->SetbIsSlow(bIsSlow);
+	}
+}
+
 void ADuelSheriff::SetIsDead(bool bIsDead)
 {
 	if (Controller)
@@ -141,6 +150,29 @@ void ADuelSheriff::SetIsDead(bool bIsDead)
 	if (AnimInstance)
 	{
 		AnimInstance->SetbIsDead(bIsDead);
+	}
+}
+
+void ADuelSheriff::SetShoot(bool bShoot)
+{
+	if (Controller)
+	{
+		Controller->SetControlRotation(FRotator(0, 90, 0));
+	}
+
+	UDuelSheriffAnimInstance* AnimInstance = Cast<UDuelSheriffAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->SetbShoot(bShoot);
+	}
+}
+
+void ADuelSheriff::SetIsSlow(bool bIsSlow)
+{
+	UDuelSheriffAnimInstance* AnimInstance = Cast<UDuelSheriffAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->SetbIsSlow(bIsSlow);
 	}
 }
 

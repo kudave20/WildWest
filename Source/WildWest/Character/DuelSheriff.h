@@ -29,8 +29,17 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastSetShoot(bool bShoot);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastSetIsSlow(bool bIsSlow);
+
 	UFUNCTION(BlueprintCallable)
 	void SetIsDead(bool bIsDead);
+
+	UFUNCTION(BlueprintCallable)
+	void SetShoot(bool bShoot);
+
+	UFUNCTION(BlueprintCallable)
+	void SetIsSlow(bool bIsSlow);
 
 protected:
 	virtual void BeginPlay() override;

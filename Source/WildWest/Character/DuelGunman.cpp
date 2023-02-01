@@ -124,6 +124,20 @@ void ADuelGunman::MulticastPlayShootMontage_Implementation(float PlayRate)
 	}
 }
 
+void ADuelGunman::SetIsDead(bool bIsDead)
+{
+	if (Controller)
+	{
+		Controller->SetControlRotation(FRotator(0, 180, 0));
+	}
+
+	UDuelGunmanAnimInstance* AnimInstance = Cast<UDuelGunmanAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AnimInstance->SetbIsDead(bIsDead);
+	}
+}
+
 void ADuelGunman::ServerShootLeft_Implementation()
 {
 	UWorld* World = GetWorld();
