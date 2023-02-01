@@ -4,6 +4,7 @@
 #include "DuelPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraActor.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 
 ADuelPlayerController::ADuelPlayerController()
 {
@@ -40,14 +41,19 @@ void ADuelPlayerController::ClientFightBackBroadcast_Implementation()
 	FightBackDelegate.Broadcast();
 }
 
-void ADuelPlayerController::OnPossess(APawn* InPawn)
+void ADuelPlayerController::SetInitialControlRotation(const FRotator& NewRotation)
 {
-	Super::OnPossess(InPawn);
+	SetControlRotation(NewRotation);
+	ClientSetRotation(NewRotation);
+}
+
+void ADuelPlayerController::PostSeamlessTravel()
+{
+	Super::PostSeamlessTravel();
 
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		AActor* CameraActor = UGameplayStatics::GetActorOfClass(World, ACameraActor::StaticClass());
-		SetViewTargetWithBlend(CameraActor);
+		UWidgetLayoutLibrary::RemoveAllWidgets(World);
 	}
 }

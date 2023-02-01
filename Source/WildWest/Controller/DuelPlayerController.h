@@ -60,11 +60,10 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientFightBackBroadcast();
 
-protected:
-	virtual void OnPossess(APawn* InPawn) override;
+	UFUNCTION(BlueprintCallable)
+	void SetInitialControlRotation(const FRotator& NewRotation);
 
-private:
-	UPROPERTY(EditDefaultsOnly, Category = "Cutscene")
-	class ULevelSequence* MasterSequence;
-	
+protected:
+	virtual void PostSeamlessTravel() override;
+
 };

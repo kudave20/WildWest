@@ -368,8 +368,11 @@ void ASheriff::EnterDuel()
 				}
 			}
 
-			// bUseSeamlessTravel = true;
-			World->ServerTravel(FString("/Game/Maps/Duel?listen"));
+			ATownGameMode* TownGameMode = World->GetAuthGameMode<ATownGameMode>();
+			if (TownGameMode)
+			{
+				TownGameMode->TravelToDuel();
+			}
 		}
 	}
 }
