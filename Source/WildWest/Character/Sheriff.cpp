@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "WildWest/Controller/TownPlayerController.h"
+#include "WildWest/GameMode/TownGameMode.h"
 #include "WildWest/GameState/TownGameState.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
@@ -609,8 +610,11 @@ void ASheriff::ServerEnterDuel_Implementation()
 				}
 			}
 
-			// bUseSeamlessTravel = true;
-			World->ServerTravel(FString("/Game/Maps/Duel?listen"));
+			ATownGameMode* TownGameMode = World->GetAuthGameMode<ATownGameMode>();
+			if (TownGameMode)
+			{
+				TownGameMode->TravelToDuel();
+			}
 		}
 	}
 }

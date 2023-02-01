@@ -14,4 +14,7 @@ class WILDWEST_API ATownGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
+public:
+	void TravelToDuel();
+
 };

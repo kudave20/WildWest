@@ -2,4 +2,13 @@
 
 
 #include "TownGameMode.h"
-#include "WildWest/GameInstance/WildWestGameInstance.h"
+
+void ATownGameMode::TravelToDuel()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		bUseSeamlessTravel = true;
+		World->ServerTravel(FString("/Game/Maps/Duel?listen"));
+	}
+}

@@ -58,6 +58,7 @@ protected:
 	void OnStartSessionComplete(FName SessionName, bool bWasSuccessful);
 
 private:
+	IOnlineSessionPtr SessionInterface;
 	TSharedPtr<FOnlineSessionSettings> LastSessionSettings;
 	TSharedPtr<FOnlineSessionSearch> LastSessionSearch;
 
