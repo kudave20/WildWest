@@ -11,6 +11,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFireDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDuelSelectCompleteDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFireCompleteDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFightBackDelegate);
 
 /**
  * 
@@ -38,6 +39,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnFireCompleteDelegate FireCompleteDelegate;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnFightBackDelegate FightBackDelegate;
+
 	UFUNCTION(Client, Reliable)
 	void ClientHitBroadcast();
 
@@ -52,6 +56,9 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void ClientFireCompleteBroadcast();
+
+	UFUNCTION(Client, Reliable)
+	void ClientFightBackBroadcast();
 
 protected:
 	virtual void OnPossess(APawn* InPawn) override;

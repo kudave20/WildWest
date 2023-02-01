@@ -44,7 +44,7 @@ void ADuelGameState::StartDuel()
 						DuelSheriff = Cast<ADuelSheriff>(ClientPlayerController->GetPawn());
 						if (DuelGunman)
 						{
-							DuelGunman->MulticastPlayShootMontage(0.5f);
+							DuelGunman->MulticastPlayShootMontage(0.25f);
 
 							FTimerHandle WaitHandle;
 							switch (SheriffDuelState)
@@ -95,7 +95,7 @@ void ADuelGameState::StartDuel()
 						DuelSheriff = Cast<ADuelSheriff>(ServerPlayerController->GetPawn());
 						if (DuelGunman)
 						{
-							DuelGunman->MulticastPlayShootMontage(0.5f);
+							DuelGunman->MulticastPlayShootMontage(0.25f);
 
 							FTimerHandle WaitHandle;
 							switch (SheriffDuelState)
@@ -162,7 +162,6 @@ void ADuelGameState::StartDuel()
 						break;
 					case ECharacterState::ECS_Sheriff:
 						DuelSheriff = Cast<ADuelSheriff>(ServerPlayerController->GetPawn());
-						AController* SheriffController = NULL;
 						if (DuelSheriff)
 						{
 							switch (SheriffDuelState)
@@ -171,11 +170,12 @@ void ADuelGameState::StartDuel()
 								DuelSheriff->MulticastPlayDodgeLeftMontage(1.0f);
 								break;
 							case EDuelState::EDS_Middle:
-								SheriffController = DuelSheriff->GetController();
-								if (SheriffController)
-								{
-									SheriffController->SetControlRotation(FRotator(0, 90, 0));
-								}
+								ServerPlayerController->SetControlRotation(FRotator(0, 90, 0));
+								ServerPlayerController->FightBackDelegate.Broadcast();
+								ClientPlayerController->ClientFightBackBroadcast();
+
+								bIsDuelOver = true;
+								World->GetTimerManager().ClearTimer(TimerHandle);
 
 								DuelSheriff->MulticastSetShoot(true);
 								break;
@@ -201,7 +201,6 @@ void ADuelGameState::StartDuel()
 						break;
 					case ECharacterState::ECS_Sheriff:
 						DuelSheriff = Cast<ADuelSheriff>(ClientPlayerController->GetPawn());
-						AController* SheriffController = NULL;
 						if (DuelSheriff)
 						{
 							switch (SheriffDuelState)
@@ -210,11 +209,12 @@ void ADuelGameState::StartDuel()
 								DuelSheriff->MulticastPlayDodgeLeftMontage(1.0f);
 								break;
 							case EDuelState::EDS_Middle:
-								SheriffController = DuelSheriff->GetController();
-								if (SheriffController)
-								{
-									SheriffController->SetControlRotation(FRotator(0, 90, 0));
-								}
+								ClientPlayerController->SetControlRotation(FRotator(0, 90, 0));
+								ServerPlayerController->FightBackDelegate.Broadcast();
+								ClientPlayerController->ClientFightBackBroadcast();
+
+								bIsDuelOver = true;
+								World->GetTimerManager().ClearTimer(TimerHandle);
 
 								DuelSheriff->MulticastSetShoot(true);
 								break;

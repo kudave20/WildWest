@@ -35,6 +35,11 @@ void ADuelPlayerController::ClientFireCompleteBroadcast_Implementation()
 	FireCompleteDelegate.Broadcast();
 }
 
+void ADuelPlayerController::ClientFightBackBroadcast_Implementation()
+{
+	FightBackDelegate.Broadcast();
+}
+
 void ADuelPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
