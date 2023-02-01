@@ -53,6 +53,15 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerDodgeRight();
 
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Gun")
+	TSubclassOf<AActor> RevolverClass;
+
+	UPROPERTY()
+	AActor* Revolver;
+
+	void SpawnRevolver();
+
 public:
 
 };

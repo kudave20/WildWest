@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "WildWest/GameState/DuelGameState.h"
 #include "DuelSheriffAnimInstance.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -123,6 +124,8 @@ void ADuelSheriff::MulticastPlayDodgeRightMontage_Implementation(float PlayRate)
 
 void ADuelSheriff::MulticastSetShoot_Implementation(bool bShoot)
 {
+	SpawnRevolver();
+
 	UDuelSheriffAnimInstance* AnimInstance = Cast<UDuelSheriffAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance)
 	{
@@ -155,6 +158,8 @@ void ADuelSheriff::SetIsDead(bool bIsDead)
 
 void ADuelSheriff::SetShoot(bool bShoot)
 {
+	SpawnRevolver();
+
 	if (Controller)
 	{
 		Controller->SetControlRotation(FRotator(0, 90, 0));
@@ -173,6 +178,21 @@ void ADuelSheriff::SetIsSlow(bool bIsSlow)
 	if (AnimInstance)
 	{
 		AnimInstance->SetbIsSlow(bIsSlow);
+	}
+}
+
+void ADuelSheriff::SpawnRevolver()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		Revolver = World->SpawnActor<AActor>(RevolverClass);
+
+		const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("LeftHandSocket"));
+		if (HandSocket)
+		{
+			HandSocket->AttachActor(Revolver, GetMesh());
+		}
 	}
 }
 
