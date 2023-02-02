@@ -4,6 +4,10 @@
 #include "Gunman.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "WildWest/Props/Vault.h"
+#include "WildWest/HUD/VaultGauge.h"
+#include "Components/Image.h"
+#include "Net/UnrealNetwork.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -24,6 +28,16 @@ void AGunman::BeginPlay()
 	
 }
 
+void AGunman::Jump()
+{
+	if (bIsInteracting)
+	{
+		return;
+	}
+
+	Super::Jump();
+}
+
 void AGunman::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -35,21 +49,43 @@ void AGunman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController)
+	{
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+		if (Subsystem)
+		{
+			Subsystem->ClearAllMappings();
+			Subsystem->AddMappingContext(InputMapping, 0);
 
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-	Subsystem->ClearAllMappings();
-	Subsystem->AddMappingContext(InputMapping, 0);
+			UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+			if (EnhancedInputComponent)
+			{
+				EnhancedInputComponent->BindAction(InputActions->InputJump, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+				EnhancedInputComponent->BindAction(InputActions->InputMoveForward, ETriggerEvent::Triggered, this, &AGunman::MoveForward);
+				EnhancedInputComponent->BindAction(InputActions->InputMoveRight, ETriggerEvent::Triggered, this, &AGunman::MoveRight);
+				EnhancedInputComponent->BindAction(InputActions->InputTurn, ETriggerEvent::Triggered, this, &AGunman::Turn);
+				EnhancedInputComponent->BindAction(InputActions->InputLookUp, ETriggerEvent::Triggered, this, &AGunman::LookUp);
+				EnhancedInputComponent->BindAction(InputActions->InputInteract, ETriggerEvent::Triggered, this, &AGunman::OpenVault);
+				EnhancedInputComponent->BindAction(InputActions->InputInteract, ETriggerEvent::Completed, this, &AGunman::RemoveVaultGauge);
+			}
+		}
+	}
+}
 
-	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	EnhancedInputComponent->BindAction(InputActions->InputJump, ETriggerEvent::Triggered, this, &ACharacter::Jump);
-	EnhancedInputComponent->BindAction(InputActions->InputMoveForward, ETriggerEvent::Triggered, this, &AGunman::MoveForward);
-	EnhancedInputComponent->BindAction(InputActions->InputMoveRight, ETriggerEvent::Triggered, this, &AGunman::MoveRight);
-	EnhancedInputComponent->BindAction(InputActions->InputTurn, ETriggerEvent::Triggered, this, &AGunman::Turn);
-	EnhancedInputComponent->BindAction(InputActions->InputLookUp, ETriggerEvent::Triggered, this, &AGunman::LookUp);
+void AGunman::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGunman, OverlappingVault);
 }
 
 void AGunman::MoveForward(const FInputActionValue& Value)
 {
+	if (bIsInteracting)
+	{
+		return;
+	}
+
 	if (Controller != nullptr)
 	{
 		const float MoveValue = Value.Get<float>();
@@ -65,6 +101,11 @@ void AGunman::MoveForward(const FInputActionValue& Value)
 
 void AGunman::MoveRight(const FInputActionValue& Value)
 {
+	if (bIsInteracting)
+	{
+		return;
+	}
+
 	if (Controller != nullptr)
 	{
 		const float MoveValue = Value.Get<float>();
@@ -80,11 +121,98 @@ void AGunman::MoveRight(const FInputActionValue& Value)
 
 void AGunman::Turn(const FInputActionValue& Value)
 {
+	if (bIsInteracting)
+	{
+		return;
+	}
+
 	AddControllerYawInput(Value.Get<float>());
 }
 
 void AGunman::LookUp(const FInputActionValue& Value)
 {
+	if (bIsInteracting)
+	{
+		return;
+	}
+
 	AddControllerPitchInput(Value.Get<float>());
+}
+
+void AGunman::OpenVault()
+{
+	if (OverlappingVault)
+	{
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			if (VaultGauge == nullptr)
+			{
+				VaultGauge = CreateWidget<UVaultGauge>(World, VaultGaugeClass);
+				if (VaultGauge)
+				{
+					VaultGauge->AddToViewport();
+				}
+			}
+
+			float OpenTimer = OverlappingVault->GetOpenTimer();
+			float MaxOpenTimer = OverlappingVault->GetMaxOpenTimer();
+			if (OpenTimer >= MaxOpenTimer)
+			{
+				VaultGauge->RemoveFromParent();
+
+				if (HasAuthority())
+				{
+					OverlappingVault->OpenDoorDelegate.Broadcast();
+				}
+				else
+				{
+					ServerOpenVault();
+				}
+
+				return;
+			}
+
+			if (VaultGauge)
+			{
+				if (!VaultGauge->IsInViewport())
+				{
+					VaultGauge->AddToViewport();
+				}
+
+				OverlappingVault->SetOpenTimer(OpenTimer + World->GetDeltaSeconds());
+
+				UImage* Gauge = VaultGauge->GetGauge();
+				if (Gauge)
+				{
+					UMaterialInstanceDynamic* GaugeMaterialInstance = Gauge->GetDynamicMaterial();
+					if (GaugeMaterialInstance)
+					{
+						GaugeMaterialInstance->SetScalarParameterValue(FName("GaugePercent"), OverlappingVault->GetOpenTimer() / MaxOpenTimer);
+					}
+				}
+			}
+
+			bIsInteracting = true;
+		}
+	}
+}
+
+void AGunman::RemoveVaultGauge()
+{
+	if (VaultGauge)
+	{
+		VaultGauge->RemoveFromParent();
+	}
+
+	bIsInteracting = false;
+}
+
+void AGunman::ServerOpenVault_Implementation()
+{
+	if (OverlappingVault)
+	{
+		OverlappingVault->OpenDoorDelegate.Broadcast();
+	}
 }
 
