@@ -60,13 +60,11 @@ void ASheriff::Tick(float DeltaTime)
 	}
 	else if (!bIsControlled)
 	{
+		bIsInputEnabled = true;
+
 		if (ControlTimer < InitialControlTimer)
 		{
 			ControlTimer += DeltaTime;
-		}
-		else
-		{
-			bIsInputEnabled = true;
 		}
 	}
 
