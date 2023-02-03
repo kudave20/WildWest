@@ -60,7 +60,7 @@ void AGunman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 			UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 			if (EnhancedInputComponent)
 			{
-				EnhancedInputComponent->BindAction(InputActions->InputJump, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+				EnhancedInputComponent->BindAction(InputActions->InputJump, ETriggerEvent::Triggered, this, &AGunman::Jump);
 				EnhancedInputComponent->BindAction(InputActions->InputMoveForward, ETriggerEvent::Triggered, this, &AGunman::MoveForward);
 				EnhancedInputComponent->BindAction(InputActions->InputMoveRight, ETriggerEvent::Triggered, this, &AGunman::MoveRight);
 				EnhancedInputComponent->BindAction(InputActions->InputTurn, ETriggerEvent::Triggered, this, &AGunman::Turn);

@@ -118,6 +118,7 @@ void ASheriff::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASheriff, CharacterIndex);
+	DOREPLIFETIME(ASheriff, bIsControlled);
 }
 
 void ASheriff::MoveForward(const FInputActionValue& Value)
@@ -531,9 +532,7 @@ void ASheriff::ServerSwitchToFirst_Implementation()
 							NewController->ClientSetRotation(NewDirection);
 						}
 
-						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
-						Sheriff->SetControlGauge(ControlGauge);
-						ControlGauge = NextControlGauge;
+						ClientSwapControlGauge(Sheriff);
 					}
 				}
 			}
@@ -592,9 +591,7 @@ void ASheriff::ServerSwitchToSecond_Implementation()
 							NewController->ClientSetRotation(NewDirection);
 						}
 
-						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
-						Sheriff->SetControlGauge(ControlGauge);
-						ControlGauge = NextControlGauge;
+						ClientSwapControlGauge(Sheriff);
 					}
 				}
 			}
@@ -653,9 +650,7 @@ void ASheriff::ServerSwitchToThird_Implementation()
 							NewController->ClientSetRotation(NewDirection);
 						}
 
-						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
-						Sheriff->SetControlGauge(ControlGauge);
-						ControlGauge = NextControlGauge;
+						ClientSwapControlGauge(Sheriff);
 					}
 				}
 			}
@@ -714,9 +709,7 @@ void ASheriff::ServerSwitchToFourth_Implementation()
 							NewController->ClientSetRotation(NewDirection);
 						}
 
-						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
-						Sheriff->SetControlGauge(ControlGauge);
-						ControlGauge = NextControlGauge;
+						ClientSwapControlGauge(Sheriff);
 					}
 				}
 			}
@@ -755,4 +748,11 @@ void ASheriff::ServerEnterDuel_Implementation()
 			}
 		}
 	}
+}
+
+void ASheriff::ClientSwapControlGauge_Implementation(ASheriff* Sheriff)
+{
+	UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
+	Sheriff->SetControlGauge(ControlGauge);
+	ControlGauge = NextControlGauge;
 }

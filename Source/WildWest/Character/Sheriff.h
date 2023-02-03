@@ -69,13 +69,16 @@ private:
 
 	float ControlTimer;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Control", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Control", meta = (AllowPrivateAccess = "true"))
 	bool bIsControlled;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Widget", meta = (AllowPrivateAccess = "true"))
 	class UControlGauge* ControlGauge;
 
 	bool bIsInputEnabled{ true };
+
+	UFUNCTION(Client, Reliable)
+	void ClientSwapControlGauge(ASheriff* Sheriff);
 
 public:
 	FORCEINLINE FRotator GetControllerDirection() { return ControllerDirection; }
