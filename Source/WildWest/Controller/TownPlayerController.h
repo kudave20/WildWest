@@ -25,10 +25,21 @@ class WILDWEST_API ATownPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+public:
+	UFUNCTION(BlueprintCallable)
+	void SetInitialControlRotation(const FRotator& NewRotation);
+
+protected:
+	virtual void PostSeamlessTravel() override;
+
 private:
 	EScreenIndex CurrentScreenIndex;
+
+	UFUNCTION(Client, Reliable)
+	void ClientSetInputModeGameOnly();
 
 public:
 	FORCEINLINE EScreenIndex GetCurrentScreenIndex() { return CurrentScreenIndex; }
 	FORCEINLINE void SetCurrentScreenIndex(EScreenIndex NewScreenIndex) { CurrentScreenIndex = NewScreenIndex; }
+
 };

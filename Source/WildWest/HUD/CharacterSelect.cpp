@@ -78,27 +78,3 @@ void UCharacterSelect::SheriffButtonClicked()
 
 	GunmanButton->SetIsEnabled(true);
 }
-
-void UCharacterSelect::CharacterSelectTearDown()
-{
-	RemoveFromParent();
-
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		APlayerController* PlayerController = World->GetFirstPlayerController();
-		if (PlayerController)
-		{
-			FInputModeGameOnly InputModeData;
-			PlayerController->SetInputMode(InputModeData);
-			PlayerController->SetShowMouseCursor(false);
-		}
-	}
-}
-
-void UCharacterSelect::NativeDestruct()
-{
-	CharacterSelectTearDown();
-
-	Super::NativeDestruct();
-}

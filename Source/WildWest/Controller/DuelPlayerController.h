@@ -63,7 +63,4 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetInitialControlRotation(const FRotator& NewRotation);
 
-protected:
-	virtual void PostSeamlessTravel() override;
-
 };

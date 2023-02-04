@@ -2,9 +2,7 @@
 
 
 #include "DuelPlayerController.h"
-#include "Kismet/GameplayStatics.h"
 #include "Camera/CameraActor.h"
-#include "Blueprint/WidgetLayoutLibrary.h"
 
 ADuelPlayerController::ADuelPlayerController()
 {
@@ -45,15 +43,4 @@ void ADuelPlayerController::SetInitialControlRotation(const FRotator& NewRotatio
 {
 	SetControlRotation(NewRotation);
 	ClientSetRotation(NewRotation);
-}
-
-void ADuelPlayerController::PostSeamlessTravel()
-{
-	Super::PostSeamlessTravel();
-
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		UWidgetLayoutLibrary::RemoveAllWidgets(World);
-	}
 }

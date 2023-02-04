@@ -19,7 +19,6 @@ public:
 
 protected:
 	virtual bool Initialize() override;
-	virtual void NativeDestruct() override;
 
 private:
 	UPROPERTY(meta = (BindWidget))
@@ -33,6 +32,4 @@ private:
 
 	UFUNCTION()
 	void SheriffButtonClicked();
-
-	void CharacterSelectTearDown();
 };
