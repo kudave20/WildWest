@@ -60,6 +60,9 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientFightBackBroadcast();
 
+	UFUNCTION(Client, Reliable)
+	void ClientSetInputModeGameOnly();
+
 	UFUNCTION(BlueprintCallable)
 	void SetInitialControlRotation(const FRotator& NewRotation);
 

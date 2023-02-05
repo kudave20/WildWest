@@ -39,6 +39,13 @@ void ADuelPlayerController::ClientFightBackBroadcast_Implementation()
 	FightBackDelegate.Broadcast();
 }
 
+void ADuelPlayerController::ClientSetInputModeGameOnly_Implementation()
+{
+	FInputModeGameOnly InputModeData;
+	SetInputMode(InputModeData);
+	SetShowMouseCursor(false);
+}
+
 void ADuelPlayerController::SetInitialControlRotation(const FRotator& NewRotation)
 {
 	SetControlRotation(NewRotation);

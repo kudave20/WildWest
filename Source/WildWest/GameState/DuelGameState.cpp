@@ -249,8 +249,7 @@ void ADuelGameState::StartDuel()
 				ServerPlayerController->SetInputMode(InputModeData);
 				ServerPlayerController->SetShowMouseCursor(false);
 
-				ClientPlayerController->SetInputMode(InputModeData);
-				ClientPlayerController->SetShowMouseCursor(false);
+				ClientPlayerController->ClientSetInputModeGameOnly();
 			}
 		}
 	}
