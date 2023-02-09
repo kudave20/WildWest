@@ -5,6 +5,7 @@
 #include "Components/Button.h"
 #include "WildWest/Character/DuelGunman.h"
 #include "WildWest/GameState/DuelGameState.h"
+#include "WildWest/Controller/DuelPlayerController.h"
 
 void UShoot::ShootSetup()
 {
@@ -15,14 +16,27 @@ void UShoot::ShootSetup()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		APlayerController* PlayerController = World->GetFirstPlayerController();
-		if (PlayerController)
+		ADuelGameState* DuelGameState = World->GetGameState<ADuelGameState>();
+		if (DuelGameState)
 		{
-			FInputModeUIOnly InputModeData;
-			InputModeData.SetWidgetToFocus(TakeWidget());
-			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-			PlayerController->SetInputMode(InputModeData);
-			PlayerController->SetShowMouseCursor(true);
+			ADuelPlayerController* DuelPlayerController = NULL;
+			if (World->IsNetMode(ENetMode::NM_ListenServer))
+			{
+				DuelPlayerController = DuelGameState->GetServerPlayerController();
+			}
+			else
+			{
+				DuelPlayerController = DuelGameState->GetClientPlayerController();
+			}
+
+			if (DuelPlayerController)
+			{
+				FInputModeUIOnly InputModeData;
+				InputModeData.SetWidgetToFocus(TakeWidget());
+				InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+				DuelPlayerController->SetInputMode(InputModeData);
+				DuelPlayerController->SetShowMouseCursor(true);
+			}
 		}
 	}
 }

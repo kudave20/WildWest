@@ -2,11 +2,17 @@
 
 
 #include "TownPlayerController.h"
+#include "Kismet/GameplayStatics.h"
 
 void ATownPlayerController::SetInitialControlRotation(const FRotator& NewRotation)
 {
 	SetControlRotation(NewRotation);
 	ClientSetRotation(NewRotation);
+}
+
+void ATownPlayerController::ClientRemovePlayer_Implementation()
+{
+	UGameplayStatics::RemovePlayer(this, true);
 }
 
 void ATownPlayerController::PostSeamlessTravel()

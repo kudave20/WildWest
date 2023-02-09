@@ -11,146 +11,128 @@ void ALobbyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ALobbyGameState, bIsLobbyFull);
+	DOREPLIFETIME(ALobbyGameState, ClientPlayerController);
 }
 
 void ALobbyGameState::GunmanButtonClicked()
 {
-	UWorld* World = GetWorld();
-	if (World)
+	if (!HasAuthority())
 	{
-		if (!HasAuthority())
+		if (ClientPlayerController)
 		{
-			ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-			if (LobbyPlayerController)
-			{
-				LobbyPlayerController->ServerGunmanButtonClicked();
-			}
-
-			return;
+			ClientPlayerController->ServerGunmanButtonClicked();
 		}
 
-		if (bIsSheriffSelected)
-		{
-			SetupServer(ECharacterState::ECS_Gunman);
+		return;
+	}
 
-			bIsGunmanSelected = true;
-			CheckSelectedCharacter();
-			return;
-		}
+	SetupServer(ECharacterState::ECS_Gunman);
 
-		SetupServer(ECharacterState::ECS_Gunman);
+	if (ClientPlayerController && ClientPlayerController->GetbIsSelectingCharacter() && bIsSheriffSelected)
+	{
+		bIsGunmanSelected = true;
+		CheckSelectedCharacter();
+		return;
+	}
 
-		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-		if (LobbyPlayerController)
-		{
-			if (LobbyPlayerController->GetbIsSelectingCharacter()) bIsSheriffSelected = false;
-			bIsGunmanSelected = true;
-			LobbyPlayerController->SetbIsSelectingCharacter(true);
-		}
+	if (ServerPlayerController)
+	{
+		if (ServerPlayerController->GetbIsSelectingCharacter()) bIsSheriffSelected = false;
+		bIsGunmanSelected = true;
+		ServerPlayerController->SetbIsSelectingCharacter(true);
 	}
 }
 
 void ALobbyGameState::SheriffButtonClicked()
 {
-	UWorld* World = GetWorld();
-	if (World)
+	if (!HasAuthority())
 	{
-		if (!HasAuthority())
+		if (ClientPlayerController)
 		{
-			ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-			if (LobbyPlayerController)
-			{
-				LobbyPlayerController->ServerSheriffButtonClicked();
-			}
-
-			return;
+			ClientPlayerController->ServerSheriffButtonClicked();
 		}
 
-		if (bIsGunmanSelected)
-		{
-			SetupServer(ECharacterState::ECS_Sheriff);
+		return;
+	}
 
-			bIsSheriffSelected = true;
-			CheckSelectedCharacter();
-			return;
-		}
+	SetupServer(ECharacterState::ECS_Sheriff);
 
-		SetupServer(ECharacterState::ECS_Sheriff);
+	if (ClientPlayerController && ClientPlayerController->GetbIsSelectingCharacter() && bIsGunmanSelected)
+	{
+		bIsSheriffSelected = true;
+		CheckSelectedCharacter();
+		return;
+	}
 
-		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-		if (LobbyPlayerController)
-		{
-			if (LobbyPlayerController->GetbIsSelectingCharacter()) bIsGunmanSelected = false;
-			bIsSheriffSelected = true;
-			LobbyPlayerController->SetbIsSelectingCharacter(true);
-		}
+	if (ServerPlayerController)
+	{
+		if (ServerPlayerController->GetbIsSelectingCharacter()) bIsGunmanSelected = false;
+		bIsSheriffSelected = true;
+		ServerPlayerController->SetbIsSelectingCharacter(true);
 	}
 }
 
 void ALobbyGameState::ServerGunmanButtonClicked()
 {
-	if (bIsSheriffSelected)
+	SetupClient(ECharacterState::ECS_Gunman);
+
+	if (ServerPlayerController && ServerPlayerController->GetbIsSelectingCharacter() && bIsSheriffSelected)
 	{
 		bIsGunmanSelected = true;
-		SetupClient(ECharacterState::ECS_Gunman);
 		CheckSelectedCharacter();
 		return;
 	}
 
-	SetupClient(ECharacterState::ECS_Gunman);
-
-	UWorld* World = GetWorld();
-	if (World)
+	if (ClientPlayerController)
 	{
-		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-		if (LobbyPlayerController)
-		{
-			if (LobbyPlayerController->GetbIsSelectingCharacter()) bIsSheriffSelected = false;
-			bIsGunmanSelected = true;
-			LobbyPlayerController->SetbIsSelectingCharacter(true);
-		}
+		if (ClientPlayerController->GetbIsSelectingCharacter()) bIsSheriffSelected = false;
+		bIsGunmanSelected = true;
+		ClientPlayerController->SetbIsSelectingCharacter(true);
 	}
 }
 
 void ALobbyGameState::ServerSheriffButtonClicked()
 {
-	if (bIsGunmanSelected)
+	SetupClient(ECharacterState::ECS_Sheriff);
+
+	if (ServerPlayerController && ServerPlayerController->GetbIsSelectingCharacter() && bIsGunmanSelected)
 	{
 		bIsSheriffSelected = true;
-		SetupClient(ECharacterState::ECS_Sheriff);
 		CheckSelectedCharacter();
 		return;
 	}
 
-	SetupClient(ECharacterState::ECS_Sheriff);
-
-	UWorld* World = GetWorld();
-	if (World)
+	if (ClientPlayerController)
 	{
-		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-		if (LobbyPlayerController)
-		{
-			if (LobbyPlayerController->GetbIsSelectingCharacter()) bIsGunmanSelected = false;
-			bIsSheriffSelected = true;
-			LobbyPlayerController->SetbIsSelectingCharacter(true);
-		}
+		if (ClientPlayerController->GetbIsSelectingCharacter()) bIsGunmanSelected = false;
+		bIsSheriffSelected = true;
+		ClientPlayerController->SetbIsSelectingCharacter(true);
 	}
 }
 
-void ALobbyGameState::OnRep_bIsLobbyFull()
+void ALobbyGameState::WidgetSetup()
 {
-	if (bIsLobbyFull)
+	if (ServerPlayerController)
 	{
-		UWorld* World = GetWorld();
-		if (World)
-		{
-			ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-			if (LobbyPlayerController)
-			{
-				LobbyPlayerController->SelectCharacterCompleteDelegate.Broadcast();
-			}
-		}
+		ServerPlayerController->LobbyFullDelegate.Broadcast();
+	}
+}
+
+void ALobbyGameState::SetServerPlayerController(APlayerController* NewPlayer)
+{
+	ServerPlayerController = Cast<ALobbyPlayerController>(NewPlayer);
+}
+
+void ALobbyGameState::SetClientPlayerController(APlayerController* NewPlayer)
+{
+	ClientPlayerController = Cast<ALobbyPlayerController>(NewPlayer);
+}
+
+void ALobbyGameState::OnRep_ClientPlayerController()
+{
+	if (ClientPlayerController)
+	{
+		ClientPlayerController->LobbyFullDelegate.Broadcast();
 	}
 }
 
@@ -182,20 +164,5 @@ void ALobbyGameState::SetupClient(ECharacterState NewClientState)
 	if (WildWestGameInstance)
 	{
 		WildWestGameInstance->SetupClient(NewClientState);
-	}
-}
-
-void ALobbyGameState::SetbIsLobbyFull(bool bIsFull)
-{
-	bIsLobbyFull = bIsFull;
-
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-		if (LobbyPlayerController)
-		{
-			LobbyPlayerController->SelectCharacterCompleteDelegate.Broadcast();
-		}
 	}
 }

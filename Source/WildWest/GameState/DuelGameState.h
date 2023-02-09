@@ -62,6 +62,12 @@ private:
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Duel", meta = (AllowPrivateAccess = "true"))
 	bool bIsDuelOver;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Controller", meta = (AllowPrivateAccess = "true"))
+	class ADuelPlayerController* ServerPlayerController;
+
+	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Controller", meta = (AllowPrivateAccess = "true"))
+	ADuelPlayerController* ClientPlayerController;
+
 public:
 	FORCEINLINE EDuelState GetGunmanDuelState() { return GunmanDuelState; }
 	FORCEINLINE EDuelState GetSheriffDuelState() { return SheriffDuelState; }
@@ -71,4 +77,7 @@ public:
 
 	FORCEINLINE int32 GetDuelTimer() { return DuelTimer; }
 	FORCEINLINE int32 GetBulletCount() { return BulletCount; }
+
+	FORCEINLINE ADuelPlayerController* GetServerPlayerController() { return ServerPlayerController; }
+	FORCEINLINE ADuelPlayerController* GetClientPlayerController() { return ClientPlayerController; }
 };

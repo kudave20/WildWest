@@ -3,6 +3,7 @@
 
 #include "LobbyPlayerController.h"
 #include "WildWest/GameState/LobbyGameState.h"
+#include "WildWest/HUD/CharacterSelect.h"
 
 void ALobbyPlayerController::ServerGunmanButtonClicked_Implementation()
 {

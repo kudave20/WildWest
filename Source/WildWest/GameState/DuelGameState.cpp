@@ -6,7 +6,6 @@
 #include "WildWest/Character/DuelSheriff.h"
 #include "WildWest/Controller/DuelPlayerController.h"
 #include "WildWest/GameInstance/WildWestGameInstance.h"
-#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 void ADuelGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -19,6 +18,7 @@ void ADuelGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ADuelGameState, DuelTimer);
 	DOREPLIFETIME(ADuelGameState, BulletCount);
 	DOREPLIFETIME(ADuelGameState, bIsDuelOver);
+	DOREPLIFETIME(ADuelGameState, ClientPlayerController);
 }
 
 void ADuelGameState::StartDuel()
@@ -27,9 +27,6 @@ void ADuelGameState::StartDuel()
 	if (World)
 	{
 		World->GetTimerManager().ClearTimer(TimerHandle);
-
-		ADuelPlayerController* ServerPlayerController = Cast<ADuelPlayerController>(World->GetFirstPlayerController());
-		ADuelPlayerController* ClientPlayerController = Cast<ADuelPlayerController>(UGameplayStatics::GetPlayerController(World, 1));
 
 		if (ServerPlayerController && ClientPlayerController)
 		{
@@ -64,11 +61,7 @@ void ADuelGameState::StartDuel()
 									{
 										if (DuelSheriff)
 										{
-											AController* SheriffController = DuelSheriff->GetController();
-											if (SheriffController)
-											{
-												SheriffController->SetControlRotation(FRotator(0, 90, 0));
-											}
+											ClientPlayerController->SetInitialControlRotation(FRotator(0, 90, 0));
 
 											DuelSheriff->MulticastSetIsSlow(true);
 											DuelSheriff->MulticastSetShoot(true);
@@ -115,11 +108,7 @@ void ADuelGameState::StartDuel()
 									{
 										if (DuelSheriff)
 										{
-											AController* SheriffController = DuelSheriff->GetController();
-											if (SheriffController)
-											{
-												SheriffController->SetControlRotation(FRotator(0, 90, 0));
-											}
+											ServerPlayerController->SetControlRotation(FRotator(0, 90, 0));
 
 											DuelSheriff->MulticastSetIsSlow(true);
 											DuelSheriff->MulticastSetShoot(true);

@@ -4,13 +4,15 @@
 #include "Sheriff.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Gunman.h"
 #include "WildWest/Controller/TownPlayerController.h"
 #include "WildWest/GameMode/TownGameMode.h"
 #include "WildWest/GameState/TownGameState.h"
 #include "WildWest/HUD/ControlGauge.h"
 #include "Components/Image.h"
-#include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
+#include "EngineUtils.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -734,10 +736,10 @@ void ASheriff::ServerEnterDuel_Implementation()
 					continue;
 				}
 
-				APlayerController* PlayerController = Cast<APlayerController>(Sheriff->GetController());
-				if (PlayerController)
+				ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Sheriff->GetController());
+				if (TownPlayerController)
 				{
-					UGameplayStatics::RemovePlayer(PlayerController, true);
+					TownPlayerController->ClientRemovePlayer();
 				}
 			}
 

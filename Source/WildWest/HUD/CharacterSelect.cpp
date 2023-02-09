@@ -4,6 +4,7 @@
 #include "CharacterSelect.h"
 #include "Components/Button.h"
 #include "WildWest/GameState/LobbyGameState.h"
+#include "WildWest/Controller/LobbyPlayerController.h"
 
 void UCharacterSelect::CharacterSelectSetup()
 {
@@ -14,14 +15,27 @@ void UCharacterSelect::CharacterSelectSetup()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		APlayerController* PlayerController = World->GetFirstPlayerController();
-		if (PlayerController)
+		ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
+		if (LobbyGameState)
 		{
-			FInputModeUIOnly InputModeData;
-			InputModeData.SetWidgetToFocus(TakeWidget());
-			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-			PlayerController->SetInputMode(InputModeData);
-			PlayerController->SetShowMouseCursor(true);
+			ALobbyPlayerController* LobbyPlayerController = NULL;
+			if (World->IsNetMode(ENetMode::NM_ListenServer))
+			{
+				LobbyPlayerController = LobbyGameState->GetServerPlayerController();
+			}
+			else
+			{
+				LobbyPlayerController = LobbyGameState->GetClientPlayerController();
+			}
+
+			if (LobbyPlayerController)
+			{
+				FInputModeUIOnly InputModeData;
+				InputModeData.SetWidgetToFocus(TakeWidget());
+				InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+				LobbyPlayerController->SetInputMode(InputModeData);
+				LobbyPlayerController->SetShowMouseCursor(true);
+			}
 		}
 	}
 }

@@ -5,21 +5,27 @@
 #include "GameFramework/GameStateBase.h"
 #include "WildWest/GameState/LobbyGameState.h"
 
-void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
+void ALobbyGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
 {
-	Super::PostLogin(NewPlayer);
+	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
 
-	int32 NumberOfPlayers = GameState.Get()->PlayerArray.Num();
-	if (NumberOfPlayers == 2)
+	ALobbyGameState* LobbyGameState = Cast<ALobbyGameState>(GameState);
+
+	if (LobbyGameState)
 	{
-		UWorld* World = GetWorld();
-		if (World)
+		if (NewPlayer->IsLocalPlayerController())
 		{
-			ALobbyGameState* LobbyGameState = Cast<ALobbyGameState>(GameState);
-			if (LobbyGameState)
-			{
-				LobbyGameState->SetbIsLobbyFull(true);
-			}
+			LobbyGameState->SetServerPlayerController(NewPlayer);
+		}
+		else
+		{
+			LobbyGameState->SetClientPlayerController(NewPlayer);
+		}
+
+		NumberOfPlayers++;
+		if (NumberOfPlayers == 2)
+		{
+			LobbyGameState->WidgetSetup();
 		}
 	}
 }

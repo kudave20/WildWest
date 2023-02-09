@@ -29,6 +29,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetInitialControlRotation(const FRotator& NewRotation);
 
+	UFUNCTION(Client, Reliable)
+	void ClientRemovePlayer();
+
 protected:
 	virtual void PostSeamlessTravel() override;
 
