@@ -18,8 +18,6 @@ public:
 	void TravelToTown();
 
 private:
-	int32 NumberOfPlayers;
-
 	bool bIsGunmanSelected;
 	bool bIsSheriffSelected;
 

@@ -12,3 +12,8 @@ void UWildWestGameInstance::SetupClient(ECharacterState NewClientState)
 {
 	ClientCharacterState = NewClientState;
 }
+
+void UWildWestGameInstance::AddLastTransformList(FTransform LastTransform)
+{
+	LastTransformList.Add(LastTransform);
+}

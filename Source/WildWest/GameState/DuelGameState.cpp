@@ -6,6 +6,7 @@
 #include "WildWest/Character/DuelSheriff.h"
 #include "WildWest/Controller/DuelPlayerController.h"
 #include "WildWest/GameInstance/WildWestGameInstance.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 void ADuelGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -18,7 +19,6 @@ void ADuelGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ADuelGameState, DuelTimer);
 	DOREPLIFETIME(ADuelGameState, BulletCount);
 	DOREPLIFETIME(ADuelGameState, bIsDuelOver);
-	DOREPLIFETIME(ADuelGameState, ClientPlayerController);
 }
 
 void ADuelGameState::StartDuel()

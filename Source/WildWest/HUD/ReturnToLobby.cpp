@@ -16,27 +16,14 @@ void UReturnToLobby::ReturnToLobbySetup()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		ADuelGameState* DuelGameState = World->GetGameState<ADuelGameState>();
-		if (DuelGameState)
+		APlayerController* PlayerController = World->GetFirstPlayerController();
+		if (PlayerController)
 		{
-			ADuelPlayerController* DuelPlayerController = NULL;
-			if (World->IsNetMode(ENetMode::NM_ListenServer))
-			{
-				DuelPlayerController = DuelGameState->GetServerPlayerController();
-			}
-			else
-			{
-				DuelPlayerController = DuelGameState->GetClientPlayerController();
-			}
-
-			if (DuelPlayerController)
-			{
-				FInputModeUIOnly InputModeData;
-				InputModeData.SetWidgetToFocus(TakeWidget());
-				InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-				DuelPlayerController->SetInputMode(InputModeData);
-				DuelPlayerController->SetShowMouseCursor(true);
-			}
+			FInputModeUIOnly InputModeData;
+			InputModeData.SetWidgetToFocus(TakeWidget());
+			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			PlayerController->SetInputMode(InputModeData);
+			PlayerController->SetShowMouseCursor(true);
 		}
 	}
 }

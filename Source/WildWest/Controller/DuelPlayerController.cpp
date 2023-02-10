@@ -9,6 +9,21 @@ ADuelPlayerController::ADuelPlayerController()
 	bAutoManageActiveCameraTarget = false;
 }
 
+void ADuelPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		UGameViewportClient* GameViewportClient = World->GetGameViewport();
+		if (GameViewportClient)
+		{
+			GameViewportClient->SetForceDisableSplitscreen(true);
+		}
+	}
+}
+
 void ADuelPlayerController::ClientHitBroadcast_Implementation()
 {
 	HitDelegate.Broadcast();

@@ -19,6 +19,8 @@ public:
 	void SetupServer(ECharacterState NewServerState);
 	void SetupClient(ECharacterState NewClientState);
 
+	void AddLastTransformList(FTransform LastTransform);
+
 private:
 	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
 	ECharacterState ServerCharacterState;
@@ -26,7 +28,15 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
 	ECharacterState ClientCharacterState;
 
+	UPROPERTY()
+	TArray<FTransform> LastTransformList;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Index", meta = (AllowPrivateAccess = "true"))
+	int32 CurrentSheriffIndex;
+
 public:
 	FORCEINLINE ECharacterState GetServerCharacterState() { return ServerCharacterState; }
 	FORCEINLINE ECharacterState GetClientCharacterState() { return ClientCharacterState; }
+
+	FORCEINLINE void SetCurrentSheriffIndex(int32 NewIndex) { CurrentSheriffIndex = NewIndex; }
 };

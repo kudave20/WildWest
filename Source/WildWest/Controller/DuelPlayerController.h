@@ -66,4 +66,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetInitialControlRotation(const FRotator& NewRotation);
 
+protected:
+	virtual void BeginPlay() override;
+
 };

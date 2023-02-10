@@ -15,27 +15,14 @@ void UCharacterSelect::CharacterSelectSetup()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
-		if (LobbyGameState)
+		APlayerController* PlayerController = World->GetFirstPlayerController();
+		if (PlayerController)
 		{
-			ALobbyPlayerController* LobbyPlayerController = NULL;
-			if (World->IsNetMode(ENetMode::NM_ListenServer))
-			{
-				LobbyPlayerController = LobbyGameState->GetServerPlayerController();
-			}
-			else
-			{
-				LobbyPlayerController = LobbyGameState->GetClientPlayerController();
-			}
-
-			if (LobbyPlayerController)
-			{
-				FInputModeUIOnly InputModeData;
-				InputModeData.SetWidgetToFocus(TakeWidget());
-				InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-				LobbyPlayerController->SetInputMode(InputModeData);
-				LobbyPlayerController->SetShowMouseCursor(true);
-			}
+			FInputModeUIOnly InputModeData;
+			InputModeData.SetWidgetToFocus(TakeWidget());
+			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			PlayerController->SetInputMode(InputModeData);
+			PlayerController->SetShowMouseCursor(true);
 		}
 	}
 }

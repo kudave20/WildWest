@@ -3,16 +3,15 @@
 
 #include "Sheriff.h"
 #include "Camera/CameraComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Gunman.h"
 #include "WildWest/Controller/TownPlayerController.h"
 #include "WildWest/GameMode/TownGameMode.h"
 #include "WildWest/GameState/TownGameState.h"
 #include "WildWest/HUD/ControlGauge.h"
+#include "WildWest/GameInstance/WildWestGameInstance.h"
 #include "Components/Image.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
-#include "EngineUtils.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -460,24 +459,21 @@ void ASheriff::EnterDuel()
 		{
 			TArray<ASheriff*> SheriffList = TownGameState->GetSheriffList();
 
-			for (ASheriff* Sheriff : SheriffList)
+			UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+			if (WildWestGameInstance)
 			{
-				if (Sheriff == this)
+				WildWestGameInstance->SetCurrentSheriffIndex(CharacterIndex);
+
+				for (ASheriff* Sheriff : SheriffList)
 				{
-					continue;
+					WildWestGameInstance->AddLastTransformList(Sheriff->GetActorTransform());
 				}
 
-				APlayerController* PlayerController = Cast<APlayerController>(Sheriff->GetController());
-				if (PlayerController)
+				ATownGameMode* TownGameMode = World->GetAuthGameMode<ATownGameMode>();
+				if (TownGameMode)
 				{
-					UGameplayStatics::RemovePlayer(PlayerController, true);
+					TownGameMode->TravelToDuel();
 				}
-			}
-
-			ATownGameMode* TownGameMode = World->GetAuthGameMode<ATownGameMode>();
-			if (TownGameMode)
-			{
-				TownGameMode->TravelToDuel();
 			}
 		}
 	}
@@ -728,25 +724,22 @@ void ASheriff::ServerEnterDuel_Implementation()
 		if (TownGameState)
 		{
 			TArray<ASheriff*> SheriffList = TownGameState->GetSheriffList();
-
-			for (ASheriff* Sheriff : SheriffList)
+			
+			UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+			if (WildWestGameInstance)
 			{
-				if (Sheriff == this)
+				WildWestGameInstance->SetCurrentSheriffIndex(CharacterIndex);
+
+				for (ASheriff* Sheriff : SheriffList)
 				{
-					continue;
+					WildWestGameInstance->AddLastTransformList(Sheriff->GetActorTransform());
 				}
 
-				ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Sheriff->GetController());
-				if (TownPlayerController)
+				ATownGameMode* TownGameMode = World->GetAuthGameMode<ATownGameMode>();
+				if (TownGameMode)
 				{
-					TownPlayerController->ClientRemovePlayer();
+					TownGameMode->TravelToDuel();
 				}
-			}
-
-			ATownGameMode* TownGameMode = World->GetAuthGameMode<ATownGameMode>();
-			if (TownGameMode)
-			{
-				TownGameMode->TravelToDuel();
 			}
 		}
 	}

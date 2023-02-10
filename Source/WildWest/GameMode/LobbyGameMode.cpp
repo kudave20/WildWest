@@ -9,23 +9,17 @@ void ALobbyGameMode::HandleStartingNewPlayer_Implementation(APlayerController* N
 {
 	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
 
-	ALobbyGameState* LobbyGameState = Cast<ALobbyGameState>(GameState);
-
-	if (LobbyGameState)
+	int32 NumberOfPlayers = GameState.Get()->PlayerArray.Num();
+	if (NumberOfPlayers == 2)
 	{
-		if (NewPlayer->IsLocalPlayerController())
+		UWorld* World = GetWorld();
+		if (World)
 		{
-			LobbyGameState->SetServerPlayerController(NewPlayer);
-		}
-		else
-		{
-			LobbyGameState->SetClientPlayerController(NewPlayer);
-		}
-
-		NumberOfPlayers++;
-		if (NumberOfPlayers == 2)
-		{
-			LobbyGameState->WidgetSetup();
+			ALobbyGameState* LobbyGameState = Cast<ALobbyGameState>(GameState);
+			if (LobbyGameState)
+			{
+				LobbyGameState->SetbIsLobbyFull(true);
+			}
 		}
 	}
 }

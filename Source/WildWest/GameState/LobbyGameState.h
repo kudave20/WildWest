@@ -23,16 +23,13 @@ class WILDWEST_API ALobbyGameState : public AGameState
 {
 	GENERATED_BODY()
 public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	void GunmanButtonClicked();
 	void SheriffButtonClicked();
 
 	void ServerGunmanButtonClicked();
 	void ServerSheriffButtonClicked();
-
-	void WidgetSetup();
-
-	void SetServerPlayerController(APlayerController* NewPlayer);
-	void SetClientPlayerController(APlayerController* NewPlayer);
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = Character)
@@ -40,13 +37,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = Character)
 	TSubclassOf<AActor> SheriffClass;
 
-	class ALobbyPlayerController* ServerPlayerController;
+	UPROPERTY(ReplicatedUsing = OnRep_bIsLobbyFull)
+	bool bIsLobbyFull;
 
-	UPROPERTY(ReplicatedUsing = OnRep_ClientPlayerController)
-	ALobbyPlayerController* ClientPlayerController;
-	
 	UFUNCTION()
-	void OnRep_ClientPlayerController();
+	void OnRep_bIsLobbyFull();
 
 	void CheckSelectedCharacter();
 
@@ -57,7 +52,6 @@ private:
 	bool bIsSheriffSelected;
 
 public:
-	FORCEINLINE ALobbyPlayerController* GetServerPlayerController() { return ServerPlayerController; }
-	FORCEINLINE ALobbyPlayerController* GetClientPlayerController() { return ClientPlayerController; }
-	
+	void SetbIsLobbyFull(bool bIsFull);
+
 };
