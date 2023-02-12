@@ -18,6 +18,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UFUNCTION(BlueprintCallable)
+	void SelectControlCharacter();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Jump() override;

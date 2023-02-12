@@ -122,6 +122,47 @@ void ASheriff::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	DOREPLIFETIME(ASheriff, bIsControlled);
 }
 
+void ASheriff::SelectControlCharacter()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+		if (TownGameState)
+		{
+			TArray<int32> ControllableIndexList;
+			int ControllableNum = 0;
+
+			for (int32 idx = 0; idx < TownGameState->GetSheriffList().Num(); idx++)
+			{
+				if (TownGameState->GetSheriffList()[idx])
+				{
+					ControllableNum++;
+					ControllableIndexList.Add(idx);
+				}
+			}
+
+			int32 RandomIndex = FMath::RandRange(0, ControllableNum - 1);
+
+			switch (ControllableIndexList[RandomIndex])
+			{
+			case 0:
+				SwitchToFirst();
+				break;
+			case 1:
+				SwitchToSecond();
+				break;
+			case 2:
+				SwitchToThird();
+				break;
+			case 3:
+				SwitchToFourth();
+				break;
+			}
+		}
+	}
+}
+
 void ASheriff::MoveForward(const FInputActionValue& Value)
 {
 	if (!bIsInputEnabled)
@@ -206,13 +247,12 @@ void ASheriff::SwitchToFirst()
 					return;
 				}
 
-				bIsControlled = false;
-
 				if (Controller != nullptr)
 				{
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[0]);
 					if (Sheriff)
 					{
+						bIsControlled = false;
 						Sheriff->SetbIsControlled(true);
 
 						AController* NewController = Sheriff->GetController();
@@ -239,6 +279,12 @@ void ASheriff::SwitchToFirst()
 						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
 						Sheriff->SetControlGauge(ControlGauge);
 						ControlGauge = NextControlGauge;
+
+						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+						if (WildWestGameInstance)
+						{
+							WildWestGameInstance->SetCurrentSheriffIndex(1);
+						}
 					}
 				}
 			}
@@ -270,13 +316,12 @@ void ASheriff::SwitchToSecond()
 					return;
 				}
 
-				bIsControlled = false;
-
 				if (Controller != nullptr)
 				{
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[1]);
 					if (Sheriff)
 					{
+						bIsControlled = false;
 						Sheriff->SetbIsControlled(true);
 
 						AController* NewController = Sheriff->GetController();
@@ -303,6 +348,12 @@ void ASheriff::SwitchToSecond()
 						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
 						Sheriff->SetControlGauge(ControlGauge);
 						ControlGauge = NextControlGauge;
+
+						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+						if (WildWestGameInstance)
+						{
+							WildWestGameInstance->SetCurrentSheriffIndex(2);
+						}
 					}
 				}
 			}
@@ -334,13 +385,12 @@ void ASheriff::SwitchToThird()
 					return;
 				}
 
-				bIsControlled = false;
-
 				if (Controller != nullptr)
 				{
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[2]);
 					if (Sheriff)
 					{
+						bIsControlled = false;
 						Sheriff->SetbIsControlled(true);
 
 						AController* NewController = Sheriff->GetController();
@@ -367,6 +417,12 @@ void ASheriff::SwitchToThird()
 						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
 						Sheriff->SetControlGauge(ControlGauge);
 						ControlGauge = NextControlGauge;
+
+						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+						if (WildWestGameInstance)
+						{
+							WildWestGameInstance->SetCurrentSheriffIndex(3);
+						}
 					}
 				}
 			}
@@ -398,13 +454,12 @@ void ASheriff::SwitchToFourth()
 					return;
 				}
 
-				bIsControlled = false;
-
 				if (Controller != nullptr)
 				{
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[3]);
 					if (Sheriff)
 					{
+						bIsControlled = false;
 						Sheriff->SetbIsControlled(true);
 
 						AController* NewController = Sheriff->GetController();
@@ -431,6 +486,12 @@ void ASheriff::SwitchToFourth()
 						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
 						Sheriff->SetControlGauge(ControlGauge);
 						ControlGauge = NextControlGauge;
+
+						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+						if (WildWestGameInstance)
+						{
+							WildWestGameInstance->SetCurrentSheriffIndex(4);
+						}
 					}
 				}
 			}
@@ -466,7 +527,10 @@ void ASheriff::EnterDuel()
 
 				for (ASheriff* Sheriff : SheriffList)
 				{
-					WildWestGameInstance->AddLastTransformList(Sheriff->GetActorTransform());
+					if (Sheriff)
+					{
+						WildWestGameInstance->AddLastTransformList(Sheriff->GetActorTransform());
+					}
 				}
 
 				ATownGameMode* TownGameMode = World->GetAuthGameMode<ATownGameMode>();
@@ -499,11 +563,10 @@ void ASheriff::ServerSwitchToFirst_Implementation()
 						return;
 					}
 
-					bIsControlled = false;
-
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[0]);
 					if (Sheriff)
 					{
+						bIsControlled = false;
 						Sheriff->SetbIsControlled(true);
 
 						AController* NewController = Sheriff->GetController();
@@ -531,6 +594,12 @@ void ASheriff::ServerSwitchToFirst_Implementation()
 						}
 
 						ClientSwapControlGauge(Sheriff);
+
+						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+						if (WildWestGameInstance)
+						{
+							WildWestGameInstance->SetCurrentSheriffIndex(1);
+						}
 					}
 				}
 			}
@@ -558,11 +627,10 @@ void ASheriff::ServerSwitchToSecond_Implementation()
 						return;
 					}
 
-					bIsControlled = false;
-
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[1]);
 					if (Sheriff)
 					{
+						bIsControlled = false;
 						Sheriff->SetbIsControlled(true);
 
 						AController* NewController = Sheriff->GetController();
@@ -590,6 +658,12 @@ void ASheriff::ServerSwitchToSecond_Implementation()
 						}
 
 						ClientSwapControlGauge(Sheriff);
+
+						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+						if (WildWestGameInstance)
+						{
+							WildWestGameInstance->SetCurrentSheriffIndex(2);
+						}
 					}
 				}
 			}
@@ -617,11 +691,10 @@ void ASheriff::ServerSwitchToThird_Implementation()
 						return;
 					}
 
-					bIsControlled = false;
-
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[2]);
 					if (Sheriff)
 					{
+						bIsControlled = false;
 						Sheriff->SetbIsControlled(true);
 
 						AController* NewController = Sheriff->GetController();
@@ -649,6 +722,12 @@ void ASheriff::ServerSwitchToThird_Implementation()
 						}
 
 						ClientSwapControlGauge(Sheriff);
+
+						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+						if (WildWestGameInstance)
+						{
+							WildWestGameInstance->SetCurrentSheriffIndex(3);
+						}
 					}
 				}
 			}
@@ -676,11 +755,10 @@ void ASheriff::ServerSwitchToFourth_Implementation()
 						return;
 					}
 
-					bIsControlled = false;
-
 					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[3]);
 					if (Sheriff)
 					{
+						bIsControlled = false;
 						Sheriff->SetbIsControlled(true);
 
 						AController* NewController = Sheriff->GetController();
@@ -708,6 +786,12 @@ void ASheriff::ServerSwitchToFourth_Implementation()
 						}
 
 						ClientSwapControlGauge(Sheriff);
+
+						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+						if (WildWestGameInstance)
+						{
+							WildWestGameInstance->SetCurrentSheriffIndex(4);
+						}
 					}
 				}
 			}
@@ -732,7 +816,10 @@ void ASheriff::ServerEnterDuel_Implementation()
 
 				for (ASheriff* Sheriff : SheriffList)
 				{
-					WildWestGameInstance->AddLastTransformList(Sheriff->GetActorTransform());
+					if (Sheriff)
+					{
+						WildWestGameInstance->AddLastTransformList(Sheriff->GetActorTransform());
+					}
 				}
 
 				ATownGameMode* TownGameMode = World->GetAuthGameMode<ATownGameMode>();

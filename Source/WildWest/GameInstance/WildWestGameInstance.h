@@ -28,8 +28,17 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
 	ECharacterState ClientCharacterState;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, Category = "Flag", meta = (AllowPrivateAccess = "true"))
+	bool bIsGameStarted;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
 	TArray<FTransform> LastTransformList;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Index", meta = (AllowPrivateAccess = "true"))
+	TArray<int32> AliveControllerIndex{ 1, 2, 3, 4 };
+
+	UPROPERTY(BlueprintReadOnly, Category = "Index", meta = (AllowPrivateAccess = "true"))
+	TArray<int32> RemovedControllerIndex;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Index", meta = (AllowPrivateAccess = "true"))
 	int32 CurrentSheriffIndex;

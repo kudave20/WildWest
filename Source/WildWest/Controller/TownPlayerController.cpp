@@ -9,24 +9,21 @@ void ATownPlayerController::SetInitialControlRotation(const FRotator& NewRotatio
 	ClientSetRotation(NewRotation);
 }
 
-void ATownPlayerController::PostSeamlessTravel()
+void ATownPlayerController::BeginPlay()
 {
-	Super::PostSeamlessTravel();
+	Super::BeginPlay();
 
-	if (!IsLocalPlayerController())
+	FInputModeGameOnly InputModeData;
+	SetInputMode(InputModeData);
+	SetShowMouseCursor(false);
+
+	UWorld* World = GetWorld();
+	if (World)
 	{
-		ClientSetInputModeGameOnly();
-		return;
+		UGameViewportClient* GameViewportClient = World->GetGameViewport();
+		if (GameViewportClient)
+		{
+			GameViewportClient->SetForceDisableSplitscreen(false);
+		}
 	}
-
-	FInputModeGameOnly InputModeData;
-	SetInputMode(InputModeData);
-	SetShowMouseCursor(false);
-}
-
-void ATownPlayerController::ClientSetInputModeGameOnly_Implementation()
-{
-	FInputModeGameOnly InputModeData;
-	SetInputMode(InputModeData);
-	SetShowMouseCursor(false);
 }

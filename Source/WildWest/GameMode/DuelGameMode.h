@@ -17,4 +17,7 @@ class WILDWEST_API ADuelGameMode : public AGameMode
 public:
 	void TravelToLobby();
 
+	UFUNCTION(BlueprintCallable)
+	void TravelToTown();
+
 };

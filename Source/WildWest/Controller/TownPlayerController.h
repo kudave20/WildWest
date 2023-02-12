@@ -30,13 +30,10 @@ public:
 	void SetInitialControlRotation(const FRotator& NewRotation);
 
 protected:
-	virtual void PostSeamlessTravel() override;
+	virtual void BeginPlay() override;
 
 private:
 	EScreenIndex CurrentScreenIndex;
-
-	UFUNCTION(Client, Reliable)
-	void ClientSetInputModeGameOnly();
 
 public:
 	FORCEINLINE EScreenIndex GetCurrentScreenIndex() { return CurrentScreenIndex; }
