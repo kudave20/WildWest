@@ -3,9 +3,10 @@
 
 #include "Gunman.h"
 #include "Camera/CameraComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "Components/SphereComponent.h"
 #include "WildWest/Props/Vault.h"
 #include "WildWest/HUD/VaultGauge.h"
+#include "Sheriff.h"
 #include "Components/Image.h"
 #include "Net/UnrealNetwork.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
@@ -20,12 +21,24 @@ AGunman::AGunman()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(GetMesh());
 	Camera->bUsePawnControlRotation = true;
+
+	AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
+	AreaSphere->SetupAttachment(GetMesh());
+	AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AGunman::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (HasAuthority())
+	{
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+		AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AGunman::OnSphereOverlap);
+		AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AGunman::OnSphereEndOverlap);
+	}
 }
 
 void AGunman::Jump()
@@ -206,6 +219,24 @@ void AGunman::RemoveVaultGauge()
 	}
 
 	bIsInteracting = false;
+}
+
+void AGunman::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ASheriff* Sheriff = Cast<ASheriff>(OtherActor);
+	if (Sheriff)
+	{
+		Sheriff->SetOverlappingGunman(this);
+	}
+}
+
+void AGunman::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	ASheriff* Sheriff = Cast<ASheriff>(OtherActor);
+	if (Sheriff)
+	{
+		Sheriff->SetOverlappingGunman(nullptr);
+	}
 }
 
 void AGunman::ServerOpenVault_Implementation()

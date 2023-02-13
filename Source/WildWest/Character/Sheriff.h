@@ -80,6 +80,8 @@ private:
 
 	bool bIsInputEnabled{ true };
 
+	class AGunman* OverlappingGunman;
+
 	UFUNCTION(Client, Reliable)
 	void ClientSwapControlGauge(ASheriff* Sheriff);
 
@@ -96,4 +98,6 @@ public:
 
 	FORCEINLINE UControlGauge* GetControlGauge() { return ControlGauge; }
 	FORCEINLINE void SetControlGauge(UControlGauge* NewControlGauge) { ControlGauge = NewControlGauge; }
+
+	FORCEINLINE void SetOverlappingGunman(AGunman* Gunman) { OverlappingGunman = Gunman; }
 };

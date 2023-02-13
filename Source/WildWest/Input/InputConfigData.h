@@ -44,8 +44,5 @@ public:
     UInputAction* InputSwitchToFourth;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-    UInputAction* InputEnterDuel;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
     UInputAction* InputInteract;
 };

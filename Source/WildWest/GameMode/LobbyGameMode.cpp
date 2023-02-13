@@ -29,7 +29,7 @@ void ALobbyGameMode::TravelToTown()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		bUseSeamlessTravel = true;
+		//bUseSeamlessTravel = true;
 		World->ServerTravel(FString("/Game/Maps/Town?listen"));
 	}
 }

@@ -8,7 +8,7 @@ void ATownGameMode::TravelToDuel()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		bUseSeamlessTravel = true;
+		//bUseSeamlessTravel = true;
 		World->ServerTravel(FString("/Game/Maps/Duel?listen"));
 	}
 }

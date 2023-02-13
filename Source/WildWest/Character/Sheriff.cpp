@@ -108,7 +108,7 @@ void ASheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 				EnhancedInputComponent->BindAction(InputActions->InputSwitchToSecond, ETriggerEvent::Triggered, this, &ASheriff::SwitchToSecond);
 				EnhancedInputComponent->BindAction(InputActions->InputSwitchToThird, ETriggerEvent::Triggered, this, &ASheriff::SwitchToThird);
 				EnhancedInputComponent->BindAction(InputActions->InputSwitchToFourth, ETriggerEvent::Triggered, this, &ASheriff::SwitchToFourth);
-				EnhancedInputComponent->BindAction(InputActions->InputEnterDuel, ETriggerEvent::Triggered, this, &ASheriff::EnterDuel);
+				EnhancedInputComponent->BindAction(InputActions->InputInteract, ETriggerEvent::Triggered, this, &ASheriff::EnterDuel);
 			}
 		}
 	}
@@ -512,6 +512,11 @@ void ASheriff::EnterDuel()
 		return;
 	}
 
+	if (OverlappingGunman == nullptr)
+	{
+		return;
+	}
+
 	UWorld* World = GetWorld();
 	if (World)
 	{
@@ -812,6 +817,11 @@ void ASheriff::ServerSwitchToFourth_Implementation()
 
 void ASheriff::ServerEnterDuel_Implementation()
 {
+	if (OverlappingGunman == nullptr)
+	{
+		return;
+	}
+
 	UWorld* World = GetWorld();
 	if (World)
 	{
