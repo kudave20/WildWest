@@ -55,6 +55,55 @@ void AGunman::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (OverlappingVault)
+	{
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			FHitResult HitResult;
+			FVector CameraLocation = Camera->GetComponentLocation();
+			bool bIsLookingVault = World->LineTraceSingleByChannel(HitResult,
+				CameraLocation,
+				CameraLocation + AreaSphere->GetScaledSphereRadius() * Camera->GetForwardVector(),
+				ECollisionChannel::ECC_Pawn) && Cast<AVault>(HitResult.GetActor());
+
+			if (bIsLookingVault)
+			{
+				if (!bIsInteracting)
+				{
+					if (Press == nullptr)
+					{
+						Press = CreateWidget(World, PressClass);
+					}
+					if (Press && !Press->IsInViewport())
+					{
+						Press->AddToViewport();
+					}
+				}
+				else
+				{
+					if (Press && Press->IsInViewport())
+					{
+						Press->RemoveFromParent();
+					}
+				}
+			}
+			else
+			{
+				if (Press && Press->IsInViewport())
+				{
+					Press->RemoveFromParent();
+				}
+			}
+		}
+	}
+	else
+	{
+		if (Press && Press->IsInViewport())
+		{
+			Press->RemoveFromParent();
+		}
+	}
 }
 
 void AGunman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -159,6 +208,18 @@ void AGunman::OpenVault()
 		UWorld* World = GetWorld();
 		if (World)
 		{
+			FHitResult HitResult;
+			FVector CameraLocation = Camera->GetComponentLocation();
+			bool bIsLookingVault = World->LineTraceSingleByChannel(HitResult,
+				CameraLocation,
+				CameraLocation + AreaSphere->GetScaledSphereRadius() * Camera->GetForwardVector(),
+				ECollisionChannel::ECC_Pawn) && Cast<AVault>(HitResult.GetActor());
+
+			if (!bIsLookingVault)
+			{
+				return;
+			}
+
 			if (VaultGauge == nullptr)
 			{
 				VaultGauge = CreateWidget<UVaultGauge>(World, VaultGaugeClass);
@@ -246,4 +307,3 @@ void AGunman::ServerOpenVault_Implementation()
 		OverlappingVault->OpenDoorDelegate.Broadcast();
 	}
 }
-

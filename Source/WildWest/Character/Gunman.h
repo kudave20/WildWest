@@ -69,6 +69,12 @@ private:
 	UPROPERTY()
 	class UVaultGauge* VaultGauge;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Widget")
+	TSubclassOf<UUserWidget> PressClass;
+
+	UPROPERTY()
+	UUserWidget* Press;
+
 	UFUNCTION(Server, Reliable)
 	void ServerOpenVault();
 
