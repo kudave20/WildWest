@@ -15,10 +15,15 @@ class WILDWEST_API ATownGameState : public AGameState
 	GENERATED_BODY()
 	
 private:
+	UPROPERTY(BlueprintReadWrite, Category = "Gunman", meta = (AllowPrivateAccess = "true"))
+	class AGunman* Gunman;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Sheriff", meta = (AllowPrivateAccess = "true"))
 	TArray<class ASheriff*> SheriffList;
 
 public:
+	FORCEINLINE AGunman* GetGunman() { return Gunman; }
+
 	FORCEINLINE TArray<ASheriff*>& GetSheriffList() { return SheriffList; }
 
 };

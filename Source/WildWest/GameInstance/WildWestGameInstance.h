@@ -34,6 +34,9 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
 	TArray<FTransform> LastTransformList;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
+	FTransform LastGunmanTransform;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Index", meta = (AllowPrivateAccess = "true"))
 	TArray<int32> AliveControllerIndex{ 1, 2, 3, 4 };
 
@@ -46,6 +49,10 @@ private:
 public:
 	FORCEINLINE ECharacterState GetServerCharacterState() { return ServerCharacterState; }
 	FORCEINLINE ECharacterState GetClientCharacterState() { return ClientCharacterState; }
+
+	FORCEINLINE void SetLastGunmanTransform(FTransform LastTransform) { LastGunmanTransform = LastTransform; }
+
+	FORCEINLINE TArray<FTransform>& GetLastTransformList() { return LastTransformList; }
 
 	FORCEINLINE void SetCurrentSheriffIndex(int32 NewIndex) { CurrentSheriffIndex = NewIndex; }
 };

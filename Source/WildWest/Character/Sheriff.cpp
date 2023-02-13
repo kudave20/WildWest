@@ -518,18 +518,29 @@ void ASheriff::EnterDuel()
 		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 		if (TownGameState)
 		{
+			AGunman* Gunman = TownGameState->GetGunman();
 			TArray<ASheriff*> SheriffList = TownGameState->GetSheriffList();
 
 			UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
 			if (WildWestGameInstance)
 			{
 				WildWestGameInstance->SetCurrentSheriffIndex(CharacterIndex);
+				WildWestGameInstance->GetLastTransformList().Empty();
 
 				for (ASheriff* Sheriff : SheriffList)
 				{
+					if (Gunman)
+					{
+						WildWestGameInstance->SetLastGunmanTransform(Gunman->GetActorTransform());
+					}
+
 					if (Sheriff)
 					{
 						WildWestGameInstance->AddLastTransformList(Sheriff->GetActorTransform());
+					}
+					else
+					{
+						WildWestGameInstance->AddLastTransformList(FTransform());
 					}
 				}
 
@@ -807,18 +818,29 @@ void ASheriff::ServerEnterDuel_Implementation()
 		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 		if (TownGameState)
 		{
+			AGunman* Gunman = TownGameState->GetGunman();
 			TArray<ASheriff*> SheriffList = TownGameState->GetSheriffList();
 			
 			UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
 			if (WildWestGameInstance)
 			{
 				WildWestGameInstance->SetCurrentSheriffIndex(CharacterIndex);
+				WildWestGameInstance->GetLastTransformList().Empty();
+
+				if (Gunman)
+				{
+					WildWestGameInstance->SetLastGunmanTransform(Gunman->GetActorTransform());
+				}
 
 				for (ASheriff* Sheriff : SheriffList)
 				{
 					if (Sheriff)
 					{
 						WildWestGameInstance->AddLastTransformList(Sheriff->GetActorTransform());
+					}
+					else
+					{
+						WildWestGameInstance->AddLastTransformList(FTransform());
 					}
 				}
 
