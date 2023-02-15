@@ -198,7 +198,7 @@ void ADuelGameState::StartDuel()
 								DuelSheriff->MulticastPlayDodgeLeftMontage(1.0f);
 								break;
 							case EDuelState::EDS_Middle:
-								ClientPlayerController->SetControlRotation(FRotator(0, 90, 0));
+								ClientPlayerController->ClientSetRotation(FRotator(0, 90, 0));
 								ServerPlayerController->FightBackDelegate.Broadcast();
 								ClientPlayerController->ClientFightBackBroadcast();
 

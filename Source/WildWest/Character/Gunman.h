@@ -63,14 +63,14 @@ private:
 	UPROPERTY(Replicated)
 	class AVault* OverlappingVault;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Widget")
-	TSubclassOf<UUserWidget> VaultGaugeClass;
+	UPROPERTY(EditDefaultsOnly, Category = HUD)
+	TSubclassOf<UUserWidget> VaultGaugeWidget;
 	
 	UPROPERTY()
 	class UVaultGauge* VaultGauge;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Widget")
-	TSubclassOf<UUserWidget> PressClass;
+	UPROPERTY(EditDefaultsOnly, Category = HUD)
+	TSubclassOf<UUserWidget> PressWidget;
 
 	UPROPERTY()
 	UUserWidget* Press;

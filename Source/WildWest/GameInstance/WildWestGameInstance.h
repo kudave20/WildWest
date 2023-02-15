@@ -50,9 +50,11 @@ public:
 	FORCEINLINE ECharacterState GetServerCharacterState() { return ServerCharacterState; }
 	FORCEINLINE ECharacterState GetClientCharacterState() { return ClientCharacterState; }
 
-	FORCEINLINE void SetLastGunmanTransform(FTransform LastTransform) { LastGunmanTransform = LastTransform; }
+	FORCEINLINE void SetbIsGameStarted(bool bIsStarted) { bIsGameStarted = bIsStarted; }
 
 	FORCEINLINE TArray<FTransform>& GetLastTransformList() { return LastTransformList; }
+
+	FORCEINLINE void SetLastGunmanTransform(FTransform LastTransform) { LastGunmanTransform = LastTransform; }
 
 	FORCEINLINE void SetCurrentSheriffIndex(int32 NewIndex) { CurrentSheriffIndex = NewIndex; }
 };

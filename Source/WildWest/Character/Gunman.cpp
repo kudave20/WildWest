@@ -73,7 +73,7 @@ void AGunman::Tick(float DeltaTime)
 				{
 					if (Press == nullptr)
 					{
-						Press = CreateWidget(World, PressClass);
+						Press = CreateWidget(World, PressWidget);
 					}
 					if (Press && !Press->IsInViewport())
 					{
@@ -222,7 +222,7 @@ void AGunman::OpenVault()
 
 			if (VaultGauge == nullptr)
 			{
-				VaultGauge = CreateWidget<UVaultGauge>(World, VaultGaugeClass);
+				VaultGauge = CreateWidget<UVaultGauge>(World, VaultGaugeWidget);
 				if (VaultGauge)
 				{
 					VaultGauge->AddToViewport();

@@ -29,11 +29,37 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetInitialControlRotation(const FRotator& NewRotation);
 
+	UFUNCTION(Server, Reliable)
+	void ServerRemovePlayer();
+
+	UFUNCTION(Client, Reliable)
+	void ClientRemovePlayer();
+
+	UFUNCTION(Server, Reliable)
+	void ServerReturnToMainMenu();
+
 protected:
 	virtual void BeginPlay() override;
+	virtual void SetupInputComponent() override;
+
+	void ShowReturnToMainMenu();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
+	class UInputMappingContext* InputMapping;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
+	class UInputConfigData* InputActions;
 
 private:
 	EScreenIndex CurrentScreenIndex;
+	
+	UPROPERTY(EditAnywhere, Category = HUD)
+	TSubclassOf<class UUserWidget> ReturnToMainMenuWidget;
+
+	UPROPERTY()
+	class UReturnToMainMenu* ReturnToMainMenu;
+
+	bool bReturnToMainMenuOpen = false;
 
 public:
 	FORCEINLINE EScreenIndex GetCurrentScreenIndex() { return CurrentScreenIndex; }
