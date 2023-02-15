@@ -72,6 +72,16 @@ void UMenu::OnCreateSession(bool bWasSuccessful)
 		UWorld* World = GetWorld();
 		if (World)
 		{
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(
+					-1,
+					15.f,
+					FColor::Cyan,
+					FString(TEXT("Succeeded to create session!"))
+				);
+			}
+
 			World->ServerTravel(PathToLobby);
 		}
 	}
