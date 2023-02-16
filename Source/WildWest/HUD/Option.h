@@ -22,6 +22,12 @@ protected:
 	virtual bool Initialize() override;
 	
 private:
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
+	USoundMix* InMix;
+
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
+	USoundClass* InSoundClass;
+
 	UPROPERTY(meta = (BindWidget))
 	class UButton* FullScreenButton;
 
@@ -109,6 +115,9 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* OptimalButton;
 
+	UPROPERTY(meta = (BindWidget))
+	class USlider* VolumeSlider;
+
 	UFUNCTION()
 	void FullScreenButtonClicked();
 
@@ -195,6 +204,9 @@ private:
 
 	UFUNCTION()
 	void OptimalButtonClicked();
+
+	UFUNCTION()
+	void VolumeSliderValueChanged(float Value);
 
 	void SelectWindowMode(bool bFullScreen, bool bWindowed);
 	void SelectFPSButton(bool bFPSLow, bool bFPSMedium, bool bFPSHigh, bool bFPSEpic);

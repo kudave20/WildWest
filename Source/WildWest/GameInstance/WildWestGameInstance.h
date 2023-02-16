@@ -46,6 +46,8 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = "Index", meta = (AllowPrivateAccess = "true"))
 	int32 CurrentSheriffIndex;
 
+	float MasterVolume{ 1.0f };
+
 public:
 	FORCEINLINE ECharacterState GetServerCharacterState() { return ServerCharacterState; }
 	FORCEINLINE ECharacterState GetClientCharacterState() { return ClientCharacterState; }
@@ -57,4 +59,7 @@ public:
 	FORCEINLINE void SetLastGunmanTransform(FTransform LastTransform) { LastGunmanTransform = LastTransform; }
 
 	FORCEINLINE void SetCurrentSheriffIndex(int32 NewIndex) { CurrentSheriffIndex = NewIndex; }
+
+	FORCEINLINE float GetMasterVolume() { return MasterVolume; }
+	FORCEINLINE void SetMasterVolume(float Volume) { MasterVolume = Volume; }
 };

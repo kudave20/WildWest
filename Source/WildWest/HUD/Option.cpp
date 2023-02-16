@@ -4,7 +4,10 @@
 #include "Option.h"
 #include "Components/Button.h"
 #include "Components/ComboBoxString.h"
+#include "Components/Slider.h"
 #include "GameFramework/GameUserSettings.h"
+#include "Kismet/GameplayStatics.h"
+#include "WildWest/GameInstance/WildWestGameInstance.h"
 
 void UOption::OptionSetup()
 {
@@ -151,6 +154,10 @@ bool UOption::Initialize()
 	if (OptimalButton)
 	{
 		OptimalButton->OnClicked.AddDynamic(this, &ThisClass::OptimalButtonClicked);
+	}
+	if (VolumeSlider)
+	{
+		VolumeSlider->OnValueChanged.AddDynamic(this, &ThisClass::VolumeSliderValueChanged);
 	}
 
 	return true;
@@ -555,6 +562,12 @@ void UOption::BackButtonClicked()
 			PlayerController->SetShowMouseCursor(true);
 		}
 	}
+
+	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+	if (WildWestGameInstance && VolumeSlider)
+	{
+		WildWestGameInstance->SetMasterVolume(VolumeSlider->GetValue());
+	}
 }
 
 void UOption::OptimalButtonClicked()
@@ -568,6 +581,16 @@ void UOption::OptimalButtonClicked()
 			UserSettings->ApplyHardwareBenchmarkResults();
 			OptionButtonSetup();
 		}
+	}
+}
+
+void UOption::VolumeSliderValueChanged(float Value)
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		UGameplayStatics::SetSoundMixClassOverride(World, InMix, InSoundClass, Value);
+		UGameplayStatics::PushSoundMixModifier(World, InMix);
 	}
 }
 
@@ -835,5 +858,11 @@ void UOption::OptionButtonSetup()
 				break;
 			}
 		}
+	}
+
+	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+	if (WildWestGameInstance && VolumeSlider)
+	{
+		VolumeSlider->SetValue(WildWestGameInstance->GetMasterVolume());
 	}
 }
