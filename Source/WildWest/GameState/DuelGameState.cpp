@@ -246,29 +246,25 @@ void ADuelGameState::StartDuel()
 
 void ADuelGameState::StartDuelTimer()
 {
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		DuelTimer = InitialDuelTimer;
+	DuelTimer = InitialDuelTimer;
 
-		World->GetTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([&]()
+	GetWorldTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			DuelTimer--;
+			if (DuelTimer == 0)
 			{
-				DuelTimer--;
-				if (DuelTimer == 0)
+				if (GunmanDuelState == EDuelState::EDS_Initial)
 				{
-					if (GunmanDuelState == EDuelState::EDS_Initial)
-					{
-						GunmanDuelState = EDuelState::EDS_Middle;
-					}
-					if (SheriffDuelState == EDuelState::EDS_Initial)
-					{
-						SheriffDuelState = EDuelState::EDS_Middle;
-					}
-
-					StartDuel();
+					GunmanDuelState = EDuelState::EDS_Middle;
 				}
-			}), 1.0f, true);
-	}
+				if (SheriffDuelState == EDuelState::EDS_Initial)
+				{
+					SheriffDuelState = EDuelState::EDS_Middle;
+				}
+
+				StartDuel();
+			}
+		}), 1.0f, true);
 }
 
 void ADuelGameState::ResetDuelState()

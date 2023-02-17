@@ -20,6 +20,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SelectControlCharacter();
+	
+	void StartStunTimer();
+
+	UFUNCTION(Client, Reliable)
+	void ClientStartStunTimer();
 
 protected:
 	virtual void BeginPlay() override;
@@ -75,12 +80,25 @@ private:
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Control", meta = (AllowPrivateAccess = "true"))
 	bool bIsControlled;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Widget", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(BlueprintReadWrite, Category = HUD, meta = (AllowPrivateAccess = "true"))
 	class UControlGauge* ControlGauge;
 
 	bool bIsInputEnabled{ true };
 
 	class AGunman* OverlappingGunman;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Control")
+	float StunTimer;
+
+	FTimerHandle TimerHandle;
+
+	APlayerController* PlayerController;
+
+	UPROPERTY(EditDefaultsOnly, Category = HUD)
+	TSubclassOf<UUserWidget> StunWidget;
+
+	UPROPERTY()
+	UUserWidget* Stun;
 
 	UFUNCTION(Client, Reliable)
 	void ClientSwapControlGauge(ASheriff* Sheriff);

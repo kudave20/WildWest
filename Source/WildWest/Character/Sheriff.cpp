@@ -48,18 +48,24 @@ void ASheriff::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bIsControlled && bIsInputEnabled)
+	if (bIsControlled)
 	{
-		if (ControlTimer > 0)
+		if (bIsInputEnabled)
 		{
-			ControlTimer -= DeltaTime;
-		}
-		else
-		{
-			bIsInputEnabled = false;
+			if (ControlTimer > 0)
+			{
+				if (InputEnabled())
+				{
+					ControlTimer -= DeltaTime;
+				}
+			}
+			else
+			{
+				bIsInputEnabled = false;
+			}
 		}
 	}
-	else if (!bIsControlled)
+	else
 	{
 		bIsInputEnabled = true;
 
@@ -87,10 +93,10 @@ void ASheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController)
+	APlayerController* PC =  Cast<APlayerController>(GetController());
+	if (PC)
 	{
-		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
 		if (Subsystem)
 		{
 			Subsystem->ClearAllMappings();
@@ -143,24 +149,79 @@ void ASheriff::SelectControlCharacter()
 			}
 
 			int32 RandomIndex = FMath::RandRange(0, ControllableNum - 1);
+			ASheriff* NextSheriff = NULL;
 
 			switch (ControllableIndexList[RandomIndex])
 			{
 			case 0:
 				SwitchToFirst();
+				NextSheriff = TownGameState->GetSheriffList()[0];
 				break;
 			case 1:
 				SwitchToSecond();
+				NextSheriff = TownGameState->GetSheriffList()[1];
 				break;
 			case 2:
 				SwitchToThird();
+				NextSheriff = TownGameState->GetSheriffList()[2];
 				break;
 			case 3:
 				SwitchToFourth();
+				NextSheriff = TownGameState->GetSheriffList()[3];
 				break;
+			}
+
+			if (NextSheriff)
+			{
+				UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+				if (WildWestGameInstance)
+				{
+					if (WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Sheriff)
+					{
+						NextSheriff->StartStunTimer();
+					}
+					else
+					{
+						NextSheriff->ClientStartStunTimer();
+					}
+				}
 			}
 		}
 	}
+}
+
+void ASheriff::StartStunTimer()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		PlayerController = PlayerController == nullptr ? Cast<APlayerController>(GetController()) : PlayerController;
+		if (PlayerController)
+		{
+			DisableInput(PlayerController);
+
+			Stun = CreateWidget(World, StunWidget);
+			if (Stun)
+			{
+				Stun->AddToPlayerScreen(1);
+			}
+
+			World->GetTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateLambda([&]()
+				{
+					EnableInput(PlayerController);
+
+					if (Stun)
+					{
+						Stun->RemoveFromParent();
+					}
+				}), StunTimer, false);
+		}
+	}
+}
+
+void ASheriff::ClientStartStunTimer_Implementation()
+{
+	StartStunTimer();
 }
 
 void ASheriff::MoveForward(const FInputActionValue& Value)
