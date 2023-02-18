@@ -77,4 +77,6 @@ public:
 
 	FORCEINLINE int32 GetDuelTimer() { return DuelTimer; }
 	FORCEINLINE int32 GetBulletCount() { return BulletCount; }
+
+	FORCEINLINE void SetbIsDuelOver(bool bIsOver) { bIsDuelOver = bIsOver; }
 };

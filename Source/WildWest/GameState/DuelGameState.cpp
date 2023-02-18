@@ -6,7 +6,6 @@
 #include "WildWest/Character/DuelSheriff.h"
 #include "WildWest/Controller/DuelPlayerController.h"
 #include "WildWest/GameInstance/WildWestGameInstance.h"
-#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 void ADuelGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

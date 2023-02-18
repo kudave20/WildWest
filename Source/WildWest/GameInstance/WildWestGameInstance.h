@@ -43,7 +43,6 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = "Index", meta = (AllowPrivateAccess = "true"))
 	TArray<int32> RemovedControllerIndex;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Index", meta = (AllowPrivateAccess = "true"))
 	int32 CurrentSheriffIndex;
 
 	float MasterVolume{ 1.0f };
@@ -58,6 +57,11 @@ public:
 
 	FORCEINLINE void SetLastGunmanTransform(FTransform LastTransform) { LastGunmanTransform = LastTransform; }
 
+	FORCEINLINE TArray<int32>& GetAliveControllerIndex() { return AliveControllerIndex; }
+
+	FORCEINLINE TArray<int32>& GetRemovedControllerIndex() { return RemovedControllerIndex; }
+
+	FORCEINLINE int32 GetCurrentSheriffIndex() { return CurrentSheriffIndex; }
 	FORCEINLINE void SetCurrentSheriffIndex(int32 NewIndex) { CurrentSheriffIndex = NewIndex; }
 
 	FORCEINLINE float GetMasterVolume() { return MasterVolume; }

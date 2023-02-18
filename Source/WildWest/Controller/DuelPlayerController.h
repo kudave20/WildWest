@@ -66,6 +66,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetInitialControlRotation(const FRotator& NewRotation);
 
+	UFUNCTION(BlueprintCallable)
+	void SetControllerIndex();
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetControllerIndex();
+
 protected:
 	virtual void BeginPlay() override;
 
