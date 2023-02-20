@@ -80,6 +80,9 @@ private:
 
 	bool bIsInteracting;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Vault", meta = (AllowPrivateAccess = "true"))
+	int32 VaultOpened;
+
 public:
 	FORCEINLINE void SetOverlappingVault(AVault* Vault) { OverlappingVault = Vault; }
 };

@@ -56,9 +56,14 @@ private:
 
 	float OpenTimer;
 
+	bool bIsOpened;
+
 public:	
 	FORCEINLINE float GetMaxOpenTimer() { return MaxOpenTimer; }
 
 	FORCEINLINE float GetOpenTimer() { return OpenTimer; }
 	FORCEINLINE void SetOpenTimer(float NewTimer) { OpenTimer = NewTimer; }
+
+	FORCEINLINE bool GetbIsOpened() { return bIsOpened; }
+	FORCEINLINE void SetbIsOpened(bool bOpened) { bIsOpened = bOpened; }
 };

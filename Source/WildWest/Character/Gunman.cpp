@@ -203,7 +203,7 @@ void AGunman::LookUp(const FInputActionValue& Value)
 
 void AGunman::OpenVault()
 {
-	if (OverlappingVault)
+	if (OverlappingVault && !OverlappingVault->GetbIsOpened())
 	{
 		UWorld* World = GetWorld();
 		if (World)
@@ -238,11 +238,14 @@ void AGunman::OpenVault()
 				if (HasAuthority())
 				{
 					OverlappingVault->OpenDoorDelegate.Broadcast();
+					VaultOpened++;
 				}
 				else
 				{
 					ServerOpenVault();
 				}
+
+				OverlappingVault->SetbIsOpened(true);
 
 				return;
 			}
@@ -305,5 +308,6 @@ void AGunman::ServerOpenVault_Implementation()
 	if (OverlappingVault)
 	{
 		OverlappingVault->OpenDoorDelegate.Broadcast();
+		VaultOpened++;
 	}
 }
