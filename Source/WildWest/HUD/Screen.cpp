@@ -26,7 +26,7 @@ FText UScreen::SetScreen()
 	if (Sheriff)
 	{
 		int32 Index = Sheriff->GetCharacterIndex();
-		FString Result = "Screen " + FString::FromInt(Index);
+		FString Result = FString::FromInt(Index);
 		return FText::FromString(Result);
 	}
 
