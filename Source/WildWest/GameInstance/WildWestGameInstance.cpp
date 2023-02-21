@@ -17,3 +17,8 @@ void UWildWestGameInstance::AddLastTransformList(FTransform LastTransform)
 {
 	LastTransformList.Add(LastTransform);
 }
+
+void UWildWestGameInstance::ReplaceVaultList(FVector Key, bool Value)
+{
+	VaultList[Key] = Value;
+}

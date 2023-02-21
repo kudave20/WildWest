@@ -4,6 +4,7 @@
 #include "Vault.h"
 #include "Components/SphereComponent.h"
 #include "WildWest/Character/Gunman.h"
+#include "WildWest/GameInstance/WildWestGameInstance.h"
 
 AVault::AVault()
 {

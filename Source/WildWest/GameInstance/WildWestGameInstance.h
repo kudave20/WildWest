@@ -20,6 +20,7 @@ public:
 	void SetupClient(ECharacterState NewClientState);
 
 	void AddLastTransformList(FTransform LastTransform);
+	void ReplaceVaultList(FVector Key, bool Value);
 
 private:
 	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
@@ -43,10 +44,16 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = "Index", meta = (AllowPrivateAccess = "true"))
 	TArray<int32> RemovedControllerIndex;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(BlueprintReadOnly, Category = "Vault", meta = (AllowPrivateAccess = "true"))
+	TMap<FVector, bool> VaultList;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Vault", meta = (AllowPrivateAccess = "true"))
 	TArray<FTransform> VaultTransformList;
 
 	int32 CurrentSheriffIndex;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Vault", meta = (AllowPrivateAccess = "true"))
+	int32 VaultOpened;
 
 	float MasterVolume{ 1.0f };
 
@@ -64,8 +71,12 @@ public:
 
 	FORCEINLINE TArray<int32>& GetRemovedControllerIndex() { return RemovedControllerIndex; }
 
+	FORCEINLINE TMap<FVector, bool>& GetVaultList() { return VaultList; }
+
 	FORCEINLINE int32 GetCurrentSheriffIndex() { return CurrentSheriffIndex; }
 	FORCEINLINE void SetCurrentSheriffIndex(int32 NewIndex) { CurrentSheriffIndex = NewIndex; }
+
+	FORCEINLINE void AddVaultOpened(int32 NewOpenedVault) { VaultOpened += NewOpenedVault; }
 
 	FORCEINLINE float GetMasterVolume() { return MasterVolume; }
 	FORCEINLINE void SetMasterVolume(float Volume) { MasterVolume = Volume; }

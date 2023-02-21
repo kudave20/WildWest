@@ -6,6 +6,7 @@
 #include "Components/SphereComponent.h"
 #include "WildWest/Props/Vault.h"
 #include "WildWest/HUD/VaultGauge.h"
+#include "WildWest/GameInstance/WildWestGameInstance.h"
 #include "Sheriff.h"
 #include "Components/Image.h"
 #include "Net/UnrealNetwork.h"
@@ -55,7 +56,7 @@ void AGunman::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (OverlappingVault)
+	if (OverlappingVault && !OverlappingVault->GetbIsOpened())
 	{
 		UWorld* World = GetWorld();
 		if (World)
@@ -233,19 +234,25 @@ void AGunman::OpenVault()
 			float MaxOpenTimer = OverlappingVault->GetMaxOpenTimer();
 			if (OpenTimer >= MaxOpenTimer)
 			{
-				VaultGauge->RemoveFromParent();
-
-				if (HasAuthority())
+				UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+				if (WildWestGameInstance)
 				{
-					OverlappingVault->OpenDoorDelegate.Broadcast();
-					VaultOpened++;
-				}
-				else
-				{
-					ServerOpenVault();
-				}
+					VaultGauge->RemoveFromParent();
 
-				OverlappingVault->SetbIsOpened(true);
+					if (HasAuthority())
+					{
+						OverlappingVault->OpenDoorDelegate.Broadcast();
+						WildWestGameInstance->AddVaultOpened(1);
+					}
+					else
+					{
+						ServerOpenVault();
+					}
+
+					OverlappingVault->SetbIsOpened(true);
+
+					WildWestGameInstance->ReplaceVaultList(OverlappingVault->GetActorLocation(), true);
+				}
 
 				return;
 			}
@@ -308,6 +315,10 @@ void AGunman::ServerOpenVault_Implementation()
 	if (OverlappingVault)
 	{
 		OverlappingVault->OpenDoorDelegate.Broadcast();
-		VaultOpened++;
+		UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+		if (WildWestGameInstance)
+		{
+			WildWestGameInstance->AddVaultOpened(1);
+		}
 	}
 }

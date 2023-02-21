@@ -56,6 +56,7 @@ private:
 
 	float OpenTimer;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Flag", meta = (AllowPrivateAccess = "true"))
 	bool bIsOpened;
 
 public:	
