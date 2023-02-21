@@ -80,27 +80,11 @@ void ADuelPlayerController::SetControllerIndex()
 	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
 	if (WildWestGameInstance)
 	{
-		int32 Index = -1;
 		TArray<int32>& RemovedControllerIndex = WildWestGameInstance->GetRemovedControllerIndex();
 		int32 CurrentSheriffIndex = WildWestGameInstance->GetCurrentSheriffIndex();
 
-		for (int32 Idx = 0; Idx < RemovedControllerIndex.Num(); Idx++)
-		{
-			if (RemovedControllerIndex[Idx] > CurrentSheriffIndex)
-			{
-				Index = Idx;
-				break;
-			}
-		}
-
-		if (Index != -1)
-		{
-			RemovedControllerIndex.Insert(CurrentSheriffIndex, Index);
-		}
-		else
-		{
-			RemovedControllerIndex.AddUnique(CurrentSheriffIndex);
-		}
+		RemovedControllerIndex.AddUnique(CurrentSheriffIndex);
+		RemovedControllerIndex.Sort();
 
 		TArray<int32>& AliveControllerIndex = WildWestGameInstance->GetAliveControllerIndex();
 		AliveControllerIndex.Remove(CurrentSheriffIndex);
@@ -122,31 +106,15 @@ void ADuelPlayerController::ServerSetControllerIndex_Implementation()
 	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
 	if (WildWestGameInstance)
 	{
-		int32 Index = -1;
 		TArray<int32>& RemovedControllerIndex = WildWestGameInstance->GetRemovedControllerIndex();
 		int32 CurrentSheriffIndex = WildWestGameInstance->GetCurrentSheriffIndex();
 
-		for (int32 Idx = 0; Idx < RemovedControllerIndex.Num(); Idx++)
-		{
-			if (RemovedControllerIndex[Idx] > CurrentSheriffIndex)
-			{
-				Index = Idx;
-				break;
-			}
-		}
-
-		if (Index != -1)
-		{
-			RemovedControllerIndex.Insert(CurrentSheriffIndex, Index);
-		}
-		else
-		{
-			RemovedControllerIndex.AddUnique(CurrentSheriffIndex);
-		}
+		RemovedControllerIndex.AddUnique(CurrentSheriffIndex);
+		RemovedControllerIndex.Sort();
 
 		TArray<int32>& AliveControllerIndex = WildWestGameInstance->GetAliveControllerIndex();
 		AliveControllerIndex.Remove(CurrentSheriffIndex);
-		
+
 		UWorld* World = GetWorld();
 		if (World)
 		{

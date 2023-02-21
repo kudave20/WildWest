@@ -85,6 +85,9 @@ private:
 
 	bool bIsInputEnabled{ true };
 
+	UPROPERTY(Replicated)
+	bool bIsAlone;
+
 	class AGunman* OverlappingGunman;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Control")

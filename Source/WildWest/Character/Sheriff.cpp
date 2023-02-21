@@ -31,7 +31,32 @@ void ASheriff::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (HasAuthority())
+	{
+		UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+		if (WildWestGameInstance)
+		{
+			if (WildWestGameInstance->GetAliveControllerIndex().Num() == 1)
+			{
+				bIsAlone = true;
+			}
+		}
+	}
+
 	ControlTimer = InitialControlTimer;
+
+	if (ControlGauge)
+	{
+		UImage* Gauge = ControlGauge->GetGauge();
+		if (Gauge)
+		{
+			UMaterialInstanceDynamic* GaugeMaterialInstance = Gauge->GetDynamicMaterial();
+			if (GaugeMaterialInstance)
+			{
+				GaugeMaterialInstance->SetScalarParameterValue(FName("GaugePercent"), 1.0f);
+			}
+		}
+	}
 }
 
 void ASheriff::Jump()
@@ -47,6 +72,11 @@ void ASheriff::Jump()
 void ASheriff::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bIsAlone)
+	{
+		return;
+	}
 
 	if (bIsControlled)
 	{
@@ -126,6 +156,7 @@ void ASheriff::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 
 	DOREPLIFETIME(ASheriff, CharacterIndex);
 	DOREPLIFETIME(ASheriff, bIsControlled);
+	DOREPLIFETIME(ASheriff, bIsAlone);
 }
 
 void ASheriff::SelectControlCharacter()
