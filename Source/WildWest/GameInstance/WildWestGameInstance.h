@@ -43,6 +43,9 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = "Index", meta = (AllowPrivateAccess = "true"))
 	TArray<int32> RemovedControllerIndex;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
+	TArray<FTransform> VaultTransformList;
+
 	int32 CurrentSheriffIndex;
 
 	float MasterVolume{ 1.0f };
