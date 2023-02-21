@@ -81,7 +81,7 @@ void ADuelGameState::StartDuel()
 							}
 						}
 					}
-					else if (WildWestGameInstance->GetClientCharacterState() == ECharacterState::ECS_Gunman)
+					else
 					{
 						DuelGunman = Cast<ADuelGunman>(ClientPlayerController->GetPawn());
 						DuelSheriff = Cast<ADuelSheriff>(ServerPlayerController->GetPawn());
