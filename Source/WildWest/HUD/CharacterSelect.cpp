@@ -25,6 +25,13 @@ void UCharacterSelect::CharacterSelectSetup()
 			PlayerController->SetShowMouseCursor(true);
 		}
 	}
+
+	ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(GetOwningPlayer());
+	if (LobbyPlayerController)
+	{
+		LobbyPlayerController->SelectServerCharacterDelegate.AddUObject(this, &ThisClass::OnChangeServerCharacter);
+		LobbyPlayerController->SelectClientCharacterDelegate.AddUObject(this, &ThisClass::OnChangeClientCharacter);
+	}
 }
 
 bool UCharacterSelect::Initialize()
@@ -78,4 +85,34 @@ void UCharacterSelect::SheriffButtonClicked()
 	}
 
 	GunmanButton->SetIsEnabled(true);
+}
+
+void UCharacterSelect::OnChangeServerCharacter(ECharacterState NewCharacterState)
+{
+	switch (NewCharacterState)
+	{
+	case ECharacterState::ECS_Gunman:
+		GunmanButton->SetIsEnabled(false);
+		SheriffButton->SetIsEnabled(true);
+		break;
+	case ECharacterState::ECS_Sheriff:
+		SheriffButton->SetIsEnabled(false);
+		GunmanButton->SetIsEnabled(true);
+		break;
+	}
+}
+
+void UCharacterSelect::OnChangeClientCharacter(ECharacterState NewCharacterState)
+{
+	switch (NewCharacterState)
+	{
+	case ECharacterState::ECS_Gunman:
+		GunmanButton->SetIsEnabled(false);
+		SheriffButton->SetIsEnabled(true);
+		break;
+	case ECharacterState::ECS_Sheriff:
+		SheriffButton->SetIsEnabled(false);
+		GunmanButton->SetIsEnabled(true);
+		break;
+	}
 }

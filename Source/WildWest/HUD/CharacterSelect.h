@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "WildWest/GameState/LobbyGameState.h"
 #include "CharacterSelect.generated.h"
 
 /**
@@ -32,4 +33,7 @@ private:
 
 	UFUNCTION()
 	void SheriffButtonClicked();
+
+	void OnChangeServerCharacter(ECharacterState NewCharacterState);
+	void OnChangeClientCharacter(ECharacterState NewCharacterState);
 };

@@ -4,6 +4,11 @@
 #include "LobbyPlayerController.h"
 #include "WildWest/GameState/LobbyGameState.h"
 
+void ALobbyPlayerController::ClientBroadcastServerCharacter_Implementation(ECharacterState NewCharacterState)
+{
+	SelectServerCharacterDelegate.Broadcast(NewCharacterState);
+}
+
 void ALobbyPlayerController::ServerGunmanButtonClicked_Implementation()
 {
 	UWorld* World = GetWorld();
