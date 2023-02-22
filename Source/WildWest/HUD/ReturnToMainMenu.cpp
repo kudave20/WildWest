@@ -124,14 +124,18 @@ void UReturnToMainMenu::OnDestroySession(bool bWasSuccessful)
 			else
 			{
 				PlayerController = PlayerController == nullptr ? World->GetFirstPlayerController() : PlayerController;
-				ATownPlayerController* TownPC = Cast<ATownPlayerController>(PlayerController);
-				if (TownPC)
+
+				for (ATownPlayerController* TownPC : TActorRange<ATownPlayerController>(World))
 				{
-					TownPC->ServerRemovePlayer();
+					if (TownPC && !TownPC->IsPrimaryPlayer())
+					{
+						UGameplayStatics::RemovePlayer(TownPC, true);
+					}
 				}
-				if (TownPC)
+
+				if (PlayerController)
 				{
-					TownPC->ServerReturnToMainMenu();
+					PlayerController->ClientReturnToMainMenuWithTextReason(FText());
 				}
 			}
 		}

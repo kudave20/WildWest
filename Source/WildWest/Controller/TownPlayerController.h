@@ -29,14 +29,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetInitialControlRotation(const FRotator& NewRotation);
 
-	UFUNCTION(Server, Reliable)
-	void ServerRemovePlayer();
-
 	UFUNCTION(Client, Reliable)
 	void ClientRemovePlayer();
-
-	UFUNCTION(Server, Reliable)
-	void ServerReturnToMainMenu();
 
 protected:
 	virtual void BeginPlay() override;

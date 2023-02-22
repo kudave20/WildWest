@@ -17,44 +17,18 @@ void ATownPlayerController::SetInitialControlRotation(const FRotator& NewRotatio
 	ClientSetRotation(NewRotation);
 }
 
-void ATownPlayerController::ServerRemovePlayer_Implementation()
-{
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		for (ATownPlayerController* TownPC : TActorRange<ATownPlayerController>(World))
-		{
-			if (TownPC && !TownPC->IsPrimaryPlayer())
-			{
-				if (TownPC->IsLocalPlayerController())
-				{
-					UGameplayStatics::RemovePlayer(TownPC, true);
-				}
-				else
-				{
-					TownPC->ClientRemovePlayer();
-				}
-			}
-		}
-	}
-}
-
-
 void ATownPlayerController::ClientRemovePlayer_Implementation()
 {
 	UGameplayStatics::RemovePlayer(this, true);
-}
 
-void ATownPlayerController::ServerReturnToMainMenu_Implementation()
-{
-	UWorld* World = GetWorld();
-	if (World)
+	if (GEngine)
 	{
-		AGameModeBase* GameMode = World->GetAuthGameMode();
-		if (GameMode)
-		{
-			GameMode->ReturnToMainMenuHost();
-		}
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			10.f,
+			FColor::Cyan,
+			FString(TEXT("Check!"))
+		);
 	}
 }
 
