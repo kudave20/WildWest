@@ -9,6 +9,7 @@
 UENUM(BlueprintType)
 enum class ECharacterState : uint8
 {
+	ECS_None UMETA(DisplayName = "None"),
 	ECS_Gunman UMETA(DisplayName = "Gunman"),
 	ECS_Sheriff UMETA(DisplayName = "Sheriff"),
 
@@ -47,9 +48,6 @@ private:
 
 	void SetupServer(ECharacterState NewServerState);
 	void SetupClient(ECharacterState NewClientState);
-
-	bool bIsGunmanSelected;
-	bool bIsSheriffSelected;
 
 public:
 	void SetbIsLobbyFull(bool bIsFull);

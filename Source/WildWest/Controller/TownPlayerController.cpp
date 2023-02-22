@@ -20,16 +20,6 @@ void ATownPlayerController::SetInitialControlRotation(const FRotator& NewRotatio
 void ATownPlayerController::ClientRemovePlayer_Implementation()
 {
 	UGameplayStatics::RemovePlayer(this, true);
-
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			10.f,
-			FColor::Cyan,
-			FString(TEXT("Check!"))
-		);
-	}
 }
 
 void ATownPlayerController::BeginPlay()

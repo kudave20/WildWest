@@ -26,11 +26,4 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerSheriffButtonClicked();
 
-private:
-	bool bIsSelectingCharacter;
-
-public:
-	FORCEINLINE bool GetbIsSelectingCharacter() { return bIsSelectingCharacter; }
-	FORCEINLINE void SetbIsSelectingCharacter(bool bIsSelecting) { bIsSelectingCharacter = bIsSelecting; }
-	
 };

@@ -32,19 +32,11 @@ void ALobbyGameState::GunmanButtonClicked()
 
 		SetupServer(ECharacterState::ECS_Gunman);
 
-		if (bIsSheriffSelected)
+		UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+		if (WildWestGameInstance && WildWestGameInstance->GetClientCharacterState() == ECharacterState::ECS_Sheriff)
 		{
-			bIsGunmanSelected = true;
 			CheckSelectedCharacter();
 			return;
-		}
-
-		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-		if (LobbyPlayerController)
-		{
-			if (LobbyPlayerController->GetbIsSelectingCharacter()) bIsSheriffSelected = false;
-			bIsGunmanSelected = true;
-			LobbyPlayerController->SetbIsSelectingCharacter(true);
 		}
 	}
 }
@@ -67,19 +59,11 @@ void ALobbyGameState::SheriffButtonClicked()
 
 		SetupServer(ECharacterState::ECS_Sheriff);
 
-		if (bIsGunmanSelected)
+		UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+		if (WildWestGameInstance && WildWestGameInstance->GetClientCharacterState() == ECharacterState::ECS_Gunman)
 		{
-			bIsSheriffSelected = true;
 			CheckSelectedCharacter();
 			return;
-		}
-
-		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-		if (LobbyPlayerController)
-		{
-			if (LobbyPlayerController->GetbIsSelectingCharacter()) bIsGunmanSelected = false;
-			bIsSheriffSelected = true;
-			LobbyPlayerController->SetbIsSelectingCharacter(true);
 		}
 	}
 }
@@ -88,23 +72,11 @@ void ALobbyGameState::ServerGunmanButtonClicked()
 {
 	SetupClient(ECharacterState::ECS_Gunman);
 
-	if (bIsSheriffSelected)
+	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+	if (WildWestGameInstance && WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Sheriff)
 	{
-		bIsGunmanSelected = true;
 		CheckSelectedCharacter();
 		return;
-	}
-
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-		if (LobbyPlayerController)
-		{
-			if (LobbyPlayerController->GetbIsSelectingCharacter()) bIsSheriffSelected = false;
-			bIsGunmanSelected = true;
-			LobbyPlayerController->SetbIsSelectingCharacter(true);
-		}
 	}
 }
 
@@ -112,23 +84,11 @@ void ALobbyGameState::ServerSheriffButtonClicked()
 {
 	SetupClient(ECharacterState::ECS_Sheriff);
 
-	if (bIsGunmanSelected)
+	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+	if (WildWestGameInstance && WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Gunman)
 	{
-		bIsSheriffSelected = true;
 		CheckSelectedCharacter();
 		return;
-	}
-
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-		if (LobbyPlayerController)
-		{
-			if (LobbyPlayerController->GetbIsSelectingCharacter()) bIsGunmanSelected = false;
-			bIsSheriffSelected = true;
-			LobbyPlayerController->SetbIsSelectingCharacter(true);
-		}
 	}
 }
 
@@ -150,14 +110,11 @@ void ALobbyGameState::OnRep_bIsLobbyFull()
 
 void ALobbyGameState::CheckSelectedCharacter()
 {
-	if (bIsGunmanSelected && bIsSheriffSelected)
+	UWorld* World = GetWorld();
+	if (World)
 	{
-		UWorld* World = GetWorld();
-		if (World)
-		{
-			ALobbyGameMode* LobbyGameMode = World->GetAuthGameMode<ALobbyGameMode>();
-			LobbyGameMode->TravelToTown();
-		}
+		ALobbyGameMode* LobbyGameMode = World->GetAuthGameMode<ALobbyGameMode>();
+		LobbyGameMode->TravelToTown();
 	}
 }
 
