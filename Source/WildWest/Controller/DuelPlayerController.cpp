@@ -5,6 +5,8 @@
 #include "Camera/CameraActor.h"
 #include "WildWest/GameInstance/WildWestGameInstance.h"
 #include "WildWest/GameState/DuelGameState.h"
+#include "Kismet/GameplayStatics.h"
+#include "MultiplayerSessionsSubsystem.h"
 
 ADuelPlayerController::ADuelPlayerController()
 {
@@ -126,3 +128,21 @@ void ADuelPlayerController::ServerSetControllerIndex_Implementation()
 		}
 	}
 }
+
+void ADuelPlayerController::ClientRemovePlayer_Implementation()
+{
+	UGameplayStatics::RemovePlayer(this, true);
+}
+
+/*void ADuelPlayerController::ClientDestroySession_Implementation()
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	if (GameInstance)
+	{
+		UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
+		if (MultiplayerSessionsSubsystem)
+		{
+			MultiplayerSessionsSubsystem->DestroySession();
+		}
+	}
+}*/

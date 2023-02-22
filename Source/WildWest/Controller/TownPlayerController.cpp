@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
+#include "MultiplayerSessionsSubsystem.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -21,6 +22,32 @@ void ATownPlayerController::ClientRemovePlayer_Implementation()
 {
 	UGameplayStatics::RemovePlayer(this, true);
 }
+
+void ATownPlayerController::ServerNotifyDisconnected_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(World->GetFirstPlayerController());
+		if (TownPlayerController)
+		{
+			TownPlayerController->NotifyDelegate.Broadcast();
+		}
+	}
+}
+
+/*void ATownPlayerController::ClientDestroySession_Implementation()
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	if (GameInstance)
+	{
+		UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
+		if (MultiplayerSessionsSubsystem)
+		{
+			MultiplayerSessionsSubsystem->DestroySession();
+		}
+	}
+}*/
 
 void ATownPlayerController::BeginPlay()
 {

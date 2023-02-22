@@ -54,6 +54,6 @@ private:
 	class UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
 
 	int32 NumPublicConnections{4};
-	FString MatchType{TEXT("FreeForAll")};
+	FString MatchType{TEXT("Chase")};
 	FString PathToLobby{TEXT("")};
 };

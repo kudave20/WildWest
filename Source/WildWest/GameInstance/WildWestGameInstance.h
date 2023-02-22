@@ -61,6 +61,9 @@ public:
 	FORCEINLINE ECharacterState GetServerCharacterState() { return ServerCharacterState; }
 	FORCEINLINE ECharacterState GetClientCharacterState() { return ClientCharacterState; }
 
+	FORCEINLINE void SetServerCharacterState(ECharacterState NewState) { ServerCharacterState = NewState; }
+	FORCEINLINE void SetClientCharacterState(ECharacterState NewState) { ClientCharacterState = NewState; }
+
 	FORCEINLINE void SetbIsGameStarted(bool bIsStarted) { bIsGameStarted = bIsStarted; }
 
 	FORCEINLINE TArray<FTransform>& GetLastTransformList() { return LastTransformList; }
@@ -73,10 +76,13 @@ public:
 
 	FORCEINLINE TMap<FVector, bool>& GetVaultList() { return VaultList; }
 
+	FORCEINLINE TArray<FTransform>& GetVaultTransformList() { return VaultTransformList; }
+
 	FORCEINLINE int32 GetCurrentSheriffIndex() { return CurrentSheriffIndex; }
 	FORCEINLINE void SetCurrentSheriffIndex(int32 NewIndex) { CurrentSheriffIndex = NewIndex; }
 
 	FORCEINLINE void AddVaultOpened(int32 NewOpenedVault) { VaultOpened += NewOpenedVault; }
+	FORCEINLINE void SetVaultOpened(int32 NewOpenedVault) { VaultOpened = NewOpenedVault; }
 
 	FORCEINLINE float GetMasterVolume() { return MasterVolume; }
 	FORCEINLINE void SetMasterVolume(float Volume) { MasterVolume = Volume; }

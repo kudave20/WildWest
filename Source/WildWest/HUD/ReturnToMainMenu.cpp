@@ -7,6 +7,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "WildWest/GameInstance/WildWestGameInstance.h"
 #include "WildWest/Controller/TownPlayerController.h"
+#include "WildWest/Controller/DuelPlayerController.h"
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -67,7 +68,7 @@ void UReturnToMainMenu::MenuTearDown()
 		ReturnButton->OnClicked.RemoveDynamic(this, &UReturnToMainMenu::ReturnButtonClicked);
 	}
 
-	if (MultiplayerSessionsSubsystem && MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.IsBound())
+	if (MultiplayerSessionsSubsystem && !MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.IsBound())
 	{
 		MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.RemoveDynamic(this, &UReturnToMainMenu::OnDestroySession);
 	}
@@ -98,6 +99,21 @@ void UReturnToMainMenu::OnDestroySession(bool bWasSuccessful)
 		if (WildWestGameInstance)
 		{
 			WildWestGameInstance->SetbIsGameStarted(false);
+			WildWestGameInstance->SetServerCharacterState(ECharacterState::ECS_None);
+			WildWestGameInstance->SetClientCharacterState(ECharacterState::ECS_None);
+			WildWestGameInstance->GetLastTransformList().Empty();
+			WildWestGameInstance->SetLastGunmanTransform(FTransform());
+			WildWestGameInstance->GetAliveControllerIndex().Empty();
+			WildWestGameInstance->GetRemovedControllerIndex().Empty();
+			WildWestGameInstance->GetVaultList().Empty();
+			WildWestGameInstance->GetVaultTransformList().Empty();
+			WildWestGameInstance->SetCurrentSheriffIndex(0);
+			WildWestGameInstance->SetVaultOpened(0);
+
+			for (int32 Idx = 1; Idx <= 4; Idx++)
+			{
+				WildWestGameInstance->GetAliveControllerIndex().Add(Idx);
+			}
 
 			AGameModeBase* GameMode = World->GetAuthGameMode<AGameModeBase>();
 			if (GameMode)
@@ -119,18 +135,51 @@ void UReturnToMainMenu::OnDestroySession(bool bWasSuccessful)
 					}
 				}
 
+				for (ADuelPlayerController* DuelPC : TActorRange<ADuelPlayerController>(World))
+				{
+					if (DuelPC && !DuelPC->IsPrimaryPlayer())
+					{
+						if (DuelPC->IsLocalPlayerController())
+						{
+							UGameplayStatics::RemovePlayer(DuelPC, true);
+						}
+						else
+						{
+							DuelPC->ClientRemovePlayer();
+						}
+					}
+				}
+				
+				/*ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(PlayerController);
+				if (TownPlayerController)
+				{
+					TownPlayerController->ClientDestroySession();
+				}
+
+				ADuelPlayerController* DuelPlayerController = Cast<ADuelPlayerController>(PlayerController);
+				if (DuelPlayerController)
+				{
+					DuelPlayerController->ClientDestroySession();
+				}*/
+
 				GameMode->ReturnToMainMenuHost();
 			}
 			else
 			{
 				PlayerController = PlayerController == nullptr ? World->GetFirstPlayerController() : PlayerController;
 
-				for (ATownPlayerController* TownPC : TActorRange<ATownPlayerController>(World))
+				for (APlayerController* PC : TActorRange<APlayerController>(World))
 				{
-					if (TownPC && !TownPC->IsPrimaryPlayer())
+					if (PC && !PC->IsPrimaryPlayer())
 					{
-						UGameplayStatics::RemovePlayer(TownPC, true);
+						UGameplayStatics::RemovePlayer(PC, true);
 					}
+				}
+
+				ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(PlayerController);
+				if (TownPlayerController)
+				{
+					TownPlayerController->ServerNotifyDisconnected();
 				}
 
 				if (PlayerController)

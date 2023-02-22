@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "TownPlayerController.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNotifyDelegate);
+
 UENUM(BlueprintType)
 enum class EScreenIndex : uint8
 {
@@ -31,6 +33,15 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void ClientRemovePlayer();
+
+	UFUNCTION(Server, Reliable)
+	void ServerNotifyDisconnected();
+
+	/*UFUNCTION(Client, Reliable)
+	void ClientDestroySession();*/
+
+	UPROPERTY(BlueprintAssignable)
+	FOnNotifyDelegate NotifyDelegate;
 
 protected:
 	virtual void BeginPlay() override;

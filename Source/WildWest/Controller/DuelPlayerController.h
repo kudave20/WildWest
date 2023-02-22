@@ -72,6 +72,12 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerSetControllerIndex();
 
+	UFUNCTION(Client, Reliable)
+	void ClientRemovePlayer();
+
+	/*UFUNCTION(Client, Reliable)
+	void ClientDestroySession();*/
+
 protected:
 	virtual void BeginPlay() override;
 

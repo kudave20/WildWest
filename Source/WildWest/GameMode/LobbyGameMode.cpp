@@ -12,14 +12,10 @@ void ALobbyGameMode::HandleStartingNewPlayer_Implementation(APlayerController* N
 	int32 NumberOfPlayers = GameState.Get()->PlayerArray.Num();
 	if (NumberOfPlayers == 2)
 	{
-		UWorld* World = GetWorld();
-		if (World)
+		ALobbyGameState* LobbyGameState = Cast<ALobbyGameState>(GameState);
+		if (LobbyGameState)
 		{
-			ALobbyGameState* LobbyGameState = Cast<ALobbyGameState>(GameState);
-			if (LobbyGameState)
-			{
-				LobbyGameState->SetbIsLobbyFull(true);
-			}
+			LobbyGameState->SetbIsLobbyFull(true);
 		}
 	}
 }
