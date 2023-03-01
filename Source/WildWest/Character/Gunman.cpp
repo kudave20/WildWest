@@ -63,10 +63,13 @@ void AGunman::Tick(float DeltaTime)
 		{
 			FHitResult HitResult;
 			FVector CameraLocation = Camera->GetComponentLocation();
+			FCollisionQueryParams TraceParams;
+			TraceParams.AddIgnoredActor(this);
 			bool bIsLookingVault = World->LineTraceSingleByChannel(HitResult,
 				CameraLocation,
 				CameraLocation + AreaSphere->GetScaledSphereRadius() * Camera->GetForwardVector(),
-				ECollisionChannel::ECC_Pawn) && Cast<AVault>(HitResult.GetActor());
+				ECollisionChannel::ECC_Pawn,
+				TraceParams) && Cast<AVault>(HitResult.GetActor());
 
 			if (bIsLookingVault)
 			{
@@ -211,10 +214,13 @@ void AGunman::OpenVault()
 		{
 			FHitResult HitResult;
 			FVector CameraLocation = Camera->GetComponentLocation();
+			FCollisionQueryParams TraceParams;
+			TraceParams.AddIgnoredActor(this);
 			bool bIsLookingVault = World->LineTraceSingleByChannel(HitResult,
 				CameraLocation,
 				CameraLocation + AreaSphere->GetScaledSphereRadius() * Camera->GetForwardVector(),
-				ECollisionChannel::ECC_Pawn) && Cast<AVault>(HitResult.GetActor());
+				ECollisionChannel::ECC_Pawn,
+				TraceParams) && Cast<AVault>(HitResult.GetActor());
 
 			if (!bIsLookingVault)
 			{
@@ -243,6 +249,7 @@ void AGunman::OpenVault()
 					{
 						OverlappingVault->OpenDoorDelegate.Broadcast();
 						WildWestGameInstance->AddVaultOpened(1);
+						WildWestGameInstance->ReplaceVaultList(OverlappingVault->GetActorLocation(), true);
 					}
 					else
 					{
@@ -250,8 +257,6 @@ void AGunman::OpenVault()
 					}
 
 					OverlappingVault->SetbIsOpened(true);
-
-					WildWestGameInstance->ReplaceVaultList(OverlappingVault->GetActorLocation(), true);
 				}
 
 				return;
@@ -319,6 +324,7 @@ void AGunman::ServerOpenVault_Implementation()
 		if (WildWestGameInstance)
 		{
 			WildWestGameInstance->AddVaultOpened(1);
+			WildWestGameInstance->ReplaceVaultList(OverlappingVault->GetActorLocation(), true);
 		}
 	}
 }
