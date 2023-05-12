@@ -4,20 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "WildWest/WildWestTypes/ScreenIndex.h"
 #include "TownPlayerController.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNotifyDelegate);
-
-UENUM(BlueprintType)
-enum class EScreenIndex : uint8
-{
-	ECI_First UMETA(DisplayName = "First Screen"),
-	ECI_Second UMETA(DisplayName = "Second Screen"),
-	ECI_Third UMETA(DisplayName = "Third Screen"),
-	ECI_Fourth UMETA(DisplayName = "Fourth Screen"),
-
-	ECI_MAX UMETA(DisplayName = "DefaultMAX")
-};
 
 /**
  * 
@@ -43,6 +33,12 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnNotifyDelegate NotifyDelegate;
 
+	void InitialPossess();
+
+	void SetSheriffHUDScreen(int32 ScreenIndex);
+	void SetSheriffHUDViewport(EScreenIndex ScreenIndex);
+	void SetSheriffHUDGauge(float GaugePercent);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -57,9 +53,15 @@ protected:
 
 private:
 	EScreenIndex CurrentScreenIndex;
+
+	UPROPERTY(EditAnywhere, Category = HUD)
+	TSubclassOf<AHUD> SheriffHUDClass;
+
+	UPROPERTY()
+	class ASheriffHUD* SheriffHUD;
 	
 	UPROPERTY(EditAnywhere, Category = HUD)
-	TSubclassOf<class UUserWidget> ReturnToMainMenuWidget;
+	TSubclassOf<UUserWidget> ReturnToMainMenuWidget;
 
 	UPROPERTY()
 	class UReturnToMainMenu* ReturnToMainMenu;
@@ -67,7 +69,7 @@ private:
 	bool bReturnToMainMenuOpen = false;
 
 public:
-	FORCEINLINE EScreenIndex GetCurrentScreenIndex() { return CurrentScreenIndex; }
+	FORCEINLINE EScreenIndex GetCurrentScreenIndex() const { return CurrentScreenIndex; }
 	FORCEINLINE void SetCurrentScreenIndex(EScreenIndex NewScreenIndex) { CurrentScreenIndex = NewScreenIndex; }
 
 };

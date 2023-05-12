@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "WildWest/WildWestTypes/ScreenIndex.h"
 #include "EnhancedInput/Public/InputActionValue.h"
 #include "Sheriff.generated.h"
 
@@ -39,6 +40,9 @@ protected:
 	void SwitchToThird();
 	void SwitchToFourth();
 	void EnterDuel();
+
+	void SwitchCharacter(int32 Index, EScreenIndex ScreenIndex);
+	void ChangeHUDProperly(int32 Index, EScreenIndex ScreenIndex);
 	
 	UFUNCTION(Server, Reliable)
 	void ServerSwitchToFirst();
@@ -67,8 +71,6 @@ private:
 
 	FRotator ControllerDirection;
 
-	AController* CurrentController;
-
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = Character, meta = (AllowPrivateAccess = "true"))
 	int32 CharacterIndex;
 
@@ -77,17 +79,12 @@ private:
 
 	float ControlTimer;
 
-	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Control", meta = (AllowPrivateAccess = "true"))
-	bool bIsControlled;
-
-	UPROPERTY(BlueprintReadWrite, Category = HUD, meta = (AllowPrivateAccess = "true"))
-	class UControlGauge* ControlGauge;
-
 	bool bIsInputEnabled{ true };
 
 	UPROPERTY(Replicated)
 	bool bIsAlone;
 
+	UPROPERTY()
 	class AGunman* OverlappingGunman;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Control")
@@ -95,7 +92,11 @@ private:
 
 	FTimerHandle TimerHandle;
 
+	UPROPERTY()
 	APlayerController* PlayerController;
+
+	UPROPERTY()
+	class ATownPlayerController* TownPlayerController;
 
 	UPROPERTY(EditDefaultsOnly, Category = HUD)
 	TSubclassOf<UUserWidget> StunWidget;
@@ -103,22 +104,10 @@ private:
 	UPROPERTY()
 	UUserWidget* Stun;
 
-	UFUNCTION(Client, Reliable)
-	void ClientSwapControlGauge(ASheriff* Sheriff);
-
 public:
 	FORCEINLINE FRotator GetControllerDirection() { return ControllerDirection; }
 	FORCEINLINE void SetControllerDirection(FRotator NewControllerDirection) { ControllerDirection = NewControllerDirection; }
-
-	FORCEINLINE AController* GetCurrentController() { return CurrentController; }
-	FORCEINLINE void SetCurrentController(AController* NewCurrentController) { CurrentController = NewCurrentController; }
-
 	FORCEINLINE int32 GetCharacterIndex() { return CharacterIndex; }
-
-	FORCEINLINE void SetbIsControlled(bool bControlled) { bIsControlled = bControlled; }
-
-	FORCEINLINE UControlGauge* GetControlGauge() { return ControlGauge; }
-	FORCEINLINE void SetControlGauge(UControlGauge* NewControlGauge) { ControlGauge = NewControlGauge; }
-
 	FORCEINLINE void SetOverlappingGunman(AGunman* Gunman) { OverlappingGunman = Gunman; }
+	FORCEINLINE UCameraComponent* GetCamera() const { return Camera; }
 };

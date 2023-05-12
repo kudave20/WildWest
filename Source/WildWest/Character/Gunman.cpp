@@ -10,6 +10,7 @@
 #include "Sheriff.h"
 #include "Components/Image.h"
 #include "Net/UnrealNetwork.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"

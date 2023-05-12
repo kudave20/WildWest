@@ -21,7 +21,8 @@ public class WildWest : ModuleRules
 			"MovieScene",
 			"MultiplayerSessions",
 			"OnlineSubsystem",
-			"OnlineSubsystemSteam" });
+			"OnlineSubsystemSteam",
+		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

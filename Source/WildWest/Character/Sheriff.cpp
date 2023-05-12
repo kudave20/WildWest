@@ -7,19 +7,19 @@
 #include "WildWest/Controller/TownPlayerController.h"
 #include "WildWest/GameMode/TownGameMode.h"
 #include "WildWest/GameState/TownGameState.h"
-#include "WildWest/HUD/ControlGauge.h"
 #include "WildWest/GameInstance/WildWestGameInstance.h"
-#include "Components/Image.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
 #include "WildWest/Input/InputConfigData.h"
+#include "Blueprint/UserWidget.h"
 
 ASheriff::ASheriff()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(GetMesh());
@@ -44,19 +44,6 @@ void ASheriff::BeginPlay()
 	}
 
 	ControlTimer = InitialControlTimer;
-
-	if (ControlGauge)
-	{
-		UImage* Gauge = ControlGauge->GetGauge();
-		if (Gauge)
-		{
-			UMaterialInstanceDynamic* GaugeMaterialInstance = Gauge->GetDynamicMaterial();
-			if (GaugeMaterialInstance)
-			{
-				GaugeMaterialInstance->SetScalarParameterValue(FName("GaugePercent"), 1.0f);
-			}
-		}
-	}
 }
 
 void ASheriff::Jump()
@@ -78,7 +65,7 @@ void ASheriff::Tick(float DeltaTime)
 		return;
 	}
 
-	if (bIsControlled)
+	if (IsLocallyControlled())
 	{
 		if (bIsInputEnabled)
 		{
@@ -105,17 +92,10 @@ void ASheriff::Tick(float DeltaTime)
 		}
 	}
 
-	if (ControlGauge)
+	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(Controller) : TownPlayerController;
+	if (TownPlayerController)
 	{
-		UImage* Gauge = ControlGauge->GetGauge();
-		if (Gauge)
-		{
-			UMaterialInstanceDynamic* GaugeMaterialInstance = Gauge->GetDynamicMaterial();
-			if (GaugeMaterialInstance)
-			{
-				GaugeMaterialInstance->SetScalarParameterValue(FName("GaugePercent"), ControlTimer / InitialControlTimer);
-			}
-		}
+		TownPlayerController->SetSheriffHUDGauge(ControlTimer / InitialControlTimer);
 	}
 }
 
@@ -155,7 +135,6 @@ void ASheriff::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASheriff, CharacterIndex);
-	DOREPLIFETIME(ASheriff, bIsControlled);
 	DOREPLIFETIME(ASheriff, bIsAlone);
 }
 
@@ -317,277 +296,126 @@ void ASheriff::LookUp(const FInputActionValue& Value)
 
 void ASheriff::SwitchToFirst()
 {
+	ChangeHUDProperly(1, EScreenIndex::ECI_First);
+
 	if (!HasAuthority())
 	{
 		ServerSwitchToFirst();
 		return;
 	}
 
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-		if (TownGameState)
-		{
-			ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
-			if (TownPlayerController)
-			{
-				EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
-
-				if (ScreenIndex == EScreenIndex::ECI_First)
-				{
-					return;
-				}
-
-				if (Controller != nullptr)
-				{
-					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[0]);
-					if (Sheriff)
-					{
-						bIsControlled = false;
-						Sheriff->SetbIsControlled(true);
-
-						AController* NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							Sheriff->SetCurrentController(NewController);
-							Sheriff->SetControllerDirection(NewController->GetControlRotation());
-						}
-
-						ControllerDirection = Controller->GetControlRotation();
-						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_First);
-						Controller->Possess(Sheriff);
-						Controller = Sheriff->GetCurrentController();
-						Controller->Possess(this);
-						Sheriff->SetCurrentController(Sheriff->GetController());
-						Controller->SetControlRotation(ControllerDirection);
-
-						NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							NewController->SetControlRotation(Sheriff->GetControllerDirection());
-						}
-
-						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
-						Sheriff->SetControlGauge(ControlGauge);
-						ControlGauge = NextControlGauge;
-
-						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-						if (WildWestGameInstance)
-						{
-							WildWestGameInstance->SetCurrentSheriffIndex(1);
-						}
-					}
-				}
-			}
-		}
-	}
+	SwitchCharacter(1, EScreenIndex::ECI_First);
 }
 
 void ASheriff::SwitchToSecond()
 {
+	ChangeHUDProperly(2, EScreenIndex::ECI_Second);
+
 	if (!HasAuthority())
 	{
 		ServerSwitchToSecond();
 		return;
 	}
 
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-		if (TownGameState)
-		{
-			ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
-			if (TownPlayerController)
-			{
-				EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
-
-				if (ScreenIndex == EScreenIndex::ECI_Second)
-				{
-					return;
-				}
-
-				if (Controller != nullptr)
-				{
-					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[1]);
-					if (Sheriff)
-					{
-						bIsControlled = false;
-						Sheriff->SetbIsControlled(true);
-
-						AController* NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							Sheriff->SetCurrentController(NewController);
-							Sheriff->SetControllerDirection(NewController->GetControlRotation());
-						}
-
-						ControllerDirection = Controller->GetControlRotation();
-						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_Second);
-						Controller->Possess(Sheriff);
-						Controller = Sheriff->GetCurrentController();
-						Controller->Possess(this);
-						Sheriff->SetCurrentController(Sheriff->GetController());
-						Controller->SetControlRotation(ControllerDirection);
-
-						NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							NewController->SetControlRotation(Sheriff->GetControllerDirection());
-						}
-
-						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
-						Sheriff->SetControlGauge(ControlGauge);
-						ControlGauge = NextControlGauge;
-
-						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-						if (WildWestGameInstance)
-						{
-							WildWestGameInstance->SetCurrentSheriffIndex(2);
-						}
-					}
-				}
-			}
-		}
-	}
+	SwitchCharacter(2, EScreenIndex::ECI_Second);
 }
 
 void ASheriff::SwitchToThird()
 {
+	ChangeHUDProperly(3, EScreenIndex::ECI_Third);
+
 	if (!HasAuthority())
 	{
 		ServerSwitchToThird();
 		return;
 	}
 
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-		if (TownGameState)
-		{
-			ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
-			if (TownPlayerController)
-			{
-				EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
-
-				if (ScreenIndex == EScreenIndex::ECI_Third)
-				{
-					return;
-				}
-
-				if (Controller != nullptr)
-				{
-					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[2]);
-					if (Sheriff)
-					{
-						bIsControlled = false;
-						Sheriff->SetbIsControlled(true);
-
-						AController* NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							Sheriff->SetCurrentController(NewController);
-							Sheriff->SetControllerDirection(NewController->GetControlRotation());
-						}
-
-						ControllerDirection = Controller->GetControlRotation();
-						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_Third);
-						Controller->Possess(Sheriff);
-						Controller = Sheriff->GetCurrentController();
-						Controller->Possess(this);
-						Sheriff->SetCurrentController(Sheriff->GetController());
-						Controller->SetControlRotation(ControllerDirection);
-
-						NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							NewController->SetControlRotation(Sheriff->GetControllerDirection());
-						}
-
-						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
-						Sheriff->SetControlGauge(ControlGauge);
-						ControlGauge = NextControlGauge;
-
-						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-						if (WildWestGameInstance)
-						{
-							WildWestGameInstance->SetCurrentSheriffIndex(3);
-						}
-					}
-				}
-			}
-		}
-	}
+	SwitchCharacter(3, EScreenIndex::ECI_Third);
 }
 
 void ASheriff::SwitchToFourth()
 {
+	ChangeHUDProperly(4, EScreenIndex::ECI_Fourth);
+
 	if (!HasAuthority())
 	{
 		ServerSwitchToFourth();
 		return;
 	}
 
+	SwitchCharacter(4, EScreenIndex::ECI_Fourth);
+}
+
+void ASheriff::ServerSwitchToFirst_Implementation()
+{
 	UWorld* World = GetWorld();
-	if (World)
+	if (World == nullptr) return;
+
+	SwitchCharacter(1, EScreenIndex::ECI_First);
+}
+
+void ASheriff::ServerSwitchToSecond_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
+
+	SwitchCharacter(2, EScreenIndex::ECI_Second);
+}
+
+void ASheriff::ServerSwitchToThird_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
+
+	SwitchCharacter(3, EScreenIndex::ECI_Third);
+}
+
+void ASheriff::ServerSwitchToFourth_Implementation()
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
+
+	SwitchCharacter(4, EScreenIndex::ECI_Fourth);
+}
+
+void ASheriff::SwitchCharacter(int32 Index, EScreenIndex ScreenIndex)
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
+
+	ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(Controller) : TownPlayerController;
+	if (TownGameState == nullptr || TownPlayerController == nullptr) return;
+
+	EScreenIndex CurrentScreenIndex = TownPlayerController->GetCurrentScreenIndex();
+	if (CurrentScreenIndex == ScreenIndex)
 	{
-		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-		if (TownGameState)
+		return;
+	}
+
+	ASheriff* Sheriff = TownGameState->GetSheriffList()[Index - 1];
+	if (Sheriff)
+	{
+		ControllerDirection = Controller->GetControlRotation();
+		TownPlayerController->SetCurrentScreenIndex(ScreenIndex);
+		Controller->SetControlRotation(ControllerDirection);
+		Controller->Possess(Sheriff);
+
+		UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+		if (WildWestGameInstance)
 		{
-			ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
-			if (TownPlayerController)
-			{
-				EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
-
-				if (ScreenIndex == EScreenIndex::ECI_Fourth)
-				{
-					return;
-				}
-
-				if (Controller != nullptr)
-				{
-					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[3]);
-					if (Sheriff)
-					{
-						bIsControlled = false;
-						Sheriff->SetbIsControlled(true);
-
-						AController* NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							Sheriff->SetCurrentController(NewController);
-							Sheriff->SetControllerDirection(NewController->GetControlRotation());
-						}
-
-						ControllerDirection = Controller->GetControlRotation();
-						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_Fourth);
-						Controller->Possess(Sheriff);
-						Controller = Sheriff->GetCurrentController();
-						Controller->Possess(this);
-						Sheriff->SetCurrentController(Sheriff->GetController());
-						Controller->SetControlRotation(ControllerDirection);
-
-						NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							NewController->SetControlRotation(Sheriff->GetControllerDirection());
-						}
-						
-						UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
-						Sheriff->SetControlGauge(ControlGauge);
-						ControlGauge = NextControlGauge;
-
-						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-						if (WildWestGameInstance)
-						{
-							WildWestGameInstance->SetCurrentSheriffIndex(4);
-						}
-					}
-				}
-			}
+			WildWestGameInstance->SetCurrentSheriffIndex(Index);
 		}
+	}
+}
+
+void ASheriff::ChangeHUDProperly(int32 Index, EScreenIndex ScreenIndex)
+{
+	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(Controller) : TownPlayerController;
+	if (TownPlayerController)
+	{
+		TownPlayerController->SetSheriffHUDScreen(Index);
+		TownPlayerController->SetSheriffHUDViewport(ScreenIndex);
 	}
 }
 
@@ -651,262 +479,6 @@ void ASheriff::EnterDuel()
 	}
 }
 
-void ASheriff::ServerSwitchToFirst_Implementation()
-{
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		if (Controller != nullptr)
-		{
-			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-			if (TownGameState)
-			{
-				ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
-				if (TownPlayerController)
-				{
-					EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
-
-					if (ScreenIndex == EScreenIndex::ECI_First)
-					{
-						return;
-					}
-
-					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[0]);
-					if (Sheriff)
-					{
-						bIsControlled = false;
-						Sheriff->SetbIsControlled(true);
-
-						AController* NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							Sheriff->SetCurrentController(NewController);
-							Sheriff->SetControllerDirection(NewController->GetControlRotation());
-						}
-
-						ControllerDirection = Controller->GetControlRotation();
-						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_First);
-						Controller->Possess(Sheriff);
-						Controller = Sheriff->GetCurrentController();
-						Controller->Possess(this);
-						Sheriff->SetCurrentController(Sheriff->GetController());
-						Controller->SetControlRotation(ControllerDirection);
-						Controller->ClientSetRotation(ControllerDirection);
-
-						NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							FRotator NewDirection = Sheriff->GetControllerDirection();
-							NewController->SetControlRotation(NewDirection);
-							NewController->ClientSetRotation(NewDirection);
-						}
-
-						ClientSwapControlGauge(Sheriff);
-
-						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-						if (WildWestGameInstance)
-						{
-							WildWestGameInstance->SetCurrentSheriffIndex(1);
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-void ASheriff::ServerSwitchToSecond_Implementation()
-{
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		if (Controller != nullptr)
-		{
-			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-			if (TownGameState)
-			{
-				ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
-				if (TownPlayerController)
-				{
-					EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
-
-					if (ScreenIndex == EScreenIndex::ECI_Second)
-					{
-						return;
-					}
-
-					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[1]);
-					if (Sheriff)
-					{
-						bIsControlled = false;
-						Sheriff->SetbIsControlled(true);
-
-						AController* NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							Sheriff->SetCurrentController(NewController);
-							Sheriff->SetControllerDirection(NewController->GetControlRotation());
-						}
-
-						ControllerDirection = Controller->GetControlRotation();
-						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_Second);
-						Controller->Possess(Sheriff);
-						Controller = Sheriff->GetCurrentController();
-						Controller->Possess(this);
-						Sheriff->SetCurrentController(Sheriff->GetController());
-						Controller->SetControlRotation(ControllerDirection);
-						Controller->ClientSetRotation(ControllerDirection);
-
-						NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							FRotator NewDirection = Sheriff->GetControllerDirection();
-							NewController->SetControlRotation(NewDirection);
-							NewController->ClientSetRotation(NewDirection);
-						}
-
-						ClientSwapControlGauge(Sheriff);
-
-						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-						if (WildWestGameInstance)
-						{
-							WildWestGameInstance->SetCurrentSheriffIndex(2);
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-void ASheriff::ServerSwitchToThird_Implementation()
-{
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		if (Controller != nullptr)
-		{
-			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-			if (TownGameState)
-			{
-				ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
-				if (TownPlayerController)
-				{
-					EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
-
-					if (ScreenIndex == EScreenIndex::ECI_Third)
-					{
-						return;
-					}
-
-					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[2]);
-					if (Sheriff)
-					{
-						bIsControlled = false;
-						Sheriff->SetbIsControlled(true);
-
-						AController* NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							Sheriff->SetCurrentController(NewController);
-							Sheriff->SetControllerDirection(NewController->GetControlRotation());
-						}
-
-						ControllerDirection = Controller->GetControlRotation();
-						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_Third);
-						Controller->Possess(Sheriff);
-						Controller = Sheriff->GetCurrentController();
-						Controller->Possess(this);
-						Sheriff->SetCurrentController(Sheriff->GetController());
-						Controller->SetControlRotation(ControllerDirection);
-						Controller->ClientSetRotation(ControllerDirection);
-
-						NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							FRotator NewDirection = Sheriff->GetControllerDirection();
-							NewController->SetControlRotation(NewDirection);
-							NewController->ClientSetRotation(NewDirection);
-						}
-
-						ClientSwapControlGauge(Sheriff);
-
-						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-						if (WildWestGameInstance)
-						{
-							WildWestGameInstance->SetCurrentSheriffIndex(3);
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-void ASheriff::ServerSwitchToFourth_Implementation()
-{
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		if (Controller != nullptr)
-		{
-			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-			if (TownGameState)
-			{
-				ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(Controller);
-				if (TownPlayerController)
-				{
-					EScreenIndex ScreenIndex = TownPlayerController->GetCurrentScreenIndex();
-
-					if (ScreenIndex == EScreenIndex::ECI_Fourth)
-					{
-						return;
-					}
-
-					ASheriff* Sheriff = Cast<ASheriff>(TownGameState->GetSheriffList()[3]);
-					if (Sheriff)
-					{
-						bIsControlled = false;
-						Sheriff->SetbIsControlled(true);
-
-						AController* NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							Sheriff->SetCurrentController(NewController);
-							Sheriff->SetControllerDirection(NewController->GetControlRotation());
-						}
-
-						ControllerDirection = Controller->GetControlRotation();
-						TownPlayerController->SetCurrentScreenIndex(EScreenIndex::ECI_Fourth);
-						Controller->Possess(Sheriff);
-						Controller = Sheriff->GetCurrentController();
-						Controller->Possess(this);
-						Sheriff->SetCurrentController(Sheriff->GetController());
-						Controller->SetControlRotation(ControllerDirection);
-						Controller->ClientSetRotation(ControllerDirection);
-
-						NewController = Sheriff->GetController();
-						if (NewController)
-						{
-							FRotator NewDirection = Sheriff->GetControllerDirection();
-							NewController->SetControlRotation(NewDirection);
-							NewController->ClientSetRotation(NewDirection);
-						}
-
-						ClientSwapControlGauge(Sheriff);
-
-						UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-						if (WildWestGameInstance)
-						{
-							WildWestGameInstance->SetCurrentSheriffIndex(4);
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
 void ASheriff::ServerEnterDuel_Implementation()
 {
 	if (OverlappingGunman == nullptr)
@@ -954,11 +526,4 @@ void ASheriff::ServerEnterDuel_Implementation()
 			}
 		}
 	}
-}
-
-void ASheriff::ClientSwapControlGauge_Implementation(ASheriff* Sheriff)
-{
-	UControlGauge* NextControlGauge = Sheriff->GetControlGauge();
-	Sheriff->SetControlGauge(ControlGauge);
-	ControlGauge = NextControlGauge;
 }

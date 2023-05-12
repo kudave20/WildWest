@@ -3,10 +3,15 @@
 
 #include "TownPlayerController.h"
 #include "WildWest/HUD/ReturnToMainMenu.h"
-#include "GameFramework/GameModeBase.h"
-#include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
-#include "MultiplayerSessionsSubsystem.h"
+#include "WildWest/GameInstance/WildWestGameInstance.h"
+#include "WildWest/GameState/TownGameState.h"
+#include "WildWest/Character/Sheriff.h"
+#include "WildWest/HUD/SheriffHUD.h"
+#include "WildWest/HUD/CharacterOverlay.h"
+#include "Components/TextBlock.h"
+#include "WildWest/HUD/GameViewportWidget.h"
+#include "Components/Image.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -49,6 +54,111 @@ void ATownPlayerController::ServerNotifyDisconnected_Implementation()
 	}
 }*/
 
+void ATownPlayerController::InitialPossess()
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
+
+	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+	ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+	if (WildWestGameInstance == nullptr || TownGameState == nullptr) return;
+
+	if (IsLocalPlayerController())
+	{
+		if (WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Gunman)
+		{
+
+		}
+		else if (WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Sheriff)
+		{
+			TArray<ASheriff*>& SheriffList = TownGameState->GetSheriffList();
+			Possess(SheriffList[0]);
+		}
+	}
+	else
+	{
+		if (WildWestGameInstance->GetClientCharacterState() == ECharacterState::ECS_Gunman)
+		{
+
+		}
+		else if (WildWestGameInstance->GetClientCharacterState() == ECharacterState::ECS_Sheriff)
+		{
+			TArray<ASheriff*>& SheriffList = TownGameState->GetSheriffList();
+			Possess(SheriffList[0]);
+		}
+	}
+}
+
+void ATownPlayerController::SetSheriffHUDScreen(int32 ScreenIndex)
+{
+	SheriffHUD = SheriffHUD == nullptr ? Cast<ASheriffHUD>(GetHUD()) : SheriffHUD;
+	bool bHUDValid = SheriffHUD &&
+		SheriffHUD->CharacterOverlay &&
+		SheriffHUD->CharacterOverlay->ScreenIndex;
+	if (bHUDValid)
+	{
+		FString ScreenIndexText = FString::Printf(TEXT("%d"), ScreenIndex);
+		SheriffHUD->CharacterOverlay->ScreenIndex->SetText(FText::FromString(ScreenIndexText));
+	}
+}
+
+void ATownPlayerController::SetSheriffHUDViewport(EScreenIndex ScreenIndex)
+{
+	SheriffHUD = SheriffHUD == nullptr ? Cast<ASheriffHUD>(GetHUD()) : SheriffHUD;
+	bool bHUDValid = SheriffHUD &&
+		SheriffHUD->CharacterOverlay &&
+		SheriffHUD->CharacterOverlay->FirstViewport &&
+		SheriffHUD->CharacterOverlay->SecondViewport &&
+		SheriffHUD->CharacterOverlay->ThirdViewport &&
+		SheriffHUD->CharacterOverlay->FourthViewport;
+	if (bHUDValid)
+	{
+		switch (ScreenIndex)
+		{
+		case EScreenIndex::ECI_First:
+			SheriffHUD->CharacterOverlay->FirstViewport->SetVisibility(ESlateVisibility::Hidden);
+			SheriffHUD->CharacterOverlay->SecondViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->CharacterOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->CharacterOverlay->FourthViewport->SetVisibility(ESlateVisibility::Visible);
+			break;
+		case EScreenIndex::ECI_Second:
+			SheriffHUD->CharacterOverlay->FirstViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->CharacterOverlay->SecondViewport->SetVisibility(ESlateVisibility::Hidden);
+			SheriffHUD->CharacterOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->CharacterOverlay->FourthViewport->SetVisibility(ESlateVisibility::Visible);
+			break;
+		case EScreenIndex::ECI_Third:
+			SheriffHUD->CharacterOverlay->FirstViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->CharacterOverlay->SecondViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->CharacterOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Hidden);
+			SheriffHUD->CharacterOverlay->FourthViewport->SetVisibility(ESlateVisibility::Visible);
+			break;
+		case EScreenIndex::ECI_Fourth:
+			SheriffHUD->CharacterOverlay->FirstViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->CharacterOverlay->SecondViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->CharacterOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->CharacterOverlay->FourthViewport->SetVisibility(ESlateVisibility::Hidden);
+			break;
+		}
+	}
+}
+
+void ATownPlayerController::SetSheriffHUDGauge(float GaugePercent)
+{
+	SheriffHUD = SheriffHUD == nullptr ? Cast<ASheriffHUD>(GetHUD()) : SheriffHUD;
+	bool bHUDValid = SheriffHUD &&
+		SheriffHUD->CharacterOverlay &&
+		SheriffHUD->CharacterOverlay->Gauge;
+	if (bHUDValid)
+	{
+		UMaterialInstanceDynamic* GaugeMaterialInstance = SheriffHUD->CharacterOverlay->Gauge->GetDynamicMaterial();
+		if (GaugeMaterialInstance)
+		{
+			GaugeMaterialInstance->SetScalarParameterValue(FName("GaugePercent"), GaugePercent);
+		}
+	}
+}
+
 void ATownPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -57,14 +167,15 @@ void ATownPlayerController::BeginPlay()
 	SetInputMode(InputModeData);
 	SetShowMouseCursor(false);
 
-	UWorld* World = GetWorld();
-	if (World)
+	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+	if (WildWestGameInstance == nullptr) return;
+
+	if (Cast<ASheriff>(GetPawn()) != nullptr)
 	{
-		UGameViewportClient* GameViewportClient = World->GetGameViewport();
-		if (GameViewportClient)
-		{
-			GameViewportClient->SetForceDisableSplitscreen(false);
-		}
+		ClientSetHUD(SheriffHUDClass);
+		SetSheriffHUDScreen(1);
+		SetSheriffHUDViewport(EScreenIndex::ECI_First);
+		SetCurrentScreenIndex(EScreenIndex::ECI_First);
 	}
 }
 

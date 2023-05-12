@@ -2,3 +2,11 @@
 
 
 #include "TownGameState.h"
+#include "Net/UnrealNetwork.h"
+
+void ATownGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ATownGameState, SheriffList);
+}

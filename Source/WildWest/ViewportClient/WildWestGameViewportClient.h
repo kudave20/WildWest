@@ -14,6 +14,6 @@ class WILDWEST_API UWildWestGameViewportClient : public UGameViewportClient
 {
 	GENERATED_BODY()
 	
-public:
-	UWildWestGameViewportClient(const FObjectInitializer& ObjectInitializer);
+/*public:
+	virtual void Draw(FViewport* InViewport, FCanvas* SceneCanvas) override;*/
 };
