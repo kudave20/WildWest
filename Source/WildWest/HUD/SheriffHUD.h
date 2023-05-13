@@ -16,13 +16,11 @@ class WILDWEST_API ASheriffHUD : public AHUD
 
 public:
 	UPROPERTY(EditAnywhere, Category = HUD)
-	TSubclassOf<UUserWidget> CharacterOverlayClass;
+	TSubclassOf<UUserWidget> SheriffOverlayClass;
 
 	UPROPERTY()
-	class UCharacterOverlay* CharacterOverlay;
+	class USheriffOverlay* SheriffOverlay;
 
-protected:
-	virtual void BeginPlay() override;
-	void AddCharacterOverlay();
+	void AddSheriffOverlay();
 
 };

@@ -8,6 +8,8 @@
 #include "EnhancedInput/Public/InputActionValue.h"
 #include "Sheriff.generated.h"
 
+#define ARM_LENGTH 200.f
+
 UCLASS()
 class WILDWEST_API ASheriff : public ACharacter
 {
@@ -18,9 +20,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void Restart() override;
+	virtual void UnPossessed() override;
 
-	UFUNCTION(BlueprintCallable)
-	void SelectControlCharacter();
+	void SetInitialCharacter(int32 CurrentSheriffNum, bool bShouldStun);
 	
 	void StartStunTimer();
 
@@ -39,10 +42,11 @@ protected:
 	void SwitchToSecond();
 	void SwitchToThird();
 	void SwitchToFourth();
-	void EnterDuel();
+	void Interact();
 
 	void SwitchCharacter(int32 Index, EScreenIndex ScreenIndex);
-	void ChangeHUDProperly(int32 Index, EScreenIndex ScreenIndex);
+	void ChangeHUDProperly(int32 Index, EScreenIndex ScreenIndex, EScreenIndex PreviousScreenIndex);
+	void EnterDuel();
 	
 	UFUNCTION(Server, Reliable)
 	void ServerSwitchToFirst();
@@ -57,7 +61,7 @@ protected:
 	void ServerSwitchToFourth();
 
 	UFUNCTION(Server, Reliable)
-	void ServerEnterDuel();
+	void ServerInteract();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
 	class UInputMappingContext* InputMapping;
@@ -69,23 +73,19 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class UCameraComponent* Camera;
 
-	FRotator ControllerDirection;
+	FRotator PreviousDirection;
 
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = Character, meta = (AllowPrivateAccess = "true"))
 	int32 CharacterIndex;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Control")
+	UPROPERTY(EditAnywhere, Category = "Control")
 	float InitialControlTimer;
 
 	float ControlTimer;
 
-	bool bIsInputEnabled{ true };
+	bool bIsInputEnabled = true;
 
-	UPROPERTY(Replicated)
 	bool bIsAlone;
-
-	UPROPERTY()
-	class AGunman* OverlappingGunman;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Control")
 	float StunTimer;
@@ -93,10 +93,10 @@ private:
 	FTimerHandle TimerHandle;
 
 	UPROPERTY()
-	APlayerController* PlayerController;
+	class ATownPlayerController* TownPlayerController;
 
 	UPROPERTY()
-	class ATownPlayerController* TownPlayerController;
+	class UWildWestGameInstance* WildWestGameInstance;
 
 	UPROPERTY(EditDefaultsOnly, Category = HUD)
 	TSubclassOf<UUserWidget> StunWidget;
@@ -105,9 +105,7 @@ private:
 	UUserWidget* Stun;
 
 public:
-	FORCEINLINE FRotator GetControllerDirection() { return ControllerDirection; }
-	FORCEINLINE void SetControllerDirection(FRotator NewControllerDirection) { ControllerDirection = NewControllerDirection; }
-	FORCEINLINE int32 GetCharacterIndex() { return CharacterIndex; }
-	FORCEINLINE void SetOverlappingGunman(AGunman* Gunman) { OverlappingGunman = Gunman; }
+	FORCEINLINE FRotator GetPreviousDirection() const { return PreviousDirection; }
+	FORCEINLINE int32 GetCharacterIndex() const { return CharacterIndex; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return Camera; }
 };

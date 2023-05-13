@@ -3,21 +3,14 @@
 
 #include "SheriffHUD.h"
 #include "GameFramework/PlayerController.h"
-#include "CharacterOverlay.h"
+#include "SheriffOverlay.h"
 
-void ASheriffHUD::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	AddCharacterOverlay();
-}
-
-void ASheriffHUD::AddCharacterOverlay()
+void ASheriffHUD::AddSheriffOverlay()
 {
 	APlayerController* PlayerController = GetOwningPlayerController();
-	if (PlayerController && CharacterOverlayClass)
+	if (PlayerController && SheriffOverlayClass)
 	{
-		CharacterOverlay = CreateWidget<UCharacterOverlay>(PlayerController, CharacterOverlayClass);
-		CharacterOverlay->AddToViewport();
+		SheriffOverlay = CreateWidget<USheriffOverlay>(PlayerController, SheriffOverlayClass);
+		SheriffOverlay->OverlaySetup();
 	}
 }

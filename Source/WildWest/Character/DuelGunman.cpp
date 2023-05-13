@@ -14,7 +14,7 @@
 ADuelGunman::ADuelGunman()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
+	bReplicates = true;
 }
 
 void ADuelGunman::BeginPlay()

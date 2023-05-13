@@ -3,7 +3,6 @@
 
 #include "Gunman.h"
 #include "Camera/CameraComponent.h"
-#include "Components/SphereComponent.h"
 #include "WildWest/Props/Vault.h"
 #include "WildWest/HUD/VaultGauge.h"
 #include "WildWest/GameInstance/WildWestGameInstance.h"
@@ -24,23 +23,13 @@ AGunman::AGunman()
 	Camera->SetupAttachment(GetMesh());
 	Camera->bUsePawnControlRotation = true;
 
-	AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
-	AreaSphere->SetupAttachment(GetMesh());
-	AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 }
 
 void AGunman::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	if (HasAuthority())
-	{
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
-		AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AGunman::OnSphereOverlap);
-		AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AGunman::OnSphereEndOverlap);
-	}
+
 }
 
 void AGunman::Jump()
@@ -57,7 +46,7 @@ void AGunman::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (OverlappingVault && !OverlappingVault->GetbIsOpened())
+	/*if (OverlappingVault && !OverlappingVault->GetbIsOpened())
 	{
 		UWorld* World = GetWorld();
 		if (World)
@@ -108,7 +97,7 @@ void AGunman::Tick(float DeltaTime)
 		{
 			Press->RemoveFromParent();
 		}
-	}
+	}*/
 }
 
 void AGunman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -208,7 +197,7 @@ void AGunman::LookUp(const FInputActionValue& Value)
 
 void AGunman::OpenVault()
 {
-	if (OverlappingVault && !OverlappingVault->GetbIsOpened())
+	/*if (OverlappingVault && !OverlappingVault->GetbIsOpened())
 	{
 		UWorld* World = GetWorld();
 		if (World)
@@ -285,7 +274,7 @@ void AGunman::OpenVault()
 
 			bIsInteracting = true;
 		}
-	}
+	}*/
 }
 
 void AGunman::RemoveVaultGauge()
@@ -296,24 +285,6 @@ void AGunman::RemoveVaultGauge()
 	}
 
 	bIsInteracting = false;
-}
-
-void AGunman::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	ASheriff* Sheriff = Cast<ASheriff>(OtherActor);
-	if (Sheriff)
-	{
-		Sheriff->SetOverlappingGunman(this);
-	}
-}
-
-void AGunman::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	ASheriff* Sheriff = Cast<ASheriff>(OtherActor);
-	if (Sheriff)
-	{
-		Sheriff->SetOverlappingGunman(nullptr);
-	}
 }
 
 void AGunman::ServerOpenVault_Implementation()

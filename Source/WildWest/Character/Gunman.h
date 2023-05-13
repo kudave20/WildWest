@@ -29,24 +29,6 @@ protected:
 	void OpenVault();
 	void RemoveVaultGauge();
 
-	UFUNCTION()
-	virtual void OnSphereOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult
-	);
-
-	UFUNCTION()
-	void OnSphereEndOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex
-	);
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
 	class UInputMappingContext* InputMapping;
 
@@ -56,9 +38,6 @@ protected:
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class UCameraComponent* Camera;
-
-	UPROPERTY(VisibleAnywhere, Category = "Collision")
-	class USphereComponent* AreaSphere;
 
 	UPROPERTY(Replicated)
 	class AVault* OverlappingVault;

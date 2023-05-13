@@ -2,11 +2,12 @@
 
 
 #include "DuelPlayerController.h"
-#include "Camera/CameraActor.h"
+//#include "Camera/CameraActor.h"
 #include "WildWest/GameInstance/WildWestGameInstance.h"
 #include "WildWest/GameState/DuelGameState.h"
 #include "Kismet/GameplayStatics.h"
-#include "MultiplayerSessionsSubsystem.h"
+#include "WildWest/Character/DuelGunman.h"
+#include "WildWest/Character/DuelSheriff.h"
 
 ADuelPlayerController::ADuelPlayerController()
 {
@@ -17,13 +18,15 @@ void ADuelPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UWorld* World = GetWorld();
-	if (World)
+	if (GetPawn())
 	{
-		UGameViewportClient* GameViewportClient = World->GetGameViewport();
-		if (GameViewportClient)
+		if (GetPawn()->IsA(ADuelSheriff::StaticClass()))
 		{
-			GameViewportClient->SetForceDisableSplitscreen(true);
+			ClientSetHUD(DuelSheriffHUDClass);
+		}
+		else if (GetPawn()->IsA(ADuelGunman::StaticClass()))
+		{
+
 		}
 	}
 }

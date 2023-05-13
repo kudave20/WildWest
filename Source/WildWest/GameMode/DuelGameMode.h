@@ -20,4 +20,22 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void TravelToTown();
 
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+
+private:
+	UPROPERTY()
+	AActor* Camera;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> DuelGunmanClass;
+
+	UPROPERTY()
+	class ADuelGunman* DuelGunman;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> DuelSheriffClass;
+
+	UPROPERTY()
+	class ADuelSheriff* DuelSheriff;
 };

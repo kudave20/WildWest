@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
-#include "WildWest/Character/Sheriff.h"
 #include "TownGameState.generated.h"
 
 
@@ -20,15 +19,18 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
-	UPROPERTY(BlueprintReadWrite, Category = "Gunman", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	class AGunman* Gunman;
 
 	UPROPERTY(Replicated)
-	TArray<ASheriff*> SheriffList;
+	TArray<class ASheriff*> SheriffList;
+
+	UPROPERTY()
+	APlayerController* PlayerController;
 
 public:
 	FORCEINLINE AGunman* GetGunman() const { return Gunman; }
+	FORCEINLINE void SetGunman(AGunman* InGunman) { Gunman = InGunman; }
 	FORCEINLINE TArray<ASheriff*>& GetSheriffList() { return SheriffList; }
-	FORCEINLINE void SetSheriffList(TArray<ASheriff*> InSheriffList) { SheriffList = InSheriffList; }
 
 };

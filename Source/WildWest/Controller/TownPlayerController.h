@@ -18,9 +18,6 @@ class WILDWEST_API ATownPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
-	void SetInitialControlRotation(const FRotator& NewRotation);
-
 	UFUNCTION(Client, Reliable)
 	void ClientRemovePlayer();
 
@@ -35,8 +32,9 @@ public:
 
 	void InitialPossess();
 
+	void SheriffHUDSetup(APawn* InPawn);
 	void SetSheriffHUDScreen(int32 ScreenIndex);
-	void SetSheriffHUDViewport(EScreenIndex ScreenIndex);
+	void SetSheriffHUDViewport(EScreenIndex ScreenIndex, EScreenIndex PreviousScreenIndex);
 	void SetSheriffHUDGauge(float GaugePercent);
 
 protected:
@@ -52,6 +50,9 @@ protected:
 	class UInputConfigData* InputActions;
 
 private:
+	UPROPERTY()
+	class ATownGameState* TownGameState;
+
 	EScreenIndex CurrentScreenIndex;
 
 	UPROPERTY(EditAnywhere, Category = HUD)
@@ -68,8 +69,14 @@ private:
 
 	bool bReturnToMainMenuOpen = false;
 
+	void PossessRandomly();
+
+	bool bCompleteSetup;
+
 public:
 	FORCEINLINE EScreenIndex GetCurrentScreenIndex() const { return CurrentScreenIndex; }
 	FORCEINLINE void SetCurrentScreenIndex(EScreenIndex NewScreenIndex) { CurrentScreenIndex = NewScreenIndex; }
+	FORCEINLINE bool IsSetupComplete() const { return bCompleteSetup; }
+	FORCEINLINE void SetupComplete(bool bComplete) { bCompleteSetup = bComplete; }
 
 };

@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerStart.h"
 #include "WildWest/GameState/TownGameState.h"
 #include "WildWest/Controller/TownPlayerController.h"
+#include "WildWest/Character/Gunman.h"
+#include "WildWest/Character/Sheriff.h"
 
 void ATownGameMode::TravelToDuel()
 {
@@ -23,6 +25,12 @@ void ATownGameMode::InitGame(const FString& MapName, const FString& Options, FSt
 
 	UWorld* World = GetWorld();
 	if (World == nullptr) return;
+
+	AActor* GunmanStart = UGameplayStatics::GetActorOfClass(this, GunmanStartClass);
+	if (GunmanStart)
+	{
+		Gunman = World->SpawnActor<AGunman>(GunmanClass, GunmanStart->GetActorTransform());
+	}
 
 	TArray<AActor*> PlayerStarts;
 	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
@@ -45,9 +53,17 @@ void ATownGameMode::HandleStartingNewPlayer_Implementation(APlayerController* Ne
 
 	if (TownGameState->GetSheriffList().IsEmpty())
 	{
-		TownGameState->SetSheriffList(SheriffList);
+		TownGameState->SetGunman(Gunman);
+		TArray<ASheriff*>& TargetSheriffList = TownGameState->GetSheriffList();
+		for (ASheriff* Sheriff : SheriffList)
+		{
+			if (Sheriff)
+			{
+				TargetSheriffList.Add(Sheriff);
+			}
+		}
 	}
-
+	
 	ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(NewPlayer);
 	if (TownPlayerController)
 	{

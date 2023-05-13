@@ -4,19 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "CharacterOverlay.generated.h"
+#include "SheriffOverlay.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class WILDWEST_API UCharacterOverlay : public UUserWidget
+class WILDWEST_API USheriffOverlay : public UUserWidget
 {
 	GENERATED_BODY()
-
+	
 public:
-	virtual bool Initialize() override;
-
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* ScreenIndex;
 
@@ -35,9 +33,6 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UImage* Gauge;
 
-protected:
-	virtual void NativeConstruct() override;
+	void OverlaySetup();
 
-private:
-	TArray<AActor*> SheriffList;
 };

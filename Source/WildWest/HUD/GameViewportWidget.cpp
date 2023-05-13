@@ -93,7 +93,6 @@ void FCustomGameViewport::Draw(FViewport* InViewport, FCanvas* Canvas)
 
 	FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(
 		Canvas->GetRenderTarget(),
-		//InViewport,
 		GetScene(),
 		EngineShowFlags)
 		.SetWorldTimes(TimeSeconds, DeltaTimeSeconds, RealTimeSeconds)
@@ -116,14 +115,16 @@ void FCustomGameViewport::Draw(FViewport* InViewport, FCanvas* Canvas)
 
 	// Remove temporary debug lines.
 	// Possibly a hack. Lines may get added without the scene being rendered etc.
-	if (GetWorld()->LineBatcher != nullptr && (GetWorld()->LineBatcher->BatchedLines.Num() || GetWorld()->LineBatcher->BatchedPoints.Num()))
+	if (World == nullptr) return;
+
+	if (World->LineBatcher != nullptr && (World->LineBatcher->BatchedLines.Num() || World->LineBatcher->BatchedPoints.Num()))
 	{
-		GetWorld()->LineBatcher->Flush();
+		World->LineBatcher->Flush();
 	}
 
-	if (GetWorld()->ForegroundLineBatcher != nullptr && (GetWorld()->ForegroundLineBatcher->BatchedLines.Num() || GetWorld()->ForegroundLineBatcher->BatchedPoints.Num()))
+	if (World->ForegroundLineBatcher != nullptr && (World->ForegroundLineBatcher->BatchedLines.Num() || World->ForegroundLineBatcher->BatchedPoints.Num()))
 	{
-		GetWorld()->ForegroundLineBatcher->Flush();
+		World->ForegroundLineBatcher->Flush();
 	}
 
 	Viewport = ViewportBackup;
@@ -136,7 +137,7 @@ UWorld* FCustomGameViewport::GetWorld() const
 
 FSceneInterface* FCustomGameViewport::GetScene() const
 {
-	return World.Get()->Scene;
+	return World.Get() ? World.Get()->Scene : nullptr;
 }
 
 FLinearColor FCustomGameViewport::GetBackgroundColor() const

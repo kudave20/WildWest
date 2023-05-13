@@ -3,6 +3,8 @@
 
 #include "TownGameState.h"
 #include "Net/UnrealNetwork.h"
+#include "WildWest/Character/Sheriff.h"
+#include "WildWest/Controller/TownPlayerController.h"
 
 void ATownGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {

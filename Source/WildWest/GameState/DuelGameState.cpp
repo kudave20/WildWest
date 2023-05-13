@@ -23,222 +23,220 @@ void ADuelGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 void ADuelGameState::StartDuel()
 {
 	UWorld* World = GetWorld();
-	if (World)
+	if (World == nullptr) return;
+	World->GetTimerManager().ClearTimer(TimerHandle);
+
+	if (ServerPlayerController && ClientPlayerController)
 	{
-		World->GetTimerManager().ClearTimer(TimerHandle);
-
-		if (ServerPlayerController && ClientPlayerController)
+		UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+		if (WildWestGameInstance)
 		{
-			UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-			if (WildWestGameInstance)
+			if (GunmanDuelState == SheriffDuelState)
 			{
-				if (GunmanDuelState == SheriffDuelState)
+				if (WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Gunman)
 				{
-					if (WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Gunman)
+					DuelGunman = Cast<ADuelGunman>(ServerPlayerController->GetPawn());
+					DuelSheriff = Cast<ADuelSheriff>(ClientPlayerController->GetPawn());
+					if (DuelGunman)
 					{
-						DuelGunman = Cast<ADuelGunman>(ServerPlayerController->GetPawn());
-						DuelSheriff = Cast<ADuelSheriff>(ClientPlayerController->GetPawn());
-						if (DuelGunman)
+						DuelGunman->MulticastPlayShootMontage(0.25f);
+
+						FTimerHandle WaitHandle;
+						switch (SheriffDuelState)
 						{
-							DuelGunman->MulticastPlayShootMontage(0.25f);
-
-							FTimerHandle WaitHandle;
-							switch (SheriffDuelState)
-							{
-							case EDuelState::EDS_Left:
-								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+						case EDuelState::EDS_Left:
+							World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+								{
+									if (DuelSheriff)
 									{
-										if (DuelSheriff)
-										{
-											DuelSheriff->MulticastPlayDodgeLeftMontage(0.25f);
-										}
-									}), 2.0f, false);
+										DuelSheriff->MulticastPlayDodgeLeftMontage(0.25f);
+									}
+								}), 2.0f, false);
 
-								break;
-							case EDuelState::EDS_Middle:
-								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+							break;
+						case EDuelState::EDS_Middle:
+							World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+								{
+									if (DuelSheriff)
 									{
-										if (DuelSheriff)
-										{
-											ClientPlayerController->SetInitialControlRotation(FRotator(0, 90, 0));
+										ClientPlayerController->SetInitialControlRotation(FRotator(0, 90, 0));
 
-											DuelSheriff->MulticastSetIsSlow(true);
-											DuelSheriff->MulticastSetShoot(true);
-										}
-									}), 2.0f, false);
+										DuelSheriff->MulticastSetIsSlow(true);
+										DuelSheriff->MulticastSetShoot(true);
+									}
+								}), 2.0f, false);
 
-								break;
-							case EDuelState::EDS_Right:
-								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+							break;
+						case EDuelState::EDS_Right:
+							World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+								{
+									if (DuelSheriff)
 									{
-										if (DuelSheriff)
-										{
-											DuelSheriff->MulticastPlayDodgeRightMontage(0.25f);
-										}
-									}), 2.0f, false);
+										DuelSheriff->MulticastPlayDodgeRightMontage(0.25f);
+									}
+								}), 2.0f, false);
 
-								break;
-							}
+							break;
 						}
 					}
-					else
-					{
-						DuelGunman = Cast<ADuelGunman>(ClientPlayerController->GetPawn());
-						DuelSheriff = Cast<ADuelSheriff>(ServerPlayerController->GetPawn());
-						if (DuelGunman)
-						{
-							DuelGunman->MulticastPlayShootMontage(0.25f);
-
-							FTimerHandle WaitHandle;
-							switch (SheriffDuelState)
-							{
-							case EDuelState::EDS_Left:
-								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
-									{
-										if (DuelSheriff)
-										{
-											DuelSheriff->MulticastPlayDodgeLeftMontage(0.25f);
-										}
-									}), 2.0f, false);
-
-								break;
-							case EDuelState::EDS_Middle:
-								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
-									{
-										if (DuelSheriff)
-										{
-											ServerPlayerController->SetControlRotation(FRotator(0, 90, 0));
-
-											DuelSheriff->MulticastSetIsSlow(true);
-											DuelSheriff->MulticastSetShoot(true);
-										}
-									}), 2.0f, false);
-
-								break;
-							case EDuelState::EDS_Right:
-								World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
-									{
-										if (DuelSheriff)
-										{
-											DuelSheriff->MulticastPlayDodgeRightMontage(0.25f);
-										}
-									}), 2.0f, false);
-
-								break;
-							}
-						}
-					}
-
-					ServerPlayerController->FireDelegate.Broadcast();
-					ClientPlayerController->ClientFireBroadcast();
-
-					ServerPlayerController->HitDelegate.Broadcast();
-					ClientPlayerController->ClientHitBroadcast();
 				}
 				else
 				{
-					switch (WildWestGameInstance->GetServerCharacterState())
+					DuelGunman = Cast<ADuelGunman>(ClientPlayerController->GetPawn());
+					DuelSheriff = Cast<ADuelSheriff>(ServerPlayerController->GetPawn());
+					if (DuelGunman)
 					{
-					case ECharacterState::ECS_Gunman:
-						DuelGunman = Cast<ADuelGunman>(ServerPlayerController->GetPawn());
-						DuelSheriff = Cast<ADuelSheriff>(ClientPlayerController->GetPawn());
-						if (DuelGunman)
+						DuelGunman->MulticastPlayShootMontage(0.25f);
+
+						FTimerHandle WaitHandle;
+						switch (SheriffDuelState)
 						{
-							DuelGunman->MulticastPlayShootMontage(1.0f);
+						case EDuelState::EDS_Left:
+							World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+								{
+									if (DuelSheriff)
+									{
+										DuelSheriff->MulticastPlayDodgeLeftMontage(0.25f);
+									}
+								}), 2.0f, false);
+
+							break;
+						case EDuelState::EDS_Middle:
+							World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+								{
+									if (DuelSheriff)
+									{
+										ServerPlayerController->SetControlRotation(FRotator(0, 90, 0));
+
+										DuelSheriff->MulticastSetIsSlow(true);
+										DuelSheriff->MulticastSetShoot(true);
+									}
+								}), 2.0f, false);
+
+							break;
+						case EDuelState::EDS_Right:
+							World->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+								{
+									if (DuelSheriff)
+									{
+										DuelSheriff->MulticastPlayDodgeRightMontage(0.25f);
+									}
+								}), 2.0f, false);
+
+							break;
 						}
-
-						break;
-					case ECharacterState::ECS_Sheriff:
-						DuelSheriff = Cast<ADuelSheriff>(ServerPlayerController->GetPawn());
-						if (DuelSheriff)
-						{
-							switch (SheriffDuelState)
-							{
-							case EDuelState::EDS_Left:
-								DuelSheriff->MulticastPlayDodgeLeftMontage(1.0f);
-								break;
-							case EDuelState::EDS_Middle:
-								ServerPlayerController->SetControlRotation(FRotator(0, 90, 0));
-								ServerPlayerController->FightBackDelegate.Broadcast();
-								ClientPlayerController->ClientFightBackBroadcast();
-
-								bIsDuelOver = true;
-								World->GetTimerManager().ClearTimer(TimerHandle);
-
-								DuelSheriff->MulticastSetShoot(true);
-								break;
-							case EDuelState::EDS_Right:
-								DuelSheriff->MulticastPlayDodgeRightMontage(1.0f);
-								break;
-							}
-						}
-
-						break;
-					}
-
-					switch (WildWestGameInstance->GetClientCharacterState())
-					{
-					case ECharacterState::ECS_Gunman:
-						DuelGunman = Cast<ADuelGunman>(ClientPlayerController->GetPawn());
-						DuelSheriff = Cast<ADuelSheriff>(ServerPlayerController->GetPawn());
-						if (DuelGunman)
-						{
-							DuelGunman->MulticastPlayShootMontage(1.0f);
-						}
-
-						break;
-					case ECharacterState::ECS_Sheriff:
-						DuelSheriff = Cast<ADuelSheriff>(ClientPlayerController->GetPawn());
-						if (DuelSheriff)
-						{
-							switch (SheriffDuelState)
-							{
-							case EDuelState::EDS_Left:
-								DuelSheriff->MulticastPlayDodgeLeftMontage(1.0f);
-								break;
-							case EDuelState::EDS_Middle:
-								ClientPlayerController->ClientSetRotation(FRotator(0, 90, 0));
-								ServerPlayerController->FightBackDelegate.Broadcast();
-								ClientPlayerController->ClientFightBackBroadcast();
-
-								bIsDuelOver = true;
-								World->GetTimerManager().ClearTimer(TimerHandle);
-
-								DuelSheriff->MulticastSetShoot(true);
-								break;
-							case EDuelState::EDS_Right:
-								DuelSheriff->MulticastPlayDodgeRightMontage(1.0f);
-								break;
-							}
-						}
-
-						break;
-					}
-
-					ServerPlayerController->DodgeDelegate.Broadcast();
-					ClientPlayerController->ClientDodgeBroadcast();
-
-					BulletCount--;
-
-					if (BulletCount == 0)
-					{
-						ServerPlayerController->FireCompleteDelegate.Broadcast();
-						ClientPlayerController->ClientFireCompleteBroadcast();
-
-						bIsDuelOver = true;
-						World->GetTimerManager().ClearTimer(TimerHandle);
 					}
 				}
 
-				ServerPlayerController->DuelSelectCompleteDelegate.Broadcast();
-				ClientPlayerController->ClientDuelSelectCompleteBroadcast();
+				ServerPlayerController->FireDelegate.Broadcast();
+				ClientPlayerController->ClientFireBroadcast();
 
-				FInputModeGameOnly InputModeData;
-				ServerPlayerController->SetInputMode(InputModeData);
-				ServerPlayerController->SetShowMouseCursor(false);
-
-				ClientPlayerController->ClientSetInputModeGameOnly();
+				ServerPlayerController->HitDelegate.Broadcast();
+				ClientPlayerController->ClientHitBroadcast();
 			}
+			else
+			{
+				switch (WildWestGameInstance->GetServerCharacterState())
+				{
+				case ECharacterState::ECS_Gunman:
+					DuelGunman = Cast<ADuelGunman>(ServerPlayerController->GetPawn());
+					DuelSheriff = Cast<ADuelSheriff>(ClientPlayerController->GetPawn());
+					if (DuelGunman)
+					{
+						DuelGunman->MulticastPlayShootMontage(1.0f);
+					}
+
+					break;
+				case ECharacterState::ECS_Sheriff:
+					DuelSheriff = Cast<ADuelSheriff>(ServerPlayerController->GetPawn());
+					if (DuelSheriff)
+					{
+						switch (SheriffDuelState)
+						{
+						case EDuelState::EDS_Left:
+							DuelSheriff->MulticastPlayDodgeLeftMontage(1.0f);
+							break;
+						case EDuelState::EDS_Middle:
+							ServerPlayerController->SetControlRotation(FRotator(0, 90, 0));
+							ServerPlayerController->FightBackDelegate.Broadcast();
+							ClientPlayerController->ClientFightBackBroadcast();
+
+							bIsDuelOver = true;
+							World->GetTimerManager().ClearTimer(TimerHandle);
+
+							DuelSheriff->MulticastSetShoot(true);
+							break;
+						case EDuelState::EDS_Right:
+							DuelSheriff->MulticastPlayDodgeRightMontage(1.0f);
+							break;
+						}
+					}
+
+					break;
+				}
+
+				switch (WildWestGameInstance->GetClientCharacterState())
+				{
+				case ECharacterState::ECS_Gunman:
+					DuelGunman = Cast<ADuelGunman>(ClientPlayerController->GetPawn());
+					DuelSheriff = Cast<ADuelSheriff>(ServerPlayerController->GetPawn());
+					if (DuelGunman)
+					{
+						DuelGunman->MulticastPlayShootMontage(1.0f);
+					}
+
+					break;
+				case ECharacterState::ECS_Sheriff:
+					DuelSheriff = Cast<ADuelSheriff>(ClientPlayerController->GetPawn());
+					if (DuelSheriff)
+					{
+						switch (SheriffDuelState)
+						{
+						case EDuelState::EDS_Left:
+							DuelSheriff->MulticastPlayDodgeLeftMontage(1.0f);
+							break;
+						case EDuelState::EDS_Middle:
+							ClientPlayerController->ClientSetRotation(FRotator(0, 90, 0));
+							ServerPlayerController->FightBackDelegate.Broadcast();
+							ClientPlayerController->ClientFightBackBroadcast();
+
+							bIsDuelOver = true;
+							World->GetTimerManager().ClearTimer(TimerHandle);
+
+							DuelSheriff->MulticastSetShoot(true);
+							break;
+						case EDuelState::EDS_Right:
+							DuelSheriff->MulticastPlayDodgeRightMontage(1.0f);
+							break;
+						}
+					}
+
+					break;
+				}
+
+				ServerPlayerController->DodgeDelegate.Broadcast();
+				ClientPlayerController->ClientDodgeBroadcast();
+
+				BulletCount--;
+
+				if (BulletCount == 0)
+				{
+					ServerPlayerController->FireCompleteDelegate.Broadcast();
+					ClientPlayerController->ClientFireCompleteBroadcast();
+
+					bIsDuelOver = true;
+					World->GetTimerManager().ClearTimer(TimerHandle);
+				}
+			}
+
+			ServerPlayerController->DuelSelectCompleteDelegate.Broadcast();
+			ClientPlayerController->ClientDuelSelectCompleteBroadcast();
+
+			FInputModeGameOnly InputModeData;
+			ServerPlayerController->SetInputMode(InputModeData);
+			ServerPlayerController->SetShowMouseCursor(false);
+
+			ClientPlayerController->ClientSetInputModeGameOnly();
 		}
 	}
 }

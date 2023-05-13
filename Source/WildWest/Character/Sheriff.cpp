@@ -19,7 +19,6 @@
 ASheriff::ASheriff()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	bReplicates = true;
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(GetMesh());
@@ -31,27 +30,24 @@ void ASheriff::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HasAuthority())
+	UWorld* World = GetWorld();
+	if (World)
 	{
-		UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-		if (WildWestGameInstance)
+		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+		if (TownGameState && TownGameState->GetSheriffList().Num() == 1)
 		{
-			if (WildWestGameInstance->GetAliveControllerIndex().Num() == 1)
-			{
-				bIsAlone = true;
-			}
+			bIsAlone = true;
 		}
 	}
 
+	WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
 	ControlTimer = InitialControlTimer;
+	PreviousDirection = GetActorRotation();
 }
 
 void ASheriff::Jump()
 {
-	if (!bIsInputEnabled)
-	{
-		return;
-	}
+	if (!bIsInputEnabled) return;
 
 	Super::Jump();
 }
@@ -60,26 +56,17 @@ void ASheriff::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bIsAlone)
-	{
-		return;
-	}
+	if (bIsAlone) return;
 
-	if (IsLocallyControlled())
+	if (IsLocallyControlled() && InputEnabled())
 	{
-		if (bIsInputEnabled)
+		if (ControlTimer > 0)
 		{
-			if (ControlTimer > 0)
-			{
-				if (InputEnabled())
-				{
-					ControlTimer -= DeltaTime;
-				}
-			}
-			else
-			{
-				bIsInputEnabled = false;
-			}
+			ControlTimer -= DeltaTime;
+		}
+		else
+		{
+			bIsInputEnabled = false;
 		}
 	}
 	else
@@ -103,10 +90,10 @@ void ASheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	APlayerController* PC =  Cast<APlayerController>(GetController());
-	if (PC)
+	APlayerController* PlayerController =  Cast<APlayerController>(GetController());
+	if (PlayerController)
 	{
-		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 		if (Subsystem)
 		{
 			Subsystem->ClearAllMappings();
@@ -124,7 +111,7 @@ void ASheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 				EnhancedInputComponent->BindAction(InputActions->InputSwitchToSecond, ETriggerEvent::Triggered, this, &ASheriff::SwitchToSecond);
 				EnhancedInputComponent->BindAction(InputActions->InputSwitchToThird, ETriggerEvent::Triggered, this, &ASheriff::SwitchToThird);
 				EnhancedInputComponent->BindAction(InputActions->InputSwitchToFourth, ETriggerEvent::Triggered, this, &ASheriff::SwitchToFourth);
-				EnhancedInputComponent->BindAction(InputActions->InputInteract, ETriggerEvent::Triggered, this, &ASheriff::EnterDuel);
+				EnhancedInputComponent->BindAction(InputActions->InputInteract, ETriggerEvent::Triggered, this, &ASheriff::Interact);
 			}
 		}
 	}
@@ -135,67 +122,78 @@ void ASheriff::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASheriff, CharacterIndex);
-	DOREPLIFETIME(ASheriff, bIsAlone);
 }
 
-void ASheriff::SelectControlCharacter()
+void ASheriff::Restart()
+{
+	Super::Restart();
+
+	if (IsLocallyControlled())
+	{
+		UWorld* World = GetWorld();
+		if (World == nullptr) return;
+
+		TownPlayerController = Cast<ATownPlayerController>(Controller);
+		if (TownPlayerController && !TownPlayerController->IsSetupComplete())
+		{
+			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+			if (TownGameState == nullptr) return;
+
+			TArray<ASheriff*>& SheriffList = TownGameState->GetSheriffList();
+			TownPlayerController->SheriffHUDSetup(this);
+			TownPlayerController->SetupComplete(true);
+			SetInitialCharacter(SheriffList.Num(), false);
+		}
+	}
+}
+
+void ASheriff::UnPossessed()
+{
+	Super::UnPossessed();
+
+	TownPlayerController = nullptr;
+}
+
+void ASheriff::SetInitialCharacter(int32 CurrentSheriffNum, bool bShouldStun)
 {
 	UWorld* World = GetWorld();
-	if (World)
+	if (World == nullptr) return;
+
+	ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+	if (TownGameState == nullptr) return;
+
+	int32 RandomIndex = FMath::RandRange(1, CurrentSheriffNum);
+	ASheriff* NextSheriff = nullptr;
+
+	switch (RandomIndex)
 	{
-		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-		if (TownGameState)
+	case 1:
+		SwitchToFirst();
+		NextSheriff = TownGameState->GetSheriffList()[0];
+		break;
+	case 2:
+		SwitchToSecond();
+		NextSheriff = TownGameState->GetSheriffList()[1];
+		break;
+	case 3:
+		SwitchToThird();
+		NextSheriff = TownGameState->GetSheriffList()[2];
+		break;
+	case 4:
+		SwitchToFourth();
+		NextSheriff = TownGameState->GetSheriffList()[3];
+		break;
+	}
+
+	if (bShouldStun && NextSheriff)
+	{
+		if (NextSheriff->IsLocallyControlled())
 		{
-			TArray<int32> ControllableIndexList;
-			int ControllableNum = 0;
-
-			for (int32 idx = 0; idx < TownGameState->GetSheriffList().Num(); idx++)
-			{
-				if (TownGameState->GetSheriffList()[idx])
-				{
-					ControllableNum++;
-					ControllableIndexList.Add(idx);
-				}
-			}
-
-			int32 RandomIndex = FMath::RandRange(0, ControllableNum - 1);
-			ASheriff* NextSheriff = NULL;
-
-			switch (ControllableIndexList[RandomIndex])
-			{
-			case 0:
-				SwitchToFirst();
-				NextSheriff = TownGameState->GetSheriffList()[0];
-				break;
-			case 1:
-				SwitchToSecond();
-				NextSheriff = TownGameState->GetSheriffList()[1];
-				break;
-			case 2:
-				SwitchToThird();
-				NextSheriff = TownGameState->GetSheriffList()[2];
-				break;
-			case 3:
-				SwitchToFourth();
-				NextSheriff = TownGameState->GetSheriffList()[3];
-				break;
-			}
-
-			if (NextSheriff)
-			{
-				UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-				if (WildWestGameInstance)
-				{
-					if (WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Sheriff)
-					{
-						NextSheriff->StartStunTimer();
-					}
-					else
-					{
-						NextSheriff->ClientStartStunTimer();
-					}
-				}
-			}
+			NextSheriff->StartStunTimer();
+		}
+		else
+		{
+			NextSheriff->ClientStartStunTimer();
 		}
 	}
 }
@@ -205,7 +203,7 @@ void ASheriff::StartStunTimer()
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		PlayerController = PlayerController == nullptr ? Cast<APlayerController>(GetController()) : PlayerController;
+		APlayerController* PlayerController = World->GetFirstPlayerController();
 		if (PlayerController)
 		{
 			DisableInput(PlayerController);
@@ -236,10 +234,7 @@ void ASheriff::ClientStartStunTimer_Implementation()
 
 void ASheriff::MoveForward(const FInputActionValue& Value)
 {
-	if (!bIsInputEnabled)
-	{
-		return;
-	}
+	if (!bIsInputEnabled) return;
 
 	if (Controller != nullptr)
 	{
@@ -256,10 +251,7 @@ void ASheriff::MoveForward(const FInputActionValue& Value)
 
 void ASheriff::MoveRight(const FInputActionValue& Value)
 {
-	if (!bIsInputEnabled)
-	{
-		return;
-	}
+	if (!bIsInputEnabled) return;
 
 	if (Controller != nullptr)
 	{
@@ -276,27 +268,27 @@ void ASheriff::MoveRight(const FInputActionValue& Value)
 
 void ASheriff::Turn(const FInputActionValue& Value)
 {
-	if (!bIsInputEnabled)
-	{
-		return;
-	}
+	if (!bIsInputEnabled) return;
 
 	AddControllerYawInput(Value.Get<float>());
 }
 
 void ASheriff::LookUp(const FInputActionValue& Value)
 {
-	if (!bIsInputEnabled)
-	{
-		return;
-	}
+	if (!bIsInputEnabled) return;
 
 	AddControllerPitchInput(Value.Get<float>());
 }
 
 void ASheriff::SwitchToFirst()
 {
-	ChangeHUDProperly(1, EScreenIndex::ECI_First);
+	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(Controller) : TownPlayerController;
+	if (TownPlayerController == nullptr) return;
+
+	EScreenIndex CurrentScreenIndex = TownPlayerController->GetCurrentScreenIndex();
+	if (CurrentScreenIndex == EScreenIndex::ECI_First) return;
+
+	ChangeHUDProperly(1, EScreenIndex::ECI_First, TownPlayerController->GetCurrentScreenIndex());
 
 	if (!HasAuthority())
 	{
@@ -309,7 +301,13 @@ void ASheriff::SwitchToFirst()
 
 void ASheriff::SwitchToSecond()
 {
-	ChangeHUDProperly(2, EScreenIndex::ECI_Second);
+	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(Controller) : TownPlayerController;
+	if (TownPlayerController == nullptr) return;
+
+	EScreenIndex CurrentScreenIndex = TownPlayerController->GetCurrentScreenIndex();
+	if (CurrentScreenIndex == EScreenIndex::ECI_Second) return;
+
+	ChangeHUDProperly(2, EScreenIndex::ECI_Second, TownPlayerController->GetCurrentScreenIndex());
 
 	if (!HasAuthority())
 	{
@@ -322,7 +320,13 @@ void ASheriff::SwitchToSecond()
 
 void ASheriff::SwitchToThird()
 {
-	ChangeHUDProperly(3, EScreenIndex::ECI_Third);
+	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(Controller) : TownPlayerController;
+	if (TownPlayerController == nullptr) return;
+
+	EScreenIndex CurrentScreenIndex = TownPlayerController->GetCurrentScreenIndex();
+	if (CurrentScreenIndex == EScreenIndex::ECI_Third) return;
+
+	ChangeHUDProperly(3, EScreenIndex::ECI_Third, TownPlayerController->GetCurrentScreenIndex());
 
 	if (!HasAuthority())
 	{
@@ -335,7 +339,13 @@ void ASheriff::SwitchToThird()
 
 void ASheriff::SwitchToFourth()
 {
-	ChangeHUDProperly(4, EScreenIndex::ECI_Fourth);
+	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(Controller) : TownPlayerController;
+	if (TownPlayerController == nullptr) return;
+
+	EScreenIndex CurrentScreenIndex = TownPlayerController->GetCurrentScreenIndex();
+	if (CurrentScreenIndex == EScreenIndex::ECI_Fourth) return;
+
+	ChangeHUDProperly(4, EScreenIndex::ECI_Fourth, TownPlayerController->GetCurrentScreenIndex());
 
 	if (!HasAuthority())
 	{
@@ -387,21 +397,15 @@ void ASheriff::SwitchCharacter(int32 Index, EScreenIndex ScreenIndex)
 	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(Controller) : TownPlayerController;
 	if (TownGameState == nullptr || TownPlayerController == nullptr) return;
 
-	EScreenIndex CurrentScreenIndex = TownPlayerController->GetCurrentScreenIndex();
-	if (CurrentScreenIndex == ScreenIndex)
-	{
-		return;
-	}
-
 	ASheriff* Sheriff = TownGameState->GetSheriffList()[Index - 1];
 	if (Sheriff)
 	{
-		ControllerDirection = Controller->GetControlRotation();
-		TownPlayerController->SetCurrentScreenIndex(ScreenIndex);
-		Controller->SetControlRotation(ControllerDirection);
+		PreviousDirection = Controller->GetControlRotation();
 		Controller->Possess(Sheriff);
+		Sheriff->Controller->SetControlRotation(Sheriff->GetPreviousDirection());
+		Sheriff->Controller->ClientSetRotation(Sheriff->GetPreviousDirection());
 
-		UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+		WildWestGameInstance = WildWestGameInstance == nullptr ? GetGameInstance<UWildWestGameInstance>() : WildWestGameInstance;
 		if (WildWestGameInstance)
 		{
 			WildWestGameInstance->SetCurrentSheriffIndex(Index);
@@ -409,17 +413,18 @@ void ASheriff::SwitchCharacter(int32 Index, EScreenIndex ScreenIndex)
 	}
 }
 
-void ASheriff::ChangeHUDProperly(int32 Index, EScreenIndex ScreenIndex)
+void ASheriff::ChangeHUDProperly(int32 Index, EScreenIndex ScreenIndex, EScreenIndex PreviousScreenIndex)
 {
 	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(Controller) : TownPlayerController;
 	if (TownPlayerController)
 	{
 		TownPlayerController->SetSheriffHUDScreen(Index);
-		TownPlayerController->SetSheriffHUDViewport(ScreenIndex);
+		TownPlayerController->SetSheriffHUDViewport(ScreenIndex, PreviousScreenIndex);
+		TownPlayerController->SetCurrentScreenIndex(ScreenIndex);
 	}
 }
 
-void ASheriff::EnterDuel()
+void ASheriff::Interact()
 {
 	if (!bIsInputEnabled)
 	{
@@ -428,102 +433,85 @@ void ASheriff::EnterDuel()
 
 	if (!HasAuthority())
 	{
-		ServerEnterDuel();
+		ServerInteract();
 		return;
 	}
 
-	if (OverlappingGunman == nullptr)
-	{
-		return;
-	}
-
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-		if (TownGameState)
-		{
-			AGunman* Gunman = TownGameState->GetGunman();
-			TArray<ASheriff*> SheriffList = TownGameState->GetSheriffList();
-
-			UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-			if (WildWestGameInstance)
-			{
-				WildWestGameInstance->SetCurrentSheriffIndex(CharacterIndex);
-				WildWestGameInstance->GetLastTransformList().Empty();
-
-				for (ASheriff* Sheriff : SheriffList)
-				{
-					if (Gunman)
-					{
-						WildWestGameInstance->SetLastGunmanTransform(Gunman->GetActorTransform());
-					}
-
-					if (Sheriff)
-					{
-						WildWestGameInstance->AddLastTransformList(Sheriff->GetActorTransform());
-					}
-					else
-					{
-						WildWestGameInstance->AddLastTransformList(FTransform());
-					}
-				}
-
-				ATownGameMode* TownGameMode = World->GetAuthGameMode<ATownGameMode>();
-				if (TownGameMode)
-				{
-					TownGameMode->TravelToDuel();
-				}
-			}
-		}
-	}
+	EnterDuel();
 }
 
-void ASheriff::ServerEnterDuel_Implementation()
+void ASheriff::ServerInteract_Implementation()
 {
-	if (OverlappingGunman == nullptr)
+	EnterDuel();
+}
+
+void ASheriff::EnterDuel()
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
+
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)
 	{
-		return;
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
 	}
 
-	UWorld* World = GetWorld();
-	if (World)
+	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	FVector CrosshairWorldPosition;
+	FVector CrosshairWorldDirection;
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
+		UGameplayStatics::GetPlayerController(this, 0),
+		CrosshairLocation,
+		CrosshairWorldPosition,
+		CrosshairWorldDirection
+	);
+
+	if (!bScreenToWorld) return;
+
+	FVector Start = CrosshairWorldPosition;
+	float DistanceToCharacter = (GetActorLocation() - Start).Size();
+	Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
+
+	FVector End = Start + CrosshairWorldDirection * ARM_LENGTH;
+
+	FHitResult HitResult;
+	World->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECollisionChannel::ECC_Visibility
+	);
+
+	if (HitResult.GetActor() == nullptr || !HitResult.GetActor()->IsA(AGunman::StaticClass())) return;
+
+	ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+	if (TownGameState == nullptr) return;
+
+	AGunman* Gunman = TownGameState->GetGunman();
+	TArray<ASheriff*>& SheriffList = TownGameState->GetSheriffList();
+
+	WildWestGameInstance = WildWestGameInstance == nullptr ? GetGameInstance<UWildWestGameInstance>() : WildWestGameInstance;
+	if (WildWestGameInstance == nullptr || Gunman == nullptr) return;
+
+	WildWestGameInstance->SetCurrentSheriffIndex(CharacterIndex);
+	WildWestGameInstance->GetLastTransformList().Empty();
+	WildWestGameInstance->SetLastGunmanTransform(Gunman->GetActorTransform());
+
+	for (ASheriff* Sheriff : SheriffList)
 	{
-		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-		if (TownGameState)
+		if (Sheriff)
 		{
-			AGunman* Gunman = TownGameState->GetGunman();
-			TArray<ASheriff*> SheriffList = TownGameState->GetSheriffList();
-			
-			UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-			if (WildWestGameInstance)
-			{
-				WildWestGameInstance->SetCurrentSheriffIndex(CharacterIndex);
-				WildWestGameInstance->GetLastTransformList().Empty();
-
-				if (Gunman)
-				{
-					WildWestGameInstance->SetLastGunmanTransform(Gunman->GetActorTransform());
-				}
-
-				for (ASheriff* Sheriff : SheriffList)
-				{
-					if (Sheriff)
-					{
-						WildWestGameInstance->AddLastTransformList(Sheriff->GetActorTransform());
-					}
-					else
-					{
-						WildWestGameInstance->AddLastTransformList(FTransform());
-					}
-				}
-
-				ATownGameMode* TownGameMode = World->GetAuthGameMode<ATownGameMode>();
-				if (TownGameMode)
-				{
-					TownGameMode->TravelToDuel();
-				}
-			}
+			WildWestGameInstance->AddLastTransformList(Sheriff->GetActorTransform());
 		}
+		else
+		{
+			WildWestGameInstance->AddLastTransformList(FTransform());
+		}
+	}
+
+	ATownGameMode* TownGameMode = World->GetAuthGameMode<ATownGameMode>();
+	if (TownGameMode)
+	{
+		TownGameMode->TravelToDuel();
 	}
 }

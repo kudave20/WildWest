@@ -6,9 +6,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "WildWest/GameInstance/WildWestGameInstance.h"
 #include "WildWest/GameState/TownGameState.h"
+#include "WildWest/Character/Gunman.h"
 #include "WildWest/Character/Sheriff.h"
 #include "WildWest/HUD/SheriffHUD.h"
-#include "WildWest/HUD/CharacterOverlay.h"
+#include "WildWest/HUD/SheriffOverlay.h"
 #include "Components/TextBlock.h"
 #include "WildWest/HUD/GameViewportWidget.h"
 #include "Components/Image.h"
@@ -16,12 +17,6 @@
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
 #include "WildWest/Input/InputConfigData.h"
-
-void ATownPlayerController::SetInitialControlRotation(const FRotator& NewRotation)
-{
-	SetControlRotation(NewRotation);
-	ClientSetRotation(NewRotation);
-}
 
 void ATownPlayerController::ClientRemovePlayer_Implementation()
 {
@@ -60,31 +55,61 @@ void ATownPlayerController::InitialPossess()
 	if (World == nullptr) return;
 
 	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-	ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+	TownGameState = TownGameState == nullptr ? World->GetGameState<ATownGameState>() : TownGameState;
 	if (WildWestGameInstance == nullptr || TownGameState == nullptr) return;
 
 	if (IsLocalPlayerController())
 	{
 		if (WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Gunman)
 		{
-
+			Possess(TownGameState->GetGunman());
 		}
 		else if (WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Sheriff)
 		{
-			TArray<ASheriff*>& SheriffList = TownGameState->GetSheriffList();
-			Possess(SheriffList[0]);
+			PossessRandomly();
 		}
 	}
 	else
 	{
 		if (WildWestGameInstance->GetClientCharacterState() == ECharacterState::ECS_Gunman)
 		{
-
+			Possess(TownGameState->GetGunman());
 		}
 		else if (WildWestGameInstance->GetClientCharacterState() == ECharacterState::ECS_Sheriff)
 		{
+			PossessRandomly();
+		}
+	}
+}
+
+void ATownPlayerController::PossessRandomly()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		TownGameState = TownGameState == nullptr ? World->GetGameState<ATownGameState>() : TownGameState;
+		if (TownGameState)
+		{
 			TArray<ASheriff*>& SheriffList = TownGameState->GetSheriffList();
 			Possess(SheriffList[0]);
+			SetControlRotation(SheriffList[0]->GetActorRotation());
+			ClientSetRotation(SheriffList[0]->GetActorRotation());
+		}
+	}
+}
+
+void ATownPlayerController::SheriffHUDSetup(APawn* InPawn)
+{
+	if (InPawn && InPawn->IsA(ASheriff::StaticClass()))
+	{
+		ClientSetHUD(SheriffHUDClass);
+		SheriffHUD = Cast<ASheriffHUD>(GetHUD());
+		if (SheriffHUD)
+		{
+			SheriffHUD->AddSheriffOverlay();
+			SetSheriffHUDScreen(1);
+			SetSheriffHUDViewport(EScreenIndex::ECI_First, EScreenIndex::ECI_First);
+			SetCurrentScreenIndex(EScreenIndex::ECI_First);
 		}
 	}
 }
@@ -93,51 +118,144 @@ void ATownPlayerController::SetSheriffHUDScreen(int32 ScreenIndex)
 {
 	SheriffHUD = SheriffHUD == nullptr ? Cast<ASheriffHUD>(GetHUD()) : SheriffHUD;
 	bool bHUDValid = SheriffHUD &&
-		SheriffHUD->CharacterOverlay &&
-		SheriffHUD->CharacterOverlay->ScreenIndex;
+		SheriffHUD->SheriffOverlay &&
+		SheriffHUD->SheriffOverlay->ScreenIndex;
 	if (bHUDValid)
 	{
 		FString ScreenIndexText = FString::Printf(TEXT("%d"), ScreenIndex);
-		SheriffHUD->CharacterOverlay->ScreenIndex->SetText(FText::FromString(ScreenIndexText));
+		SheriffHUD->SheriffOverlay->ScreenIndex->SetText(FText::FromString(ScreenIndexText));
 	}
 }
 
-void ATownPlayerController::SetSheriffHUDViewport(EScreenIndex ScreenIndex)
+void ATownPlayerController::SetSheriffHUDViewport(EScreenIndex ScreenIndex, EScreenIndex PreviousScreenIndex)
 {
 	SheriffHUD = SheriffHUD == nullptr ? Cast<ASheriffHUD>(GetHUD()) : SheriffHUD;
 	bool bHUDValid = SheriffHUD &&
-		SheriffHUD->CharacterOverlay &&
-		SheriffHUD->CharacterOverlay->FirstViewport &&
-		SheriffHUD->CharacterOverlay->SecondViewport &&
-		SheriffHUD->CharacterOverlay->ThirdViewport &&
-		SheriffHUD->CharacterOverlay->FourthViewport;
+		SheriffHUD->SheriffOverlay &&
+		SheriffHUD->SheriffOverlay->FirstViewport &&
+		SheriffHUD->SheriffOverlay->SecondViewport &&
+		SheriffHUD->SheriffOverlay->ThirdViewport &&
+		SheriffHUD->SheriffOverlay->FourthViewport;
 	if (bHUDValid)
 	{
+		UWorld* World = GetWorld();
+		if (World == nullptr) return;
+
+		TownGameState = TownGameState == nullptr ? World->GetGameState<ATownGameState>() : TownGameState;
+		if (TownGameState == nullptr) return;
+
+		FVector Location;
+		FRotator Rotation;
+
 		switch (ScreenIndex)
 		{
 		case EScreenIndex::ECI_First:
-			SheriffHUD->CharacterOverlay->FirstViewport->SetVisibility(ESlateVisibility::Hidden);
-			SheriffHUD->CharacterOverlay->SecondViewport->SetVisibility(ESlateVisibility::Visible);
-			SheriffHUD->CharacterOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Visible);
-			SheriffHUD->CharacterOverlay->FourthViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->SheriffOverlay->FirstViewport->SetVisibility(ESlateVisibility::Hidden);
+			SheriffHUD->SheriffOverlay->SecondViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->SheriffOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->SheriffOverlay->FourthViewport->SetVisibility(ESlateVisibility::Visible);
+
+			switch (PreviousScreenIndex)
+			{
+			case EScreenIndex::ECI_First:
+				break;
+			case EScreenIndex::ECI_Second:
+				TownGameState->GetSheriffList()[1]->GetActorEyesViewPoint(Location, Rotation);
+				SheriffHUD->SheriffOverlay->SecondViewport->SetCameraLocation(false, Location);
+				SheriffHUD->SheriffOverlay->SecondViewport->SetCameraRotation(false, Rotation);
+				break;
+			case EScreenIndex::ECI_Third:
+				TownGameState->GetSheriffList()[2]->GetActorEyesViewPoint(Location, Rotation);
+				SheriffHUD->SheriffOverlay->ThirdViewport->SetCameraLocation(false, Location);
+				SheriffHUD->SheriffOverlay->ThirdViewport->SetCameraRotation(false, Rotation);
+				break;
+			case EScreenIndex::ECI_Fourth:
+				TownGameState->GetSheriffList()[3]->GetActorEyesViewPoint(Location, Rotation);
+				SheriffHUD->SheriffOverlay->FourthViewport->SetCameraLocation(false, Location);
+				SheriffHUD->SheriffOverlay->FourthViewport->SetCameraRotation(false, Rotation);
+				break;
+			}
 			break;
 		case EScreenIndex::ECI_Second:
-			SheriffHUD->CharacterOverlay->FirstViewport->SetVisibility(ESlateVisibility::Visible);
-			SheriffHUD->CharacterOverlay->SecondViewport->SetVisibility(ESlateVisibility::Hidden);
-			SheriffHUD->CharacterOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Visible);
-			SheriffHUD->CharacterOverlay->FourthViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->SheriffOverlay->FirstViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->SheriffOverlay->SecondViewport->SetVisibility(ESlateVisibility::Hidden);
+			SheriffHUD->SheriffOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->SheriffOverlay->FourthViewport->SetVisibility(ESlateVisibility::Visible);
+
+			switch (PreviousScreenIndex)
+			{
+			case EScreenIndex::ECI_First:
+				TownGameState->GetSheriffList()[0]->GetActorEyesViewPoint(Location, Rotation);
+				SheriffHUD->SheriffOverlay->FirstViewport->SetCameraLocation(false, Location);
+				SheriffHUD->SheriffOverlay->FirstViewport->SetCameraRotation(false, Rotation);
+				break;
+			case EScreenIndex::ECI_Second:
+				break;
+			case EScreenIndex::ECI_Third:
+				TownGameState->GetSheriffList()[2]->GetActorEyesViewPoint(Location, Rotation);
+				SheriffHUD->SheriffOverlay->ThirdViewport->SetCameraLocation(false, Location);
+				SheriffHUD->SheriffOverlay->ThirdViewport->SetCameraRotation(false, Rotation);
+				break;
+			case EScreenIndex::ECI_Fourth:
+				TownGameState->GetSheriffList()[3]->GetActorEyesViewPoint(Location, Rotation);
+				SheriffHUD->SheriffOverlay->FourthViewport->SetCameraLocation(false, Location);
+				SheriffHUD->SheriffOverlay->FourthViewport->SetCameraRotation(false, Rotation);
+				break;
+			}
 			break;
 		case EScreenIndex::ECI_Third:
-			SheriffHUD->CharacterOverlay->FirstViewport->SetVisibility(ESlateVisibility::Visible);
-			SheriffHUD->CharacterOverlay->SecondViewport->SetVisibility(ESlateVisibility::Visible);
-			SheriffHUD->CharacterOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Hidden);
-			SheriffHUD->CharacterOverlay->FourthViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->SheriffOverlay->FirstViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->SheriffOverlay->SecondViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->SheriffOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Hidden);
+			SheriffHUD->SheriffOverlay->FourthViewport->SetVisibility(ESlateVisibility::Visible);
+
+			switch (PreviousScreenIndex)
+			{
+			case EScreenIndex::ECI_First:
+				TownGameState->GetSheriffList()[0]->GetActorEyesViewPoint(Location, Rotation);
+				SheriffHUD->SheriffOverlay->FirstViewport->SetCameraLocation(false, Location);
+				SheriffHUD->SheriffOverlay->FirstViewport->SetCameraRotation(false, Rotation);
+				break;
+			case EScreenIndex::ECI_Second:
+				TownGameState->GetSheriffList()[1]->GetActorEyesViewPoint(Location, Rotation);
+				SheriffHUD->SheriffOverlay->SecondViewport->SetCameraLocation(false, Location);
+				SheriffHUD->SheriffOverlay->SecondViewport->SetCameraRotation(false, Rotation);
+				break;
+			case EScreenIndex::ECI_Third:
+				break;
+			case EScreenIndex::ECI_Fourth:
+				TownGameState->GetSheriffList()[3]->GetActorEyesViewPoint(Location, Rotation);
+				SheriffHUD->SheriffOverlay->FourthViewport->SetCameraLocation(false, Location);
+				SheriffHUD->SheriffOverlay->FourthViewport->SetCameraRotation(false, Rotation);
+				break;
+			}
 			break;
 		case EScreenIndex::ECI_Fourth:
-			SheriffHUD->CharacterOverlay->FirstViewport->SetVisibility(ESlateVisibility::Visible);
-			SheriffHUD->CharacterOverlay->SecondViewport->SetVisibility(ESlateVisibility::Visible);
-			SheriffHUD->CharacterOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Visible);
-			SheriffHUD->CharacterOverlay->FourthViewport->SetVisibility(ESlateVisibility::Hidden);
+			SheriffHUD->SheriffOverlay->FirstViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->SheriffOverlay->SecondViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->SheriffOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Visible);
+			SheriffHUD->SheriffOverlay->FourthViewport->SetVisibility(ESlateVisibility::Hidden);
+
+			switch (PreviousScreenIndex)
+			{
+			case EScreenIndex::ECI_First:
+				TownGameState->GetSheriffList()[0]->GetActorEyesViewPoint(Location, Rotation);
+				SheriffHUD->SheriffOverlay->FirstViewport->SetCameraLocation(false, Location);
+				SheriffHUD->SheriffOverlay->FirstViewport->SetCameraRotation(false, Rotation);
+				break;
+			case EScreenIndex::ECI_Second:
+				TownGameState->GetSheriffList()[1]->GetActorEyesViewPoint(Location, Rotation);
+				SheriffHUD->SheriffOverlay->SecondViewport->SetCameraLocation(false, Location);
+				SheriffHUD->SheriffOverlay->SecondViewport->SetCameraRotation(false, Rotation);
+				break;
+			case EScreenIndex::ECI_Third:
+				TownGameState->GetSheriffList()[2]->GetActorEyesViewPoint(Location, Rotation);
+				SheriffHUD->SheriffOverlay->ThirdViewport->SetCameraLocation(false, Location);
+				SheriffHUD->SheriffOverlay->ThirdViewport->SetCameraRotation(false, Rotation);
+				break;
+			case EScreenIndex::ECI_Fourth:
+				break;
+			}
 			break;
 		}
 	}
@@ -147,11 +265,11 @@ void ATownPlayerController::SetSheriffHUDGauge(float GaugePercent)
 {
 	SheriffHUD = SheriffHUD == nullptr ? Cast<ASheriffHUD>(GetHUD()) : SheriffHUD;
 	bool bHUDValid = SheriffHUD &&
-		SheriffHUD->CharacterOverlay &&
-		SheriffHUD->CharacterOverlay->Gauge;
+		SheriffHUD->SheriffOverlay &&
+		SheriffHUD->SheriffOverlay->Gauge;
 	if (bHUDValid)
 	{
-		UMaterialInstanceDynamic* GaugeMaterialInstance = SheriffHUD->CharacterOverlay->Gauge->GetDynamicMaterial();
+		UMaterialInstanceDynamic* GaugeMaterialInstance = SheriffHUD->SheriffOverlay->Gauge->GetDynamicMaterial();
 		if (GaugeMaterialInstance)
 		{
 			GaugeMaterialInstance->SetScalarParameterValue(FName("GaugePercent"), GaugePercent);
@@ -166,17 +284,6 @@ void ATownPlayerController::BeginPlay()
 	FInputModeGameOnly InputModeData;
 	SetInputMode(InputModeData);
 	SetShowMouseCursor(false);
-
-	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-	if (WildWestGameInstance == nullptr) return;
-
-	if (Cast<ASheriff>(GetPawn()) != nullptr)
-	{
-		ClientSetHUD(SheriffHUDClass);
-		SetSheriffHUDScreen(1);
-		SetSheriffHUDViewport(EScreenIndex::ECI_First);
-		SetCurrentScreenIndex(EScreenIndex::ECI_First);
-	}
 }
 
 void ATownPlayerController::SetupInputComponent()

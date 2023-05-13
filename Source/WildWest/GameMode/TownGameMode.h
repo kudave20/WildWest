@@ -21,6 +21,15 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> GunmanStartClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> GunmanClass;
+
+	UPROPERTY()
+	class AGunman* Gunman;
+
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> SheriffClass;
 
 	UPROPERTY()
