@@ -35,6 +35,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ResetDuelState();
+
+protected:
+	virtual void BeginPlay() override;
 	
 private:
 	EDuelState GunmanDuelState{ EDuelState::EDS_Initial };
@@ -48,35 +51,52 @@ private:
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 	class ADuelSheriff* DuelSheriff;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Timer")
+	UPROPERTY(EditAnywhere, Category = "Timer")
 	int32 InitialDuelTimer;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_DuelTimer)
 	int32 DuelTimer;
+
+	UFUNCTION()
+	void OnRep_DuelTimer();
 
 	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Count")
 	int32 BulletCount;
 
-	FTimerHandle TimerHandle;
+	FTimerHandle CurrentDuelTimer;
+
+	UFUNCTION()
+	void CurrentDuelTimerFinished();
 
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Duel", meta = (AllowPrivateAccess = "true"))
 	bool bIsDuelOver;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Controller", meta = (AllowPrivateAccess = "true"))
-	class ADuelPlayerController* ServerPlayerController;
+	bool bLastDuel;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Controller", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
+	class ADuelPlayerController* DuelPlayerController;
+
+	UPROPERTY()
+	ADuelPlayerController* ServerPlayerController;
+
+	UPROPERTY()
 	ADuelPlayerController* ClientPlayerController;
 
-public:
-	FORCEINLINE EDuelState GetGunmanDuelState() { return GunmanDuelState; }
-	FORCEINLINE EDuelState GetSheriffDuelState() { return SheriffDuelState; }
+	void SetHUDTimer(int32 Timer);
 
+	void ControlHitMontages(APlayerController* Controller);
+	void ControlDodgeMontages(APlayerController* Controller);
+
+	UFUNCTION()
+	void ControlTimerFinished(APlayerController* Controller);
+
+public:
+	FORCEINLINE EDuelState GetGunmanDuelState() const { return GunmanDuelState; }
+	FORCEINLINE EDuelState GetSheriffDuelState() const { return SheriffDuelState; }
 	FORCEINLINE void SetGunmanDuelState(EDuelState NewDuelState) { GunmanDuelState = NewDuelState; }
 	FORCEINLINE void SetSheriffDuelState(EDuelState NewDuelState) { SheriffDuelState = NewDuelState; }
-
-	FORCEINLINE int32 GetDuelTimer() { return DuelTimer; }
-	FORCEINLINE int32 GetBulletCount() { return BulletCount; }
-
-	FORCEINLINE void SetbIsDuelOver(bool bIsOver) { bIsDuelOver = bIsOver; }
+	FORCEINLINE int32 GetDuelTimer() const { return DuelTimer; }
+	FORCEINLINE int32 GetBulletCount() const { return BulletCount; }
+	FORCEINLINE void SetDuelOver(bool bIsOver) { bIsDuelOver = bIsOver; }
+	FORCEINLINE bool IsLastDuel() const { return bLastDuel; }
 };

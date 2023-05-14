@@ -15,6 +15,7 @@ public:
 	ADuelGunman();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void Restart() override;
 
 	void ShootLeft();
 	void ShootMiddle();

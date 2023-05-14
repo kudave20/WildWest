@@ -5,19 +5,20 @@
 #include "GameFramework/PlayerController.h"
 #include "DuelSheriffOverlay.h"
 
-void ADuelSheriffHUD::BeginPlay()
-{
-	Super::BeginPlay();
-
-	AddDuelSheriffOverlay();
-}
-
 void ADuelSheriffHUD::AddDuelSheriffOverlay()
 {
 	APlayerController* PlayerController = GetOwningPlayerController();
 	if (PlayerController && DuelSheriffOverlayClass)
 	{
 		DuelSheriffOverlay = CreateWidget<UDuelSheriffOverlay>(PlayerController, DuelSheriffOverlayClass);
-		DuelSheriffOverlay->AddToViewport();
+		DuelSheriffOverlay->OverlaySetup(PlayerController);
+	}
+}
+
+void ADuelSheriffHUD::RemoveOverlay()
+{
+	if (DuelSheriffOverlay)
+	{
+		DuelSheriffOverlay->RemoveFromParent();
 	}
 }

@@ -6,6 +6,7 @@
 #include "WildWest/GameState/DuelGameState.h"
 #include "DuelSheriffAnimInstance.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "WildWest/Controller/DuelPlayerController.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -33,6 +34,20 @@ void ADuelSheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void ADuelSheriff::Restart()
+{
+	Super::Restart();
+
+	if (IsLocallyControlled())
+	{
+		ADuelPlayerController* DuelPlayerController = Cast<ADuelPlayerController>(Controller);
+		if (DuelPlayerController)
+		{
+			DuelPlayerController->DuelSheriffHUDSetup();
+		}
+	}
 }
 
 void ADuelSheriff::DodgeLeft()

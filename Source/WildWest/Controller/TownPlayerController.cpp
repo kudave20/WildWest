@@ -36,53 +36,56 @@ void ATownPlayerController::ServerNotifyDisconnected_Implementation()
 	}
 }
 
-/*void ATownPlayerController::ClientDestroySession_Implementation()
-{
-	UGameInstance* GameInstance = GetGameInstance();
-	if (GameInstance)
-	{
-		UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
-		if (MultiplayerSessionsSubsystem)
-		{
-			MultiplayerSessionsSubsystem->DestroySession();
-		}
-	}
-}*/
-
 void ATownPlayerController::InitialPossess()
 {
 	UWorld* World = GetWorld();
 	if (World == nullptr) return;
 
 	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-	TownGameState = TownGameState == nullptr ? World->GetGameState<ATownGameState>() : TownGameState;
-	if (WildWestGameInstance == nullptr || TownGameState == nullptr) return;
+	if (WildWestGameInstance == nullptr) return;
 
 	if (IsLocalPlayerController())
 	{
 		if (WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Gunman)
 		{
-			Possess(TownGameState->GetGunman());
+			PossessGunman();
 		}
 		else if (WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Sheriff)
 		{
-			PossessRandomly();
+			PossessSheriffRandomly();
 		}
 	}
 	else
 	{
 		if (WildWestGameInstance->GetClientCharacterState() == ECharacterState::ECS_Gunman)
 		{
-			Possess(TownGameState->GetGunman());
+			PossessGunman();
 		}
 		else if (WildWestGameInstance->GetClientCharacterState() == ECharacterState::ECS_Sheriff)
 		{
-			PossessRandomly();
+			PossessSheriffRandomly();
 		}
 	}
 }
 
-void ATownPlayerController::PossessRandomly()
+void ATownPlayerController::PossessGunman()
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
+
+	TownGameState = TownGameState == nullptr ? World->GetGameState<ATownGameState>() : TownGameState;
+	if (TownGameState == nullptr) return;
+
+	AGunman* Gunman = TownGameState->GetGunman();
+	if (Gunman)
+	{
+		Possess(Gunman);
+		SetControlRotation(Gunman->GetActorRotation());
+		ClientSetRotation(Gunman->GetActorRotation());
+	}
+}
+
+void ATownPlayerController::PossessSheriffRandomly()
 {
 	UWorld* World = GetWorld();
 	if (World)

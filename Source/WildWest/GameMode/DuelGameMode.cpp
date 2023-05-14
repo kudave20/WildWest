@@ -60,25 +60,45 @@ void ADuelGameMode::HandleStartingNewPlayer_Implementation(APlayerController* Ne
 		{
 			if (WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Gunman)
 			{
-				NewPlayer->Possess(DuelGunman);
+				PossessDuelGunman(NewPlayer);
 			}
 			else if (WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Sheriff)
 			{
-				NewPlayer->Possess(DuelSheriff);
+				PossessDuelSheriff(NewPlayer);
 			}
 		}
 		else
 		{
 			if (WildWestGameInstance->GetClientCharacterState() == ECharacterState::ECS_Gunman)
 			{
-				NewPlayer->Possess(DuelGunman);
+				PossessDuelGunman(NewPlayer);
 			}
 			else if (WildWestGameInstance->GetClientCharacterState() == ECharacterState::ECS_Sheriff)
 			{
-				NewPlayer->Possess(DuelSheriff);
+				PossessDuelSheriff(NewPlayer);
 			}
 		}
 
 		NewPlayer->SetViewTargetWithBlend(Camera);
+	}
+}
+
+void ADuelGameMode::PossessDuelGunman(APlayerController* NewPlayer)
+{
+	if (DuelGunman)
+	{
+		NewPlayer->SetControlRotation(DuelGunman->GetActorRotation());
+		NewPlayer->ClientSetRotation(DuelGunman->GetActorRotation());
+		NewPlayer->Possess(DuelGunman);
+	}
+}
+
+void ADuelGameMode::PossessDuelSheriff(APlayerController* NewPlayer)
+{
+	if (DuelSheriff)
+	{
+		NewPlayer->SetControlRotation(DuelSheriff->GetActorRotation());
+		NewPlayer->ClientSetRotation(DuelSheriff->GetActorRotation());
+		NewPlayer->Possess(DuelSheriff);
 	}
 }

@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "DuelSheriffOverlay.generated.h"
+#include "DuelGunmanOverlay.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class WILDWEST_API UDuelSheriffOverlay : public UUserWidget
+class WILDWEST_API UDuelGunmanOverlay : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -29,7 +29,7 @@ protected:
 
 private:
 	UPROPERTY()
-	class ADuelSheriff* DuelSheriff;
+	class ADuelGunman* DuelGunman;
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* LeftButton;
@@ -48,5 +48,4 @@ private:
 
 	UFUNCTION()
 	void RightButtonClicked();
-	
 };

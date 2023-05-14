@@ -69,7 +69,8 @@ private:
 
 	bool bReturnToMainMenuOpen = false;
 
-	void PossessRandomly();
+	void PossessGunman();
+	void PossessSheriffRandomly();
 
 	bool bCompleteSetup;
 

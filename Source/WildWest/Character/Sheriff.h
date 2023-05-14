@@ -8,7 +8,7 @@
 #include "EnhancedInput/Public/InputActionValue.h"
 #include "Sheriff.generated.h"
 
-#define ARM_LENGTH 200.f
+#define ARM_LENGTH 150.f
 
 UCLASS()
 class WILDWEST_API ASheriff : public ACharacter
@@ -85,8 +85,6 @@ private:
 
 	bool bIsInputEnabled = true;
 
-	bool bIsAlone;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Control")
 	float StunTimer;
 
@@ -103,6 +101,8 @@ private:
 
 	UPROPERTY()
 	UUserWidget* Stun;
+
+	bool TraceTowardGunman();
 
 public:
 	FORCEINLINE FRotator GetPreviousDirection() const { return PreviousDirection; }

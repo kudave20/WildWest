@@ -6,6 +6,7 @@
 #include "WildWest/GameState/DuelGameState.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "DuelGunmanAnimInstance.h"
+#include "WildWest/Controller/DuelPlayerController.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -14,7 +15,7 @@
 ADuelGunman::ADuelGunman()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	bReplicates = true;
+
 }
 
 void ADuelGunman::BeginPlay()
@@ -44,6 +45,20 @@ void ADuelGunman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void ADuelGunman::Restart()
+{
+	Super::Restart();
+
+	if (IsLocallyControlled())
+	{
+		ADuelPlayerController* DuelPlayerController = Cast<ADuelPlayerController>(Controller);
+		if (DuelPlayerController)
+		{
+			DuelPlayerController->DuelGunmanHUDSetup();
+		}
+	}
 }
 
 void ADuelGunman::ShootLeft()

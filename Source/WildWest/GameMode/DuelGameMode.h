@@ -38,4 +38,7 @@ private:
 
 	UPROPERTY()
 	class ADuelSheriff* DuelSheriff;
+
+	void PossessDuelGunman(APlayerController* NewPlayer);
+	void PossessDuelSheriff(APlayerController* NewPlayer);
 };

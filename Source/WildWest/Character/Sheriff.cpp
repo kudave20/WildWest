@@ -33,10 +33,11 @@ void ASheriff::BeginPlay()
 	UWorld* World = GetWorld();
 	if (World)
 	{
+		WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
 		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
-		if (TownGameState && TownGameState->GetSheriffList().Num() == 1)
+		if (WildWestGameInstance && TownGameState && TownGameState->GetSheriffList().Num() == 1)
 		{
-			bIsAlone = true;
+			WildWestGameInstance->ChaseLastly(true);
 		}
 	}
 
@@ -56,7 +57,8 @@ void ASheriff::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bIsAlone) return;
+	WildWestGameInstance = WildWestGameInstance == nullptr ? GetGameInstance<UWildWestGameInstance>() : WildWestGameInstance;
+	if (WildWestGameInstance && WildWestGameInstance->IsLastChase()) return;
 
 	if (IsLocallyControlled() && InputEnabled())
 	{
@@ -426,10 +428,7 @@ void ASheriff::ChangeHUDProperly(int32 Index, EScreenIndex ScreenIndex, EScreenI
 
 void ASheriff::Interact()
 {
-	if (!bIsInputEnabled)
-	{
-		return;
-	}
+	if (!bIsInputEnabled || !TraceTowardGunman()) return;
 
 	if (!HasAuthority())
 	{
@@ -445,10 +444,10 @@ void ASheriff::ServerInteract_Implementation()
 	EnterDuel();
 }
 
-void ASheriff::EnterDuel()
+bool ASheriff::TraceTowardGunman()
 {
 	UWorld* World = GetWorld();
-	if (World == nullptr) return;
+	if (World == nullptr) return false;
 
 	FVector2D ViewportSize;
 	if (GEngine && GEngine->GameViewport)
@@ -466,11 +465,11 @@ void ASheriff::EnterDuel()
 		CrosshairWorldDirection
 	);
 
-	if (!bScreenToWorld) return;
+	if (!bScreenToWorld) return false;
 
 	FVector Start = CrosshairWorldPosition;
 	float DistanceToCharacter = (GetActorLocation() - Start).Size();
-	Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
+	Start += CrosshairWorldDirection * (DistanceToCharacter + 10.f);
 
 	FVector End = Start + CrosshairWorldDirection * ARM_LENGTH;
 
@@ -482,7 +481,15 @@ void ASheriff::EnterDuel()
 		ECollisionChannel::ECC_Visibility
 	);
 
-	if (HitResult.GetActor() == nullptr || !HitResult.GetActor()->IsA(AGunman::StaticClass())) return;
+	if (HitResult.GetActor() == nullptr || !HitResult.GetActor()->IsA(AGunman::StaticClass())) return false;
+
+	return true;
+}
+
+void ASheriff::EnterDuel()
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
 
 	ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
 	if (TownGameState == nullptr) return;

@@ -32,17 +32,13 @@ private:
 	UPROPERTY(BlueprintReadWrite, Category = "Flag", meta = (AllowPrivateAccess = "true"))
 	bool bIsGameStarted;
 
+	bool bLastChase;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
 	TArray<FTransform> LastTransformList;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
 	FTransform LastGunmanTransform;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Index", meta = (AllowPrivateAccess = "true"))
-	TArray<int32> AliveControllerIndex{ 1, 2, 3, 4 };
-
-	UPROPERTY(BlueprintReadOnly, Category = "Index", meta = (AllowPrivateAccess = "true"))
-	TArray<int32> RemovedControllerIndex;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Vault", meta = (AllowPrivateAccess = "true"))
 	TMap<FVector, bool> VaultList;
@@ -58,32 +54,21 @@ private:
 	float MasterVolume{ 1.0f };
 
 public:
-	FORCEINLINE ECharacterState GetServerCharacterState() { return ServerCharacterState; }
-	FORCEINLINE ECharacterState GetClientCharacterState() { return ClientCharacterState; }
-
+	FORCEINLINE ECharacterState GetServerCharacterState() const { return ServerCharacterState; }
+	FORCEINLINE ECharacterState GetClientCharacterState() const { return ClientCharacterState; }
 	FORCEINLINE void SetServerCharacterState(ECharacterState NewState) { ServerCharacterState = NewState; }
 	FORCEINLINE void SetClientCharacterState(ECharacterState NewState) { ClientCharacterState = NewState; }
-
-	FORCEINLINE void SetbIsGameStarted(bool bIsStarted) { bIsGameStarted = bIsStarted; }
-
+	FORCEINLINE void StartGame(bool bIsStarted) { bIsGameStarted = bIsStarted; }
+	FORCEINLINE bool IsLastChase() const { return bLastChase; }
+	FORCEINLINE void ChaseLastly(bool bLast) { bLastChase = bLast; }
 	FORCEINLINE TArray<FTransform>& GetLastTransformList() { return LastTransformList; }
-
 	FORCEINLINE void SetLastGunmanTransform(FTransform LastTransform) { LastGunmanTransform = LastTransform; }
-
-	FORCEINLINE TArray<int32>& GetAliveControllerIndex() { return AliveControllerIndex; }
-
-	FORCEINLINE TArray<int32>& GetRemovedControllerIndex() { return RemovedControllerIndex; }
-
 	FORCEINLINE TMap<FVector, bool>& GetVaultList() { return VaultList; }
-
 	FORCEINLINE TArray<FTransform>& GetVaultTransformList() { return VaultTransformList; }
-
-	FORCEINLINE int32 GetCurrentSheriffIndex() { return CurrentSheriffIndex; }
+	FORCEINLINE int32 GetCurrentSheriffIndex() const { return CurrentSheriffIndex; }
 	FORCEINLINE void SetCurrentSheriffIndex(int32 NewIndex) { CurrentSheriffIndex = NewIndex; }
-
 	FORCEINLINE void AddVaultOpened(int32 NewOpenedVault) { VaultOpened += NewOpenedVault; }
 	FORCEINLINE void SetVaultOpened(int32 NewOpenedVault) { VaultOpened = NewOpenedVault; }
-
 	FORCEINLINE float GetMasterVolume() { return MasterVolume; }
 	FORCEINLINE void SetMasterVolume(float Volume) { MasterVolume = Volume; }
 };

@@ -4,26 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
-#include "DuelSheriffHUD.generated.h"
+#include "DuelGunmanHUD.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class WILDWEST_API ADuelSheriffHUD : public AHUD
+class WILDWEST_API ADuelGunmanHUD : public AHUD
 {
 	GENERATED_BODY()
-
+	
 public:
 	UFUNCTION(BlueprintCallable)
-	void AddDuelSheriffOverlay();
+	void AddDuelGunmanOverlay();
 
 	UFUNCTION(BlueprintCallable)
 	void RemoveOverlay();
 
 	UPROPERTY(EditAnywhere, Category = HUD)
-	TSubclassOf<UUserWidget> DuelSheriffOverlayClass;
+	TSubclassOf<UUserWidget> DuelGunmanOverlayClass;
 
 	UPROPERTY()
-	class UDuelSheriffOverlay* DuelSheriffOverlay;
+	class UDuelGunmanOverlay* DuelGunmanOverlay;
 };

@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "DuelSheriffOverlay.h"
+#include "DuelGunmanOverlay.h"
 #include "Components/Button.h"
-#include "WildWest/Character/DuelSheriff.h"
+#include "WildWest/Character/DuelGunman.h"
 
-void UDuelSheriffOverlay::OverlaySetup(APlayerController* Controller)
+void UDuelGunmanOverlay::OverlaySetup(APlayerController* Controller)
 {
 	AddToViewport();
 	SetVisibility(ESlateVisibility::Visible);
@@ -22,11 +22,11 @@ void UDuelSheriffOverlay::OverlaySetup(APlayerController* Controller)
 		Controller->SetInputMode(InputModeData);
 		Controller->SetShowMouseCursor(true);
 
-		DuelSheriff = Controller->GetPawn<ADuelSheriff>();
+		DuelGunman = Controller->GetPawn<ADuelGunman>();
 	}
 }
 
-void UDuelSheriffOverlay::OverlayReset()
+void UDuelGunmanOverlay::OverlayReset()
 {
 	if (LeftButton)
 	{
@@ -42,7 +42,7 @@ void UDuelSheriffOverlay::OverlayReset()
 	}
 }
 
-bool UDuelSheriffOverlay::Initialize()
+bool UDuelGunmanOverlay::Initialize()
 {
 	if (!Super::Initialize())
 	{
@@ -51,65 +51,65 @@ bool UDuelSheriffOverlay::Initialize()
 
 	if (LeftButton)
 	{
-		LeftButton->OnClicked.AddDynamic(this, &UDuelSheriffOverlay::LeftButtonClicked);
+		LeftButton->OnClicked.AddDynamic(this, &UDuelGunmanOverlay::LeftButtonClicked);
 	}
 	if (MiddleButton)
 	{
-		MiddleButton->OnClicked.AddDynamic(this, &UDuelSheriffOverlay::MiddleButtonClicked);
+		MiddleButton->OnClicked.AddDynamic(this, &UDuelGunmanOverlay::MiddleButtonClicked);
 	}
 	if (RightButton)
 	{
-		RightButton->OnClicked.AddDynamic(this, &UDuelSheriffOverlay::RightButtonClicked);
+		RightButton->OnClicked.AddDynamic(this, &UDuelGunmanOverlay::RightButtonClicked);
 	}
 
 	return true;
 }
 
-void UDuelSheriffOverlay::LeftButtonClicked()
+void UDuelGunmanOverlay::LeftButtonClicked()
 {
 	LeftButton->SetIsEnabled(false);
 
 	UWorld* World = GetWorld();
 	if (World == nullptr) return;
 
-	DuelSheriff = DuelSheriff == nullptr ? World->GetFirstPlayerController()->GetPawn<ADuelSheriff>() : DuelSheriff;
-	if (DuelSheriff)
+	DuelGunman = DuelGunman == nullptr ? World->GetFirstPlayerController()->GetPawn<ADuelGunman>() : DuelGunman;
+	if (DuelGunman)
 	{
-		DuelSheriff->DodgeLeft();
+		DuelGunman->ShootLeft();
 	}
 
 	MiddleButton->SetIsEnabled(true);
 	RightButton->SetIsEnabled(true);
 }
 
-void UDuelSheriffOverlay::MiddleButtonClicked()
+void UDuelGunmanOverlay::MiddleButtonClicked()
 {
 	MiddleButton->SetIsEnabled(false);
 
 	UWorld* World = GetWorld();
 	if (World == nullptr) return;
 
-	DuelSheriff = DuelSheriff == nullptr ? World->GetFirstPlayerController()->GetPawn<ADuelSheriff>() : DuelSheriff;
-	if (DuelSheriff)
+	DuelGunman = DuelGunman == nullptr ? World->GetFirstPlayerController()->GetPawn<ADuelGunman>() : DuelGunman;
+	if (DuelGunman)
 	{
-		DuelSheriff->Reload();
+		DuelGunman->ShootMiddle();
 	}
 
 	LeftButton->SetIsEnabled(true);
 	RightButton->SetIsEnabled(true);
 }
 
-void UDuelSheriffOverlay::RightButtonClicked()
+void UDuelGunmanOverlay::RightButtonClicked()
 {
 	RightButton->SetIsEnabled(false);
 
 	UWorld* World = GetWorld();
 	if (World == nullptr) return;
 
-	DuelSheriff = DuelSheriff == nullptr ? World->GetFirstPlayerController()->GetPawn<ADuelSheriff>() : DuelSheriff;
-	if (DuelSheriff)
+	DuelGunman = DuelGunman == nullptr ? World->GetFirstPlayerController()->GetPawn<ADuelGunman>() : DuelGunman;
+	if (DuelGunman)
 	{
-		DuelSheriff->DodgeRight();
+		DuelGunman->ShootRight();
 	}
 
 	LeftButton->SetIsEnabled(true);

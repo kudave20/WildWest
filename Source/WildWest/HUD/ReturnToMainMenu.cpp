@@ -98,27 +98,21 @@ void UReturnToMainMenu::OnDestroySession(bool bWasSuccessful)
 		UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
 		if (WildWestGameInstance)
 		{
-			WildWestGameInstance->SetbIsGameStarted(false);
+			WildWestGameInstance->StartGame(false);
+			WildWestGameInstance->ChaseLastly(false);
 			WildWestGameInstance->SetServerCharacterState(ECharacterState::ECS_None);
 			WildWestGameInstance->SetClientCharacterState(ECharacterState::ECS_None);
 			WildWestGameInstance->GetLastTransformList().Empty();
 			WildWestGameInstance->SetLastGunmanTransform(FTransform());
-			WildWestGameInstance->GetAliveControllerIndex().Empty();
-			WildWestGameInstance->GetRemovedControllerIndex().Empty();
 			WildWestGameInstance->GetVaultList().Empty();
 			WildWestGameInstance->GetVaultTransformList().Empty();
 			WildWestGameInstance->SetCurrentSheriffIndex(0);
 			WildWestGameInstance->SetVaultOpened(0);
 
-			for (int32 Idx = 1; Idx <= 4; Idx++)
-			{
-				WildWestGameInstance->GetAliveControllerIndex().Add(Idx);
-			}
-
 			AGameModeBase* GameMode = World->GetAuthGameMode<AGameModeBase>();
 			if (GameMode)
 			{
-				PlayerController = PlayerController == nullptr ? World->GetFirstPlayerController() : PlayerController;
+				/*PlayerController = PlayerController == nullptr ? World->GetFirstPlayerController() : PlayerController;
 
 				for (ATownPlayerController* TownPC : TActorRange<ATownPlayerController>(World))
 				{
@@ -148,18 +142,6 @@ void UReturnToMainMenu::OnDestroySession(bool bWasSuccessful)
 							DuelPC->ClientRemovePlayer();
 						}
 					}
-				}
-				
-				/*ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(PlayerController);
-				if (TownPlayerController)
-				{
-					TownPlayerController->ClientDestroySession();
-				}
-
-				ADuelPlayerController* DuelPlayerController = Cast<ADuelPlayerController>(PlayerController);
-				if (DuelPlayerController)
-				{
-					DuelPlayerController->ClientDestroySession();
 				}*/
 
 				GameMode->ReturnToMainMenuHost();
@@ -167,7 +149,7 @@ void UReturnToMainMenu::OnDestroySession(bool bWasSuccessful)
 			else
 			{
 				PlayerController = PlayerController == nullptr ? World->GetFirstPlayerController() : PlayerController;
-
+				/*
 				for (APlayerController* PC : TActorRange<APlayerController>(World))
 				{
 					if (PC && !PC->IsPrimaryPlayer())
@@ -180,7 +162,7 @@ void UReturnToMainMenu::OnDestroySession(bool bWasSuccessful)
 				if (TownPlayerController)
 				{
 					TownPlayerController->ServerNotifyDisconnected();
-				}
+				}*/
 
 				if (PlayerController)
 				{

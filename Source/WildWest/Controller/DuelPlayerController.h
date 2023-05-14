@@ -24,6 +24,12 @@ class WILDWEST_API ADuelPlayerController : public APlayerController
 public:
 	ADuelPlayerController();
 
+	void DuelGunmanHUDSetup();
+	void DuelSheriffHUDSetup();
+
+	void SetDuelGunmanHUDTimer(int32 Timer);
+	void SetDuelSheriffHUDTimer(int32 Timer);
+
 	UPROPERTY(BlueprintAssignable)
 	FOnHitDuelDelegate HitDelegate;
 
@@ -60,32 +66,29 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientFightBackBroadcast();
 
-	UFUNCTION(Client, Reliable)
-	void ClientSetInputModeGameOnly();
-
 	UFUNCTION(BlueprintCallable)
-	void SetInitialControlRotation(const FRotator& NewRotation);
-
-	UFUNCTION(BlueprintCallable)
-	void SetControllerIndex();
-
-	UFUNCTION(Server, Reliable)
-	void ServerSetControllerIndex();
+	void SetDuelOver();
 
 	UFUNCTION(Client, Reliable)
 	void ClientRemovePlayer();
 
-	/*UFUNCTION(Client, Reliable)
-	void ClientDestroySession();*/
-
-protected:
-	virtual void BeginPlay() override;
-
 private:
+	UPROPERTY(EditAnywhere, Category = HUD)
+	TSubclassOf<AHUD> DuelGunmanHUDClass;
+
+	UPROPERTY()
+	class ADuelGunmanHUD* DuelGunmanHUD;
+
 	UPROPERTY(EditAnywhere, Category = HUD)
 	TSubclassOf<AHUD> DuelSheriffHUDClass;
 
 	UPROPERTY()
 	class ADuelSheriffHUD* DuelSheriffHUD;
+
+	UFUNCTION()
+	void DuelGunmanHUDTimerFinished();
+
+	UFUNCTION()
+	void DuelSheriffHUDTimerFinished();
 
 };

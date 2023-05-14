@@ -2,32 +2,91 @@
 
 
 #include "DuelPlayerController.h"
-//#include "Camera/CameraActor.h"
 #include "WildWest/GameInstance/WildWestGameInstance.h"
 #include "WildWest/GameState/DuelGameState.h"
 #include "Kismet/GameplayStatics.h"
-#include "WildWest/Character/DuelGunman.h"
-#include "WildWest/Character/DuelSheriff.h"
+#include "WildWest/HUD/DuelGunmanHUD.h"
+#include "WildWest/HUD/DuelGunmanOverlay.h"
+#include "WildWest/HUD/DuelSheriffHUD.h"
+#include "WildWest/HUD/DuelSheriffOverlay.h"
+#include "Components/TextBlock.h"
 
 ADuelPlayerController::ADuelPlayerController()
 {
 	bAutoManageActiveCameraTarget = false;
 }
 
-void ADuelPlayerController::BeginPlay()
+void ADuelPlayerController::DuelGunmanHUDSetup()
 {
-	Super::BeginPlay();
+	FTimerHandle DuelGunmanHUDTimer;
+	GetWorldTimerManager().SetTimer(
+		DuelGunmanHUDTimer,
+		this,
+		&ADuelPlayerController::DuelGunmanHUDTimerFinished,
+		1.1f
+	);
+}
 
-	if (GetPawn())
+void ADuelPlayerController::DuelSheriffHUDSetup()
+{
+	FTimerHandle DuelSheriffHUDTimer;
+	GetWorldTimerManager().SetTimer(
+		DuelSheriffHUDTimer,
+		this,
+		&ADuelPlayerController::DuelSheriffHUDTimerFinished,
+		1.1f
+	);
+}
+
+void ADuelPlayerController::DuelGunmanHUDTimerFinished()
+{
+	if (DuelGunmanHUDClass)
 	{
-		if (GetPawn()->IsA(ADuelSheriff::StaticClass()))
+		ClientSetHUD(DuelGunmanHUDClass);
+		DuelGunmanHUD = Cast<ADuelGunmanHUD>(GetHUD());
+		if (DuelGunmanHUD)
 		{
-			ClientSetHUD(DuelSheriffHUDClass);
+			DuelGunmanHUD->AddDuelGunmanOverlay();
 		}
-		else if (GetPawn()->IsA(ADuelGunman::StaticClass()))
-		{
+	}
+}
 
+void ADuelPlayerController::DuelSheriffHUDTimerFinished()
+{
+	if (DuelSheriffHUDClass)
+	{
+		ClientSetHUD(DuelSheriffHUDClass);
+		DuelSheriffHUD = Cast<ADuelSheriffHUD>(GetHUD());
+		if (DuelSheriffHUD)
+		{
+			DuelSheriffHUD->AddDuelSheriffOverlay();
 		}
+	}
+}
+
+void ADuelPlayerController::SetDuelGunmanHUDTimer(int32 Timer)
+{
+	DuelGunmanHUD = DuelGunmanHUD == nullptr ? Cast<ADuelGunmanHUD>(GetHUD()) : DuelGunmanHUD;
+	bool bHUDValid = DuelGunmanHUD &&
+		DuelGunmanHUD->DuelGunmanOverlay &&
+		DuelGunmanHUD->DuelGunmanOverlay->TimerText;
+	if (bHUDValid)
+	{
+		FString TimerText = FString::Printf(TEXT("%d"), Timer);
+		DuelGunmanHUD->DuelGunmanOverlay->TimerText->SetText(FText::FromString(TimerText));
+	}
+}
+
+void ADuelPlayerController::SetDuelSheriffHUDTimer(int32 Timer)
+{
+	DuelSheriffHUD = DuelSheriffHUD == nullptr ? Cast<ADuelSheriffHUD>(GetHUD()) : DuelSheriffHUD;
+	bool bHUDValid = DuelSheriffHUD &&
+		DuelSheriffHUD->DuelSheriffOverlay &&
+		DuelSheriffHUD->DuelSheriffOverlay->TimerText;
+	if (bHUDValid)
+	{
+		FString TimerText = FString::Printf(TEXT("%d"), Timer);
+		DuelSheriffHUD->DuelSheriffOverlay->TimerText->SetText(FText::FromString(TimerText));
 	}
 }
 
@@ -61,74 +120,16 @@ void ADuelPlayerController::ClientFightBackBroadcast_Implementation()
 	FightBackDelegate.Broadcast();
 }
 
-void ADuelPlayerController::ClientSetInputModeGameOnly_Implementation()
+void ADuelPlayerController::SetDuelOver()
 {
-	FInputModeGameOnly InputModeData;
-	SetInputMode(InputModeData);
-	SetShowMouseCursor(false);
-}
-
-void ADuelPlayerController::SetInitialControlRotation(const FRotator& NewRotation)
-{
-	SetControlRotation(NewRotation);
-	ClientSetRotation(NewRotation);
-}
-
-void ADuelPlayerController::SetControllerIndex()
-{
-	if (!HasAuthority())
-	{
-		ServerSetControllerIndex();
-		return;
-	}
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
 
 	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-	if (WildWestGameInstance)
+	ADuelGameState* DuelGameState = World->GetGameState<ADuelGameState>();
+	if (WildWestGameInstance && DuelGameState)
 	{
-		TArray<int32>& RemovedControllerIndex = WildWestGameInstance->GetRemovedControllerIndex();
-		int32 CurrentSheriffIndex = WildWestGameInstance->GetCurrentSheriffIndex();
-
-		RemovedControllerIndex.AddUnique(CurrentSheriffIndex);
-		RemovedControllerIndex.Sort();
-
-		TArray<int32>& AliveControllerIndex = WildWestGameInstance->GetAliveControllerIndex();
-		AliveControllerIndex.Remove(CurrentSheriffIndex);
-
-		UWorld* World = GetWorld();
-		if (World)
-		{
-			ADuelGameState* DuelGameState = World->GetGameState<ADuelGameState>();
-			if (DuelGameState)
-			{
-				DuelGameState->SetbIsDuelOver(AliveControllerIndex.IsEmpty());
-			}
-		}
-	}
-}
-
-void ADuelPlayerController::ServerSetControllerIndex_Implementation()
-{
-	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-	if (WildWestGameInstance)
-	{
-		TArray<int32>& RemovedControllerIndex = WildWestGameInstance->GetRemovedControllerIndex();
-		int32 CurrentSheriffIndex = WildWestGameInstance->GetCurrentSheriffIndex();
-
-		RemovedControllerIndex.AddUnique(CurrentSheriffIndex);
-		RemovedControllerIndex.Sort();
-
-		TArray<int32>& AliveControllerIndex = WildWestGameInstance->GetAliveControllerIndex();
-		AliveControllerIndex.Remove(CurrentSheriffIndex);
-
-		UWorld* World = GetWorld();
-		if (World)
-		{
-			ADuelGameState* DuelGameState = World->GetGameState<ADuelGameState>();
-			if (DuelGameState)
-			{
-				DuelGameState->SetbIsDuelOver(AliveControllerIndex.IsEmpty());
-			}
-		}
+		DuelGameState->SetDuelOver(WildWestGameInstance->IsLastChase());
 	}
 }
 
@@ -136,16 +137,3 @@ void ADuelPlayerController::ClientRemovePlayer_Implementation()
 {
 	UGameplayStatics::RemovePlayer(this, true);
 }
-
-/*void ADuelPlayerController::ClientDestroySession_Implementation()
-{
-	UGameInstance* GameInstance = GetGameInstance();
-	if (GameInstance)
-	{
-		UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
-		if (MultiplayerSessionsSubsystem)
-		{
-			MultiplayerSessionsSubsystem->DestroySession();
-		}
-	}
-}*/
