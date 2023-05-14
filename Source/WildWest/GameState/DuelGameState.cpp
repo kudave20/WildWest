@@ -100,6 +100,7 @@ void ADuelGameState::StartDuel()
 		ClientPlayerController->ClientDodgeBroadcast();
 
 		BulletCount--;
+		SetHUDBullet(BulletCount);
 		if (BulletCount == 0)
 		{
 			ServerPlayerController->FireCompleteDelegate.Broadcast();
@@ -205,6 +206,7 @@ void ADuelGameState::StartDuelTimer()
 {
 	DuelTimer = InitialDuelTimer;
 	SetHUDTimer(DuelTimer);
+	SetHUDBullet(BulletCount);
 
 	GetWorldTimerManager().SetTimer(
 		CurrentDuelTimer,
@@ -240,6 +242,11 @@ void ADuelGameState::OnRep_DuelTimer()
 	SetHUDTimer(DuelTimer);
 }
 
+void ADuelGameState::OnRep_BulletCount()
+{
+	SetHUDBullet(BulletCount);
+}
+
 void ADuelGameState::SetHUDTimer(int32 Timer)
 {
 	UWorld* World = GetWorld();
@@ -248,8 +255,22 @@ void ADuelGameState::SetHUDTimer(int32 Timer)
 		DuelPlayerController = DuelPlayerController == nullptr ? World->GetFirstPlayerController<ADuelPlayerController>() : DuelPlayerController;
 		if (DuelPlayerController && DuelPlayerController->GetHUD())
 		{
-			DuelPlayerController->SetDuelGunmanHUDTimer(DuelTimer);
-			DuelPlayerController->SetDuelSheriffHUDTimer(DuelTimer);
+			DuelPlayerController->SetDuelGunmanHUDTimer(Timer);
+			DuelPlayerController->SetDuelSheriffHUDTimer(Timer);
+		}
+	}
+}
+
+void ADuelGameState::SetHUDBullet(int32 Bullet)
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		DuelPlayerController = DuelPlayerController == nullptr ? World->GetFirstPlayerController<ADuelPlayerController>() : DuelPlayerController;
+		if (DuelPlayerController && DuelPlayerController->GetHUD())
+		{
+			DuelPlayerController->SetDuelGunmanHUDBullet(Bullet);
+			DuelPlayerController->SetDuelSheriffHUDBullet(Bullet);
 		}
 	}
 }

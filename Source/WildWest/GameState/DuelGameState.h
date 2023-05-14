@@ -60,8 +60,11 @@ private:
 	UFUNCTION()
 	void OnRep_DuelTimer();
 
-	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Count")
+	UPROPERTY(ReplicatedUsing = OnRep_BulletCount, EditAnywhere, Category = "Count")
 	int32 BulletCount;
+
+	UFUNCTION()
+	void OnRep_BulletCount();
 
 	FTimerHandle CurrentDuelTimer;
 
@@ -83,6 +86,7 @@ private:
 	ADuelPlayerController* ClientPlayerController;
 
 	void SetHUDTimer(int32 Timer);
+	void SetHUDBullet(int32 Bullet);
 
 	void ControlHitMontages(APlayerController* Controller);
 	void ControlDodgeMontages(APlayerController* Controller);

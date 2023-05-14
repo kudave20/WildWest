@@ -30,6 +30,9 @@ public:
 	void SetDuelGunmanHUDTimer(int32 Timer);
 	void SetDuelSheriffHUDTimer(int32 Timer);
 
+	void SetDuelGunmanHUDBullet(int32 Bullet);
+	void SetDuelSheriffHUDBullet(int32 Bullet);
+
 	UPROPERTY(BlueprintAssignable)
 	FOnHitDuelDelegate HitDelegate;
 

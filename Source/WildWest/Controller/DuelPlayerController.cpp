@@ -90,6 +90,32 @@ void ADuelPlayerController::SetDuelSheriffHUDTimer(int32 Timer)
 	}
 }
 
+void ADuelPlayerController::SetDuelGunmanHUDBullet(int32 Bullet)
+{
+	DuelGunmanHUD = DuelGunmanHUD == nullptr ? Cast<ADuelGunmanHUD>(GetHUD()) : DuelGunmanHUD;
+	bool bHUDValid = DuelGunmanHUD &&
+		DuelGunmanHUD->DuelGunmanOverlay &&
+		DuelGunmanHUD->DuelGunmanOverlay->BulletText;
+	if (bHUDValid)
+	{
+		FString BulletText = FString::Printf(TEXT("%d"), Bullet);
+		DuelGunmanHUD->DuelGunmanOverlay->BulletText->SetText(FText::FromString(BulletText));
+	}
+}
+
+void ADuelPlayerController::SetDuelSheriffHUDBullet(int32 Bullet)
+{
+	DuelSheriffHUD = DuelSheriffHUD == nullptr ? Cast<ADuelSheriffHUD>(GetHUD()) : DuelSheriffHUD;
+	bool bHUDValid = DuelSheriffHUD &&
+		DuelSheriffHUD->DuelSheriffOverlay &&
+		DuelSheriffHUD->DuelSheriffOverlay->BulletText;
+	if (bHUDValid)
+	{
+		FString BulletText = FString::Printf(TEXT("%d"), Bullet);
+		DuelSheriffHUD->DuelSheriffOverlay->BulletText->SetText(FText::FromString(BulletText));
+	}
+}
+
 void ADuelPlayerController::ClientHitBroadcast_Implementation()
 {
 	HitDelegate.Broadcast();

@@ -22,7 +22,7 @@ public:
 	class UTextBlock* TimerText;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* CountText;
+	UTextBlock* BulletText;
 
 protected:
 	virtual bool Initialize() override;

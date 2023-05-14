@@ -72,7 +72,6 @@ void FCustomGameViewport::Draw(FViewport* InViewport, FCanvas* Canvas)
 	FViewport* ViewportBackup = Viewport;
 	Viewport = InViewport ? InViewport : Viewport;
 
-	// Determine whether we should use world time or real time based on the scene.
 	float TimeSeconds;
 	float RealTimeSeconds;
 	float DeltaTimeSeconds;
@@ -109,12 +108,9 @@ void FCustomGameViewport::Draw(FViewport* InViewport, FCanvas* Canvas)
 
 	Canvas->Clear(BackgroundColor);
 
-	// workaround for hacky renderer code that uses GFrameNumber to decide whether to resize render targets
 	--GFrameNumber;
 	GetRendererModule().BeginRenderingViewFamily(Canvas, &ViewFamily);
 
-	// Remove temporary debug lines.
-	// Possibly a hack. Lines may get added without the scene being rendered etc.
 	if (World == nullptr) return;
 
 	if (World->LineBatcher != nullptr && (World->LineBatcher->BatchedLines.Num() || World->LineBatcher->BatchedPoints.Num()))
