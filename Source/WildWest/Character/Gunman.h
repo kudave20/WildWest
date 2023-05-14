@@ -7,6 +7,8 @@
 #include "EnhancedInput/Public/InputActionValue.h"
 #include "Gunman.generated.h"
 
+#define ARM_LENGTH 150.f
+
 UCLASS()
 class WILDWEST_API AGunman : public ACharacter
 {
@@ -16,7 +18,6 @@ public:
 	AGunman();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -39,17 +40,17 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class UCameraComponent* Camera;
 
-	UPROPERTY(Replicated)
-	class AVault* OverlappingVault;
+	UPROPERTY()
+	class AVault* TargetVault;
 
-	UPROPERTY(EditDefaultsOnly, Category = HUD)
-	TSubclassOf<UUserWidget> VaultGaugeWidget;
+	UPROPERTY(EditAnywhere, Category = HUD)
+	TSubclassOf<UUserWidget> VaultGaugeClass;
 	
 	UPROPERTY()
 	class UVaultGauge* VaultGauge;
 
-	UPROPERTY(EditDefaultsOnly, Category = HUD)
-	TSubclassOf<UUserWidget> PressWidget;
+	UPROPERTY(EditAnywhere, Category = HUD)
+	TSubclassOf<UUserWidget> PressClass;
 
 	UPROPERTY()
 	UUserWidget* Press;
@@ -58,7 +59,5 @@ private:
 	void ServerOpenVault();
 
 	bool bIsInteracting;
-
-public:
-	FORCEINLINE void SetOverlappingVault(AVault* Vault) { OverlappingVault = Vault; }
+	bool bIsLookingVault;
 };

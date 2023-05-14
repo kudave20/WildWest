@@ -19,7 +19,6 @@ public:
 	void SetupServer(ECharacterState NewServerState);
 	void SetupClient(ECharacterState NewClientState);
 
-	void AddLastTransformList(FTransform LastTransform);
 	void ReplaceVaultList(FVector Key, bool Value);
 
 private:
@@ -46,8 +45,6 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = "Vault", meta = (AllowPrivateAccess = "true"))
 	TArray<FTransform> VaultTransformList;
 
-	int32 CurrentSheriffIndex;
-
 	UPROPERTY(BlueprintReadOnly, Category = "Vault", meta = (AllowPrivateAccess = "true"))
 	int32 VaultOpened;
 
@@ -62,11 +59,10 @@ public:
 	FORCEINLINE bool IsLastChase() const { return bLastChase; }
 	FORCEINLINE void ChaseLastly(bool bLast) { bLastChase = bLast; }
 	FORCEINLINE TArray<FTransform>& GetLastTransformList() { return LastTransformList; }
+	FORCEINLINE FTransform GetLastGunmanTransform() const { return LastGunmanTransform; }
 	FORCEINLINE void SetLastGunmanTransform(FTransform LastTransform) { LastGunmanTransform = LastTransform; }
 	FORCEINLINE TMap<FVector, bool>& GetVaultList() { return VaultList; }
 	FORCEINLINE TArray<FTransform>& GetVaultTransformList() { return VaultTransformList; }
-	FORCEINLINE int32 GetCurrentSheriffIndex() const { return CurrentSheriffIndex; }
-	FORCEINLINE void SetCurrentSheriffIndex(int32 NewIndex) { CurrentSheriffIndex = NewIndex; }
 	FORCEINLINE void AddVaultOpened(int32 NewOpenedVault) { VaultOpened += NewOpenedVault; }
 	FORCEINLINE void SetVaultOpened(int32 NewOpenedVault) { VaultOpened = NewOpenedVault; }
 	FORCEINLINE float GetMasterVolume() { return MasterVolume; }

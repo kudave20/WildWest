@@ -10,6 +10,7 @@
 #include "Components/Image.h"
 #include "Net/UnrealNetwork.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Kismet/GameplayStatics.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
@@ -46,58 +47,74 @@ void AGunman::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	/*if (OverlappingVault && !OverlappingVault->GetbIsOpened())
-	{
-		UWorld* World = GetWorld();
-		if (World)
-		{
-			FHitResult HitResult;
-			FVector CameraLocation = Camera->GetComponentLocation();
-			FCollisionQueryParams TraceParams;
-			TraceParams.AddIgnoredActor(this);
-			bool bIsLookingVault = World->LineTraceSingleByChannel(HitResult,
-				CameraLocation,
-				CameraLocation + AreaSphere->GetScaledSphereRadius() * Camera->GetForwardVector(),
-				ECollisionChannel::ECC_Pawn,
-				TraceParams) && Cast<AVault>(HitResult.GetActor());
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
 
-			if (bIsLookingVault)
-			{
-				if (!bIsInteracting)
-				{
-					if (Press == nullptr)
-					{
-						Press = CreateWidget(World, PressWidget);
-					}
-					if (Press && !Press->IsInViewport())
-					{
-						Press->AddToViewport();
-					}
-				}
-				else
-				{
-					if (Press && Press->IsInViewport())
-					{
-						Press->RemoveFromParent();
-					}
-				}
-			}
-			else
-			{
-				if (Press && Press->IsInViewport())
-				{
-					Press->RemoveFromParent();
-				}
-			}
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+
+	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	FVector CrosshairWorldPosition;
+	FVector CrosshairWorldDirection;
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
+		UGameplayStatics::GetPlayerController(this, 0),
+		CrosshairLocation,
+		CrosshairWorldPosition,
+		CrosshairWorldDirection
+	);
+
+	if (!bScreenToWorld) return;
+
+	FVector Start = CrosshairWorldPosition;
+	float DistanceToCharacter = (GetActorLocation() - Start).Size();
+	Start += CrosshairWorldDirection * (DistanceToCharacter + 10.f);
+
+	FVector End = Start + CrosshairWorldDirection * ARM_LENGTH;
+
+	FHitResult HitResult;
+	World->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECollisionChannel::ECC_Visibility
+	);
+
+	bIsLookingVault = HitResult.GetActor() && HitResult.GetActor()->IsA(AVault::StaticClass());
+
+	if (!bIsLookingVault)
+	{
+		if (Press)
+		{
+			Press->RemoveFromParent();
+		}
+
+		return;
+	}
+
+	TargetVault = TargetVault == nullptr ? Cast<AVault>(HitResult.GetActor()) : TargetVault;
+	if (TargetVault->GetbIsOpened()) return;
+
+	if (!bIsInteracting)
+	{
+		if (Press == nullptr)
+		{
+			Press = CreateWidget(World->GetFirstPlayerController(), PressClass);
+		}
+		if (Press && !Press->IsInViewport())
+		{
+			Press->AddToViewport();
 		}
 	}
 	else
 	{
-		if (Press && Press->IsInViewport())
+		if (Press)
 		{
 			Press->RemoveFromParent();
 		}
-	}*/
+	}
 }
 
 void AGunman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -126,13 +143,6 @@ void AGunman::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 			}
 		}
 	}
-}
-
-void AGunman::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(AGunman, OverlappingVault);
 }
 
 void AGunman::MoveForward(const FInputActionValue& Value)
@@ -197,84 +207,68 @@ void AGunman::LookUp(const FInputActionValue& Value)
 
 void AGunman::OpenVault()
 {
-	/*if (OverlappingVault && !OverlappingVault->GetbIsOpened())
+	if (!bIsLookingVault) return;
+
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
+
+	if (VaultGauge == nullptr)
 	{
-		UWorld* World = GetWorld();
-		if (World)
+		VaultGauge = CreateWidget<UVaultGauge>(World->GetFirstPlayerController(), VaultGaugeClass);
+		if (VaultGauge)
 		{
-			FHitResult HitResult;
-			FVector CameraLocation = Camera->GetComponentLocation();
-			FCollisionQueryParams TraceParams;
-			TraceParams.AddIgnoredActor(this);
-			bool bIsLookingVault = World->LineTraceSingleByChannel(HitResult,
-				CameraLocation,
-				CameraLocation + AreaSphere->GetScaledSphereRadius() * Camera->GetForwardVector(),
-				ECollisionChannel::ECC_Pawn,
-				TraceParams) && Cast<AVault>(HitResult.GetActor());
-
-			if (!bIsLookingVault)
-			{
-				return;
-			}
-
-			if (VaultGauge == nullptr)
-			{
-				VaultGauge = CreateWidget<UVaultGauge>(World, VaultGaugeWidget);
-				if (VaultGauge)
-				{
-					VaultGauge->AddToViewport();
-				}
-			}
-
-			float OpenTimer = OverlappingVault->GetOpenTimer();
-			float MaxOpenTimer = OverlappingVault->GetMaxOpenTimer();
-			if (OpenTimer >= MaxOpenTimer)
-			{
-				UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-				if (WildWestGameInstance)
-				{
-					VaultGauge->RemoveFromParent();
-
-					if (HasAuthority())
-					{
-						OverlappingVault->OpenDoorDelegate.Broadcast();
-						WildWestGameInstance->AddVaultOpened(1);
-						WildWestGameInstance->ReplaceVaultList(OverlappingVault->GetActorLocation(), true);
-					}
-					else
-					{
-						ServerOpenVault();
-					}
-
-					OverlappingVault->SetbIsOpened(true);
-				}
-
-				return;
-			}
-
-			if (VaultGauge)
-			{
-				if (!VaultGauge->IsInViewport())
-				{
-					VaultGauge->AddToViewport();
-				}
-
-				OverlappingVault->SetOpenTimer(OpenTimer + World->GetDeltaSeconds());
-
-				UImage* Gauge = VaultGauge->GetGauge();
-				if (Gauge)
-				{
-					UMaterialInstanceDynamic* GaugeMaterialInstance = Gauge->GetDynamicMaterial();
-					if (GaugeMaterialInstance)
-					{
-						GaugeMaterialInstance->SetScalarParameterValue(FName("GaugePercent"), OverlappingVault->GetOpenTimer() / MaxOpenTimer);
-					}
-				}
-			}
-
-			bIsInteracting = true;
+			VaultGauge->AddToViewport();
 		}
-	}*/
+	}
+
+	float OpenTimer = TargetVault->GetOpenTimer();
+	float MaxOpenTimer = TargetVault->GetMaxOpenTimer();
+	if (OpenTimer >= MaxOpenTimer)
+	{
+		UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+		if (WildWestGameInstance && !TargetVault->GetbIsOpened())
+		{
+			VaultGauge->RemoveFromParent();
+
+			if (HasAuthority())
+			{
+				TargetVault->OpenDoorDelegate.Broadcast();
+				WildWestGameInstance->AddVaultOpened(1);
+				WildWestGameInstance->ReplaceVaultList(TargetVault->GetActorLocation(), true);
+			}
+			else
+			{
+				ServerOpenVault();
+			}
+
+			TargetVault->SetbIsOpened(true);
+		}
+
+		TargetVault = nullptr;
+		return;
+	}
+
+	if (VaultGauge)
+	{
+		if (!VaultGauge->IsInViewport())
+		{
+			VaultGauge->AddToViewport();
+		}
+
+		TargetVault->SetOpenTimer(OpenTimer + World->GetDeltaSeconds());
+
+		UImage* Gauge = VaultGauge->GetGauge();
+		if (Gauge)
+		{
+			UMaterialInstanceDynamic* GaugeMaterialInstance = Gauge->GetDynamicMaterial();
+			if (GaugeMaterialInstance)
+			{
+				GaugeMaterialInstance->SetScalarParameterValue(FName("GaugePercent"), TargetVault->GetOpenTimer() / MaxOpenTimer);
+			}
+		}
+	}
+
+	bIsInteracting = true;
 }
 
 void AGunman::RemoveVaultGauge()
@@ -289,14 +283,14 @@ void AGunman::RemoveVaultGauge()
 
 void AGunman::ServerOpenVault_Implementation()
 {
-	if (OverlappingVault)
+	if (TargetVault)
 	{
-		OverlappingVault->OpenDoorDelegate.Broadcast();
+		TargetVault->OpenDoorDelegate.Broadcast();
 		UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
 		if (WildWestGameInstance)
 		{
 			WildWestGameInstance->AddVaultOpened(1);
-			WildWestGameInstance->ReplaceVaultList(OverlappingVault->GetActorLocation(), true);
+			WildWestGameInstance->ReplaceVaultList(TargetVault->GetActorLocation(), true);
 		}
 	}
 }

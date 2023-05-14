@@ -10,11 +10,11 @@
 #include "WildWest/GameInstance/WildWestGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Blueprint/UserWidget.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
 #include "WildWest/Input/InputConfigData.h"
-#include "Blueprint/UserWidget.h"
 
 ASheriff::ASheriff()
 {
@@ -34,7 +34,7 @@ void ASheriff::BeginPlay()
 	if (World)
 	{
 		WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-		ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+		TownGameState = World->GetGameState<ATownGameState>();
 		if (WildWestGameInstance && TownGameState && TownGameState->GetSheriffList().Num() == 1)
 		{
 			WildWestGameInstance->ChaseLastly(true);
@@ -119,13 +119,6 @@ void ASheriff::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	}
 }
 
-void ASheriff::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(ASheriff, CharacterIndex);
-}
-
 void ASheriff::Restart()
 {
 	Super::Restart();
@@ -138,7 +131,7 @@ void ASheriff::Restart()
 		TownPlayerController = Cast<ATownPlayerController>(Controller);
 		if (TownPlayerController && !TownPlayerController->IsSetupComplete())
 		{
-			ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+			TownGameState = World->GetGameState<ATownGameState>();
 			if (TownGameState == nullptr) return;
 
 			TArray<ASheriff*>& SheriffList = TownGameState->GetSheriffList();
@@ -161,7 +154,7 @@ void ASheriff::SetInitialCharacter(int32 CurrentSheriffNum, bool bShouldStun)
 	UWorld* World = GetWorld();
 	if (World == nullptr) return;
 
-	ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+	TownGameState = TownGameState == nullptr ? World->GetGameState<ATownGameState>() : TownGameState;
 	if (TownGameState == nullptr) return;
 
 	int32 RandomIndex = FMath::RandRange(1, CurrentSheriffNum);
@@ -287,8 +280,7 @@ void ASheriff::SwitchToFirst()
 	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(Controller) : TownPlayerController;
 	if (TownPlayerController == nullptr) return;
 
-	EScreenIndex CurrentScreenIndex = TownPlayerController->GetCurrentScreenIndex();
-	if (CurrentScreenIndex == EScreenIndex::ECI_First) return;
+	if (!CanSwitch(1, EScreenIndex::ECI_First)) return;
 
 	ChangeHUDProperly(1, EScreenIndex::ECI_First, TownPlayerController->GetCurrentScreenIndex());
 
@@ -306,8 +298,7 @@ void ASheriff::SwitchToSecond()
 	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(Controller) : TownPlayerController;
 	if (TownPlayerController == nullptr) return;
 
-	EScreenIndex CurrentScreenIndex = TownPlayerController->GetCurrentScreenIndex();
-	if (CurrentScreenIndex == EScreenIndex::ECI_Second) return;
+	if (!CanSwitch(2, EScreenIndex::ECI_Second)) return;
 
 	ChangeHUDProperly(2, EScreenIndex::ECI_Second, TownPlayerController->GetCurrentScreenIndex());
 
@@ -325,8 +316,7 @@ void ASheriff::SwitchToThird()
 	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(Controller) : TownPlayerController;
 	if (TownPlayerController == nullptr) return;
 
-	EScreenIndex CurrentScreenIndex = TownPlayerController->GetCurrentScreenIndex();
-	if (CurrentScreenIndex == EScreenIndex::ECI_Third) return;
+	if (!CanSwitch(3, EScreenIndex::ECI_Third)) return;
 
 	ChangeHUDProperly(3, EScreenIndex::ECI_Third, TownPlayerController->GetCurrentScreenIndex());
 
@@ -344,8 +334,7 @@ void ASheriff::SwitchToFourth()
 	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(Controller) : TownPlayerController;
 	if (TownPlayerController == nullptr) return;
 
-	EScreenIndex CurrentScreenIndex = TownPlayerController->GetCurrentScreenIndex();
-	if (CurrentScreenIndex == EScreenIndex::ECI_Fourth) return;
+	if (!CanSwitch(4, EScreenIndex::ECI_Fourth)) return;
 
 	ChangeHUDProperly(4, EScreenIndex::ECI_Fourth, TownPlayerController->GetCurrentScreenIndex());
 
@@ -390,12 +379,26 @@ void ASheriff::ServerSwitchToFourth_Implementation()
 	SwitchCharacter(4, EScreenIndex::ECI_Fourth);
 }
 
+bool ASheriff::CanSwitch(int32 Index, EScreenIndex ScreenIndex)
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr) return false;
+
+	TownGameState = TownGameState == nullptr ? World->GetGameState<ATownGameState>() : TownGameState;
+	if (TownGameState->GetSheriffList().Num() < Index || TownGameState->GetSheriffList()[Index - 1] == nullptr) return false;
+
+	EScreenIndex CurrentScreenIndex = TownPlayerController->GetCurrentScreenIndex();
+	if (CurrentScreenIndex == ScreenIndex) return false;
+
+	return true;
+}
+
 void ASheriff::SwitchCharacter(int32 Index, EScreenIndex ScreenIndex)
 {
 	UWorld* World = GetWorld();
 	if (World == nullptr) return;
 
-	ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+	TownGameState = TownGameState == nullptr ? World->GetGameState<ATownGameState>() : TownGameState;
 	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(Controller) : TownPlayerController;
 	if (TownGameState == nullptr || TownPlayerController == nullptr) return;
 
@@ -406,12 +409,6 @@ void ASheriff::SwitchCharacter(int32 Index, EScreenIndex ScreenIndex)
 		Controller->Possess(Sheriff);
 		Sheriff->Controller->SetControlRotation(Sheriff->GetPreviousDirection());
 		Sheriff->Controller->ClientSetRotation(Sheriff->GetPreviousDirection());
-
-		WildWestGameInstance = WildWestGameInstance == nullptr ? GetGameInstance<UWildWestGameInstance>() : WildWestGameInstance;
-		if (WildWestGameInstance)
-		{
-			WildWestGameInstance->SetCurrentSheriffIndex(Index);
-		}
 	}
 }
 
@@ -491,7 +488,7 @@ void ASheriff::EnterDuel()
 	UWorld* World = GetWorld();
 	if (World == nullptr) return;
 
-	ATownGameState* TownGameState = World->GetGameState<ATownGameState>();
+	TownGameState = TownGameState == nullptr ? World->GetGameState<ATownGameState>() : TownGameState;
 	if (TownGameState == nullptr) return;
 
 	AGunman* Gunman = TownGameState->GetGunman();
@@ -500,19 +497,18 @@ void ASheriff::EnterDuel()
 	WildWestGameInstance = WildWestGameInstance == nullptr ? GetGameInstance<UWildWestGameInstance>() : WildWestGameInstance;
 	if (WildWestGameInstance == nullptr || Gunman == nullptr) return;
 
-	WildWestGameInstance->SetCurrentSheriffIndex(CharacterIndex);
 	WildWestGameInstance->GetLastTransformList().Empty();
 	WildWestGameInstance->SetLastGunmanTransform(Gunman->GetActorTransform());
 
 	for (ASheriff* Sheriff : SheriffList)
 	{
-		if (Sheriff)
+		if (Sheriff && !Sheriff->IsLocallyControlled())
 		{
-			WildWestGameInstance->AddLastTransformList(Sheriff->GetActorTransform());
+			WildWestGameInstance->GetLastTransformList().Add(Sheriff->GetActorTransform());
 		}
 		else
 		{
-			WildWestGameInstance->AddLastTransformList(FTransform());
+			WildWestGameInstance->GetLastTransformList().Add(FTransform::Identity);
 		}
 	}
 

@@ -154,105 +154,117 @@ void ATownPlayerController::SetSheriffHUDViewport(EScreenIndex ScreenIndex, EScr
 		{
 		case EScreenIndex::ECI_First:
 			SheriffHUD->SheriffOverlay->FirstViewport->SetVisibility(ESlateVisibility::Hidden);
-			SheriffHUD->SheriffOverlay->SecondViewport->SetVisibility(ESlateVisibility::Visible);
-			SheriffHUD->SheriffOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Visible);
-			SheriffHUD->SheriffOverlay->FourthViewport->SetVisibility(ESlateVisibility::Visible);
 
 			switch (PreviousScreenIndex)
 			{
 			case EScreenIndex::ECI_First:
 				break;
 			case EScreenIndex::ECI_Second:
+				SheriffHUD->SheriffOverlay->SecondViewport->SetVisibility(ESlateVisibility::Visible);
 				TownGameState->GetSheriffList()[1]->GetActorEyesViewPoint(Location, Rotation);
+				Location += Rotation.Vector() * 10.f;
 				SheriffHUD->SheriffOverlay->SecondViewport->SetCameraLocation(false, Location);
 				SheriffHUD->SheriffOverlay->SecondViewport->SetCameraRotation(false, Rotation);
 				break;
 			case EScreenIndex::ECI_Third:
+				SheriffHUD->SheriffOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Visible);
 				TownGameState->GetSheriffList()[2]->GetActorEyesViewPoint(Location, Rotation);
+				Location += Rotation.Vector() * 10.f;
 				SheriffHUD->SheriffOverlay->ThirdViewport->SetCameraLocation(false, Location);
 				SheriffHUD->SheriffOverlay->ThirdViewport->SetCameraRotation(false, Rotation);
 				break;
 			case EScreenIndex::ECI_Fourth:
+				SheriffHUD->SheriffOverlay->FourthViewport->SetVisibility(ESlateVisibility::Visible);
 				TownGameState->GetSheriffList()[3]->GetActorEyesViewPoint(Location, Rotation);
+				Location += Rotation.Vector() * 10.f;
 				SheriffHUD->SheriffOverlay->FourthViewport->SetCameraLocation(false, Location);
 				SheriffHUD->SheriffOverlay->FourthViewport->SetCameraRotation(false, Rotation);
 				break;
 			}
 			break;
 		case EScreenIndex::ECI_Second:
-			SheriffHUD->SheriffOverlay->FirstViewport->SetVisibility(ESlateVisibility::Visible);
 			SheriffHUD->SheriffOverlay->SecondViewport->SetVisibility(ESlateVisibility::Hidden);
-			SheriffHUD->SheriffOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Visible);
-			SheriffHUD->SheriffOverlay->FourthViewport->SetVisibility(ESlateVisibility::Visible);
 
 			switch (PreviousScreenIndex)
 			{
 			case EScreenIndex::ECI_First:
+				SheriffHUD->SheriffOverlay->FirstViewport->SetVisibility(ESlateVisibility::Visible);
 				TownGameState->GetSheriffList()[0]->GetActorEyesViewPoint(Location, Rotation);
+				Location += Rotation.Vector() * 10.f;
 				SheriffHUD->SheriffOverlay->FirstViewport->SetCameraLocation(false, Location);
 				SheriffHUD->SheriffOverlay->FirstViewport->SetCameraRotation(false, Rotation);
 				break;
 			case EScreenIndex::ECI_Second:
 				break;
 			case EScreenIndex::ECI_Third:
+				SheriffHUD->SheriffOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Visible);
 				TownGameState->GetSheriffList()[2]->GetActorEyesViewPoint(Location, Rotation);
+				Location += Rotation.Vector() * 10.f;
 				SheriffHUD->SheriffOverlay->ThirdViewport->SetCameraLocation(false, Location);
 				SheriffHUD->SheriffOverlay->ThirdViewport->SetCameraRotation(false, Rotation);
 				break;
 			case EScreenIndex::ECI_Fourth:
+				SheriffHUD->SheriffOverlay->FourthViewport->SetVisibility(ESlateVisibility::Visible);
 				TownGameState->GetSheriffList()[3]->GetActorEyesViewPoint(Location, Rotation);
+				Location += Rotation.Vector() * 10.f;
 				SheriffHUD->SheriffOverlay->FourthViewport->SetCameraLocation(false, Location);
 				SheriffHUD->SheriffOverlay->FourthViewport->SetCameraRotation(false, Rotation);
 				break;
 			}
 			break;
 		case EScreenIndex::ECI_Third:
-			SheriffHUD->SheriffOverlay->FirstViewport->SetVisibility(ESlateVisibility::Visible);
-			SheriffHUD->SheriffOverlay->SecondViewport->SetVisibility(ESlateVisibility::Visible);
 			SheriffHUD->SheriffOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Hidden);
-			SheriffHUD->SheriffOverlay->FourthViewport->SetVisibility(ESlateVisibility::Visible);
 
 			switch (PreviousScreenIndex)
 			{
 			case EScreenIndex::ECI_First:
+				SheriffHUD->SheriffOverlay->FirstViewport->SetVisibility(ESlateVisibility::Visible);
 				TownGameState->GetSheriffList()[0]->GetActorEyesViewPoint(Location, Rotation);
+				Location += Rotation.Vector() * 10.f;
 				SheriffHUD->SheriffOverlay->FirstViewport->SetCameraLocation(false, Location);
 				SheriffHUD->SheriffOverlay->FirstViewport->SetCameraRotation(false, Rotation);
 				break;
 			case EScreenIndex::ECI_Second:
+				SheriffHUD->SheriffOverlay->SecondViewport->SetVisibility(ESlateVisibility::Visible);
 				TownGameState->GetSheriffList()[1]->GetActorEyesViewPoint(Location, Rotation);
+				Location += Rotation.Vector() * 10.f;
 				SheriffHUD->SheriffOverlay->SecondViewport->SetCameraLocation(false, Location);
 				SheriffHUD->SheriffOverlay->SecondViewport->SetCameraRotation(false, Rotation);
 				break;
 			case EScreenIndex::ECI_Third:
 				break;
 			case EScreenIndex::ECI_Fourth:
+				SheriffHUD->SheriffOverlay->FourthViewport->SetVisibility(ESlateVisibility::Visible);
 				TownGameState->GetSheriffList()[3]->GetActorEyesViewPoint(Location, Rotation);
+				Location += Rotation.Vector() * 10.f;
 				SheriffHUD->SheriffOverlay->FourthViewport->SetCameraLocation(false, Location);
 				SheriffHUD->SheriffOverlay->FourthViewport->SetCameraRotation(false, Rotation);
 				break;
 			}
 			break;
 		case EScreenIndex::ECI_Fourth:
-			SheriffHUD->SheriffOverlay->FirstViewport->SetVisibility(ESlateVisibility::Visible);
-			SheriffHUD->SheriffOverlay->SecondViewport->SetVisibility(ESlateVisibility::Visible);
-			SheriffHUD->SheriffOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Visible);
 			SheriffHUD->SheriffOverlay->FourthViewport->SetVisibility(ESlateVisibility::Hidden);
 
 			switch (PreviousScreenIndex)
 			{
 			case EScreenIndex::ECI_First:
+				SheriffHUD->SheriffOverlay->FirstViewport->SetVisibility(ESlateVisibility::Visible);
 				TownGameState->GetSheriffList()[0]->GetActorEyesViewPoint(Location, Rotation);
+				Location += Rotation.Vector() * 10.f;
 				SheriffHUD->SheriffOverlay->FirstViewport->SetCameraLocation(false, Location);
 				SheriffHUD->SheriffOverlay->FirstViewport->SetCameraRotation(false, Rotation);
 				break;
 			case EScreenIndex::ECI_Second:
+				SheriffHUD->SheriffOverlay->SecondViewport->SetVisibility(ESlateVisibility::Visible);
 				TownGameState->GetSheriffList()[1]->GetActorEyesViewPoint(Location, Rotation);
+				Location += Rotation.Vector() * 10.f;
 				SheriffHUD->SheriffOverlay->SecondViewport->SetCameraLocation(false, Location);
 				SheriffHUD->SheriffOverlay->SecondViewport->SetCameraRotation(false, Rotation);
 				break;
 			case EScreenIndex::ECI_Third:
+				SheriffHUD->SheriffOverlay->ThirdViewport->SetVisibility(ESlateVisibility::Visible);
 				TownGameState->GetSheriffList()[2]->GetActorEyesViewPoint(Location, Rotation);
+				Location += Rotation.Vector() * 10.f;
 				SheriffHUD->SheriffOverlay->ThirdViewport->SetCameraLocation(false, Location);
 				SheriffHUD->SheriffOverlay->ThirdViewport->SetCameraRotation(false, Rotation);
 				break;

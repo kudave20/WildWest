@@ -19,7 +19,6 @@ public:
 	ASheriff();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Restart() override;
 	virtual void UnPossessed() override;
 
@@ -44,6 +43,7 @@ protected:
 	void SwitchToFourth();
 	void Interact();
 
+	bool CanSwitch(int32 Index, EScreenIndex ScreenIndex);
 	void SwitchCharacter(int32 Index, EScreenIndex ScreenIndex);
 	void ChangeHUDProperly(int32 Index, EScreenIndex ScreenIndex, EScreenIndex PreviousScreenIndex);
 	void EnterDuel();
@@ -75,9 +75,6 @@ private:
 
 	FRotator PreviousDirection;
 
-	UPROPERTY(Replicated, BlueprintReadWrite, Category = Character, meta = (AllowPrivateAccess = "true"))
-	int32 CharacterIndex;
-
 	UPROPERTY(EditAnywhere, Category = "Control")
 	float InitialControlTimer;
 
@@ -85,13 +82,16 @@ private:
 
 	bool bIsInputEnabled = true;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Control")
+	UPROPERTY(EditAnywhere, Category = "Control")
 	float StunTimer;
 
 	FTimerHandle TimerHandle;
 
 	UPROPERTY()
 	class ATownPlayerController* TownPlayerController;
+
+	UPROPERTY()
+	class ATownGameState* TownGameState;
 
 	UPROPERTY()
 	class UWildWestGameInstance* WildWestGameInstance;
@@ -106,6 +106,5 @@ private:
 
 public:
 	FORCEINLINE FRotator GetPreviousDirection() const { return PreviousDirection; }
-	FORCEINLINE int32 GetCharacterIndex() const { return CharacterIndex; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return Camera; }
 };

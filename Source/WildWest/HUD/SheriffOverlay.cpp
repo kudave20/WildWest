@@ -6,6 +6,7 @@
 #include "WildWest/GameState/TownGameState.h"
 #include "WildWest/Character/Sheriff.h"
 #include "GameViewportWidget.h"
+#include "Components/Image.h"
 
 void USheriffOverlay::OverlaySetup()
 {
@@ -20,32 +21,73 @@ void USheriffOverlay::OverlaySetup()
 	TArray<ASheriff*>& SheriffList = TownGameState->GetSheriffList();
 	if (SheriffList.IsEmpty()) return;
 
+	if (FirstDeadScreen == nullptr || SecondDeadScreen == nullptr || ThirdDeadScreen == nullptr || FourthDeadScreen == nullptr) return;
+
+	FirstDeadScreen->SetVisibility(ESlateVisibility::Hidden);
+	SecondDeadScreen->SetVisibility(ESlateVisibility::Hidden);
+	ThirdDeadScreen->SetVisibility(ESlateVisibility::Hidden);
+	FourthDeadScreen->SetVisibility(ESlateVisibility::Hidden);
+
 	FVector Location;
 	FRotator Rotation;
 	if (FirstViewport)
 	{
-		SheriffList[0]->GetActorEyesViewPoint(Location, Rotation);
-		FirstViewport->SetCameraLocation(false, Location);
-		FirstViewport->SetCameraRotation(false, Rotation);
+		if (SheriffList[0])
+		{
+			SheriffList[0]->GetActorEyesViewPoint(Location, Rotation);
+			Location += Rotation.Vector() * 10.f;
+			FirstViewport->SetCameraLocation(false, Location);
+			FirstViewport->SetCameraRotation(false, Rotation);
+		}
+		else
+		{
+			FirstViewport->SetVisibility(ESlateVisibility::Hidden);
+			FirstDeadScreen->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
 	if (SecondViewport)
 	{
-		SheriffList[1]->GetActorEyesViewPoint(Location, Rotation);
-		SecondViewport->SetCameraLocation(false, Location);
-		SecondViewport->SetCameraRotation(false, Rotation);
+		if (SheriffList[1])
+		{
+			SheriffList[1]->GetActorEyesViewPoint(Location, Rotation);
+			Location += Rotation.Vector() * 10.f;
+			SecondViewport->SetCameraLocation(false, Location);
+			SecondViewport->SetCameraRotation(false, Rotation);
+		}
+		else
+		{
+			SecondViewport->SetVisibility(ESlateVisibility::Hidden);
+			SecondDeadScreen->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
 	if (ThirdViewport)
 	{
-		SheriffList[2]->GetActorEyesViewPoint(Location, Rotation);
-		ThirdViewport->SetCameraLocation(false, Location);
-		ThirdViewport->SetCameraRotation(false, Rotation);
+		if (SheriffList[2])
+		{
+			SheriffList[2]->GetActorEyesViewPoint(Location, Rotation);
+			Location += Rotation.Vector() * 10.f;
+			ThirdViewport->SetCameraLocation(false, Location);
+			ThirdViewport->SetCameraRotation(false, Rotation);
+		}
+		else
+		{
+			ThirdViewport->SetVisibility(ESlateVisibility::Hidden);
+			ThirdDeadScreen->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
-	if (FourthViewport && SheriffList.Num() >= 4)
+	if (FourthViewport)
 	{
-		SheriffList[3]->GetActorEyesViewPoint(Location, Rotation);
-		FourthViewport->SetCameraLocation(false, Location);
-		FourthViewport->SetCameraRotation(false, Rotation);
+		if (SheriffList[3])
+		{
+			SheriffList[3]->GetActorEyesViewPoint(Location, Rotation);
+			Location += Rotation.Vector() * 10.f;
+			FourthViewport->SetCameraLocation(false, Location);
+			FourthViewport->SetCameraRotation(false, Rotation);
+		}
+		else
+		{
+			FourthViewport->SetVisibility(ESlateVisibility::Hidden);
+			FourthDeadScreen->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
-	
-	return;
 }

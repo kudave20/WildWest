@@ -23,33 +23,12 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UFUNCTION()
-	virtual void OnSphereOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult
-	);
-
-	UFUNCTION()
-	void OnSphereEndOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex
-	);
-
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Vault Properties")
 	UStaticMeshComponent* VaultMesh;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Vault Properties", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* VaultDoorMesh;
-
-	UPROPERTY(VisibleAnywhere, Category = "Vault Properties")
-	class USphereComponent* AreaSphere;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Timer")
 	float MaxOpenTimer;
@@ -60,11 +39,9 @@ private:
 	bool bIsOpened;
 
 public:	
-	FORCEINLINE float GetMaxOpenTimer() { return MaxOpenTimer; }
-
-	FORCEINLINE float GetOpenTimer() { return OpenTimer; }
+	FORCEINLINE float GetMaxOpenTimer() const { return MaxOpenTimer; }
+	FORCEINLINE float GetOpenTimer() const { return OpenTimer; }
 	FORCEINLINE void SetOpenTimer(float NewTimer) { OpenTimer = NewTimer; }
-
-	FORCEINLINE bool GetbIsOpened() { return bIsOpened; }
+	FORCEINLINE bool GetbIsOpened() const { return bIsOpened; }
 	FORCEINLINE void SetbIsOpened(bool bOpened) { bIsOpened = bOpened; }
 };

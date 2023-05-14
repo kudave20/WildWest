@@ -33,6 +33,18 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UImage* Gauge;
 
+	UPROPERTY(meta = (BindWidget))
+	UImage* FirstDeadScreen;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* SecondDeadScreen;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* ThirdDeadScreen;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* FourthDeadScreen;
+
 	void OverlaySetup();
 
 };

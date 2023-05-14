@@ -8,6 +8,7 @@
 #include "WildWest/Controller/TownPlayerController.h"
 #include "WildWest/Character/Gunman.h"
 #include "WildWest/Character/Sheriff.h"
+#include "WildWest/GameInstance/WildWestGameInstance.h"
 
 void ATownGameMode::TravelToDuel()
 {
@@ -26,20 +27,39 @@ void ATownGameMode::InitGame(const FString& MapName, const FString& Options, FSt
 	UWorld* World = GetWorld();
 	if (World == nullptr) return;
 
-	AActor* GunmanStart = UGameplayStatics::GetActorOfClass(this, GunmanStartClass);
-	if (GunmanStart)
-	{
-		Gunman = World->SpawnActor<AGunman>(GunmanClass, GunmanStart->GetActorTransform());
-	}
+	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+	if (WildWestGameInstance == nullptr) return;
 
-	TArray<AActor*> PlayerStarts;
-	UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
-	for (AActor* PlayerStart : PlayerStarts)
+	if (WildWestGameInstance->GetLastTransformList().IsEmpty())
 	{
-		ASheriff* Sheriff = World->SpawnActor<ASheriff>(SheriffClass, PlayerStart->GetActorTransform());
-		if (Sheriff)
+		AActor* GunmanStart = UGameplayStatics::GetActorOfClass(this, GunmanStartClass);
+		if (GunmanStart)
 		{
+			Gunman = World->SpawnActor<AGunman>(GunmanClass, GunmanStart->GetActorTransform());
+		}
+
+		TArray<AActor*> PlayerStarts;
+		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
+		for (AActor* PlayerStart : PlayerStarts)
+		{
+			ASheriff* Sheriff = World->SpawnActor<ASheriff>(SheriffClass, PlayerStart->GetActorTransform());
 			SheriffList.Add(Sheriff);
+		}
+	}
+	else
+	{
+		Gunman = World->SpawnActor<AGunman>(GunmanClass, WildWestGameInstance->GetLastGunmanTransform());
+		for (FTransform LastTransform : WildWestGameInstance->GetLastTransformList())
+		{
+			if (LastTransform.Equals(FTransform::Identity))
+			{
+				SheriffList.Add(nullptr);
+			}
+			else
+			{
+				ASheriff* Sheriff = World->SpawnActor<ASheriff>(SheriffClass, LastTransform);
+				SheriffList.Add(Sheriff);
+			}
 		}
 	}
 }
@@ -57,10 +77,7 @@ void ATownGameMode::HandleStartingNewPlayer_Implementation(APlayerController* Ne
 		TArray<ASheriff*>& TargetSheriffList = TownGameState->GetSheriffList();
 		for (ASheriff* Sheriff : SheriffList)
 		{
-			if (Sheriff)
-			{
-				TargetSheriffList.Add(Sheriff);
-			}
+			TargetSheriffList.Add(Sheriff);
 		}
 	}
 	

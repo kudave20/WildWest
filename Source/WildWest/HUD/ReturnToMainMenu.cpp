@@ -106,7 +106,6 @@ void UReturnToMainMenu::OnDestroySession(bool bWasSuccessful)
 			WildWestGameInstance->SetLastGunmanTransform(FTransform());
 			WildWestGameInstance->GetVaultList().Empty();
 			WildWestGameInstance->GetVaultTransformList().Empty();
-			WildWestGameInstance->SetCurrentSheriffIndex(0);
 			WildWestGameInstance->SetVaultOpened(0);
 
 			AGameModeBase* GameMode = World->GetAuthGameMode<AGameModeBase>();
