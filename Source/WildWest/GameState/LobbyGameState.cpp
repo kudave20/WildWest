@@ -2,8 +2,6 @@
 
 
 #include "LobbyGameState.h"
-#include "WildWest/GameMode/LobbyGameMode.h"
-#include "WildWest/GameInstance/WildWestGameInstance.h"
 #include "WildWest/Controller/LobbyPlayerController.h"
 #include "Net/UnrealNetwork.h"
 
@@ -12,83 +10,22 @@ void ALobbyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ALobbyGameState, bIsLobbyFull);
+	DOREPLIFETIME(ALobbyGameState, ServerCharacterState);
+	DOREPLIFETIME(ALobbyGameState, ClientCharacterState);
 }
 
-void ALobbyGameState::GunmanButtonClicked()
+void ALobbyGameState::SetLobbyFull(bool bFull)
 {
+	bIsLobbyFull = bFull;
+
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		if (!HasAuthority())
+		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
+		if (LobbyPlayerController)
 		{
-			ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-			if (LobbyPlayerController)
-			{
-				LobbyPlayerController->ServerGunmanButtonClicked();
-			}
-
-			return;
+			LobbyPlayerController->AddCharacterSelect();
 		}
-
-		SetupServer(ECharacterState::ECS_Gunman);
-
-		UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-		if (WildWestGameInstance && WildWestGameInstance->GetClientCharacterState() == ECharacterState::ECS_Sheriff)
-		{
-			CheckSelectedCharacter();
-			return;
-		}
-	}
-}
-
-void ALobbyGameState::SheriffButtonClicked()
-{
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		if (!HasAuthority())
-		{
-			ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-			if (LobbyPlayerController)
-			{
-				LobbyPlayerController->ServerSheriffButtonClicked();
-			}
-
-			return;
-		}
-
-		SetupServer(ECharacterState::ECS_Sheriff);
-
-		UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-		if (WildWestGameInstance && WildWestGameInstance->GetClientCharacterState() == ECharacterState::ECS_Gunman)
-		{
-			CheckSelectedCharacter();
-			return;
-		}
-	}
-}
-
-void ALobbyGameState::ServerGunmanButtonClicked()
-{
-	SetupClient(ECharacterState::ECS_Gunman);
-
-	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-	if (WildWestGameInstance && WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Sheriff)
-	{
-		CheckSelectedCharacter();
-		return;
-	}
-}
-
-void ALobbyGameState::ServerSheriffButtonClicked()
-{
-	SetupClient(ECharacterState::ECS_Sheriff);
-
-	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-	if (WildWestGameInstance && WildWestGameInstance->GetServerCharacterState() == ECharacterState::ECS_Gunman)
-	{
-		CheckSelectedCharacter();
-		return;
 	}
 }
 
@@ -102,51 +39,56 @@ void ALobbyGameState::OnRep_bIsLobbyFull()
 			ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
 			if (LobbyPlayerController)
 			{
-				LobbyPlayerController->LobbyFullDelegate.Broadcast();
+				LobbyPlayerController->AddCharacterSelect();
 			}
 		}
 	}
 }
 
-void ALobbyGameState::CheckSelectedCharacter()
+void ALobbyGameState::SetServerCharacterState(ECharacterState NewState)
 {
-	UWorld* World = GetWorld();
-	if (World)
+	if (NewState == ECharacterState::ECS_None) return;
+	
+	ServerCharacterState = NewState;
+	
+	ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (LobbyPlayerController)
 	{
-		ALobbyGameMode* LobbyGameMode = World->GetAuthGameMode<ALobbyGameMode>();
-		LobbyGameMode->TravelToTown();
+		LobbyPlayerController->ChangeButtonState(NewState);
 	}
 }
 
-void ALobbyGameState::SetupServer(ECharacterState NewServerState)
+void ALobbyGameState::OnRep_ServerCharacterState()
 {
-	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-	if (WildWestGameInstance)
+	if (ServerCharacterState == ECharacterState::ECS_None) return;
+	
+	ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (LobbyPlayerController)
 	{
-		WildWestGameInstance->SetupServer(NewServerState);
+		LobbyPlayerController->ChangeButtonState(ServerCharacterState);
 	}
 }
 
-void ALobbyGameState::SetupClient(ECharacterState NewClientState)
+void ALobbyGameState::SetClientCharacterState(ECharacterState NewState)
 {
-	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
-	if (WildWestGameInstance)
+	if (NewState == ECharacterState::ECS_None) return;
+	
+	ClientCharacterState = NewState;
+	
+	ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (LobbyPlayerController)
 	{
-		WildWestGameInstance->SetupClient(NewClientState);
+		LobbyPlayerController->ChangeButtonState(NewState);
 	}
 }
 
-void ALobbyGameState::SetbIsLobbyFull(bool bIsFull)
+void ALobbyGameState::OnRep_ClientCharacterState()
 {
-	bIsLobbyFull = bIsFull;
-
-	UWorld* World = GetWorld();
-	if (World)
+	if (ClientCharacterState == ECharacterState::ECS_None) return;
+	
+	ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (LobbyPlayerController)
 	{
-		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-		if (LobbyPlayerController)
-		{
-			LobbyPlayerController->LobbyFullDelegate.Broadcast();
-		}
+		LobbyPlayerController->ChangeButtonState(ClientCharacterState);
 	}
 }

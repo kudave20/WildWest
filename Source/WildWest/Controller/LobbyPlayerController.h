@@ -4,11 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "WildWest/WildWestTypes/CharacterState.h"
 #include "LobbyPlayerController.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyFullDelegate);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnSelectServerCharacterDelegate, ECharacterState CharacterState);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnSelectClientCharacterDelegate, ECharacterState CharacterState);
+class UCharacterSelect;
 
 /**
  * 
@@ -19,19 +18,22 @@ class WILDWEST_API ALobbyPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintAssignable)
-	FOnLobbyFullDelegate LobbyFullDelegate;
-
-	FOnSelectServerCharacterDelegate SelectServerCharacterDelegate;
-	FOnSelectClientCharacterDelegate SelectClientCharacterDelegate;
-
-	UFUNCTION(Client, Reliable)
-	void ClientBroadcastServerCharacter(ECharacterState NewCharacterState);
-
+	void GunmanButtonClicked();
 	UFUNCTION(Server, Reliable)
 	void ServerGunmanButtonClicked();
 
+	void SheriffButtonClicked();
 	UFUNCTION(Server, Reliable)
 	void ServerSheriffButtonClicked();
 
+	void AddCharacterSelect();
+
+	void ChangeButtonState(ECharacterState NewState);
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Widget")
+	TSubclassOf<UUserWidget> CharacterSelectClass;
+
+	UPROPERTY()
+	UCharacterSelect* CharacterSelect;
 };

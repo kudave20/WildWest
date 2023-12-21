@@ -4,17 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
+#include "WildWest/WildWestTypes/CharacterState.h"
 #include "LobbyGameState.generated.h"
-
-UENUM(BlueprintType)
-enum class ECharacterState : uint8
-{
-	ECS_None UMETA(DisplayName = "None"),
-	ECS_Gunman UMETA(DisplayName = "Gunman"),
-	ECS_Sheriff UMETA(DisplayName = "Sheriff"),
-
-	ECS_MAX UMETA(DisplayName = "DefaultMAX")
-};
 
 /**
  * 
@@ -26,12 +17,6 @@ class WILDWEST_API ALobbyGameState : public AGameState
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void GunmanButtonClicked();
-	void SheriffButtonClicked();
-
-	void ServerGunmanButtonClicked();
-	void ServerSheriffButtonClicked();
-
 private:
 	UPROPERTY(EditDefaultsOnly, Category = Character)
 	TSubclassOf<AActor> GunmanClass;
@@ -41,15 +26,22 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_bIsLobbyFull)
 	bool bIsLobbyFull;
 
+	UPROPERTY(ReplicatedUsing = OnRep_ServerCharacterState)
+	ECharacterState ServerCharacterState;
+	UPROPERTY(ReplicatedUsing = OnRep_ClientCharacterState)
+	ECharacterState ClientCharacterState;
+
 	UFUNCTION()
 	void OnRep_bIsLobbyFull();
 
-	void CheckSelectedCharacter();
-
-	void SetupServer(ECharacterState NewServerState);
-	void SetupClient(ECharacterState NewClientState);
+	UFUNCTION()
+	void OnRep_ServerCharacterState();
+	UFUNCTION()
+	void OnRep_ClientCharacterState();
 
 public:
-	void SetbIsLobbyFull(bool bIsFull);
+	void SetLobbyFull(bool bFull);
+	void SetServerCharacterState(ECharacterState NewState);
+	void SetClientCharacterState(ECharacterState NewState);
 
 };

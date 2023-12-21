@@ -4,6 +4,7 @@
 #include "Sheriff.h"
 #include "Camera/CameraComponent.h"
 #include "Gunman.h"
+#include "ToolContextInterfaces.h"
 #include "WildWest/Controller/TownPlayerController.h"
 #include "WildWest/GameMode/TownGameMode.h"
 #include "WildWest/GameState/TownGameState.h"
@@ -13,6 +14,7 @@
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "WildWest/Input/InputConfigData.h"
 #include "WildWest/WildWestTypes/ScreenIndex.h"
 
@@ -82,12 +84,22 @@ void ASheriff::Tick(float DeltaTime)
 	}
 
 	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(GetWorld()->GetFirstPlayerController()) : TownPlayerController;
-	if (TownPlayerController == nullptr) return;
+	if (TownPlayerController == nullptr || TownGameState == nullptr) return;
 
 	TownPlayerController->SetSheriffHUDGauge(ControlTimer / InitialControlTimer);
-
-	Gunman = Gunman == nullptr ? Cast<AGunman>(UGameplayStatics::GetActorOfClass(this, AGunman::StaticClass())) : Gunman;
-	if (LineOfSightTo(Gunman))
+	
+	Gunman = Gunman == nullptr ? TownGameState->GetGunman() : Gunman;
+	
+	bool bShouldRender = false;
+	bShouldRender = LineOfSightTo(Gunman);
+	for (ASheriff* Sheriff : TownGameState->GetSheriffList())
+	{
+		if (Sheriff != this)
+		{
+			bShouldRender = bShouldRender || LineOfSightTo(Sheriff);
+		}
+	}
+	if (bShouldRender)
 	{
 		TownPlayerController->SetSheriffViewportRendered(SheriffIndex, true);
 	}
@@ -414,6 +426,7 @@ void ASheriff::SwitchCharacter(int32 Index, EScreenIndex ScreenIndex)
 	ASheriff* Sheriff = TownGameState->GetSheriffList()[Index - 1];
 	if (Sheriff)
 	{
+		Sheriff->GetCharacterMovement()->StopMovementImmediately();
 		PreviousDirection = Controller->GetControlRotation();
 		Controller->Possess(Sheriff);
 		Sheriff->Controller->SetControlRotation(Sheriff->GetPreviousDirection());

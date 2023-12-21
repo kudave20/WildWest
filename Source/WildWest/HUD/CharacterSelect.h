@@ -7,6 +7,8 @@
 #include "WildWest/GameState/LobbyGameState.h"
 #include "CharacterSelect.generated.h"
 
+class UButton;
+
 /**
  * 
  */
@@ -15,25 +17,20 @@ class WILDWEST_API UCharacterSelect : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	UFUNCTION(BlueprintCallable)
-	void CharacterSelectSetup();
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> GunmanButton;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> SheriffButton;
+
+	void CharacterSelectSetup();
+	
 protected:
 	virtual bool Initialize() override;
 
 private:
-	UPROPERTY(meta = (BindWidget))
-	class UButton* GunmanButton;
-
-	UPROPERTY(meta = (BindWidget))
-	UButton* SheriffButton;
-
 	UFUNCTION()
 	void GunmanButtonClicked();
-
 	UFUNCTION()
 	void SheriffButtonClicked();
-
-	void OnChangeServerCharacter(ECharacterState NewCharacterState);
-	void OnChangeClientCharacter(ECharacterState NewCharacterState);
 };

@@ -17,8 +17,4 @@ public:
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 	void TravelToTown();
 
-private:
-	bool bIsGunmanSelected;
-	bool bIsSheriffSelected;
-
 };

@@ -3,7 +3,8 @@
 
 #include "WildWestGameInstance.h"
 #include "WildWest/Controller/LobbyPlayerController.h"
-#include "Kismet/GameplayStatics.h"
+#include "WildWest/GameMode/LobbyGameMode.h"
+#include "WildWest/GameState/LobbyGameState.h"
 
 void UWildWestGameInstance::SetupServer(ECharacterState NewServerState)
 {
@@ -12,10 +13,10 @@ void UWildWestGameInstance::SetupServer(ECharacterState NewServerState)
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(UGameplayStatics::GetPlayerController(World, 1));
-		if (LobbyPlayerController)
+		ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
+		if (LobbyGameState)
 		{
-			LobbyPlayerController->ClientBroadcastServerCharacter(NewServerState);
+			LobbyGameState->SetServerCharacterState(NewServerState);
 		}
 	}
 }
@@ -27,11 +28,23 @@ void UWildWestGameInstance::SetupClient(ECharacterState NewClientState)
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		ALobbyPlayerController* LobbyPlayerController = Cast<ALobbyPlayerController>(World->GetFirstPlayerController());
-		if (LobbyPlayerController)
+		ALobbyGameState* LobbyGameState = World->GetGameState<ALobbyGameState>();
+		if (LobbyGameState)
 		{
-			LobbyPlayerController->SelectClientCharacterDelegate.Broadcast(NewClientState);
+			LobbyGameState->SetClientCharacterState(NewClientState);
 		}
+	}
+}
+
+void UWildWestGameInstance::CheckSelectedCharacter()
+{
+	if (ServerCharacterState == ECharacterState::ECS_None || ClientCharacterState == ECharacterState::ECS_None || ServerCharacterState == ClientCharacterState) return;
+	
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		ALobbyGameMode* LobbyGameMode = World->GetAuthGameMode<ALobbyGameMode>();
+		LobbyGameMode->TravelToTown();
 	}
 }
 

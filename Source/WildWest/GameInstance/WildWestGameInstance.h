@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
-#include "WildWest/GameState/LobbyGameState.h"
+#include "WildWest/WildWestTypes/CharacterState.h"
 #include "WildWestGameInstance.generated.h"
 
 /**
@@ -18,6 +18,8 @@ class WILDWEST_API UWildWestGameInstance : public UGameInstance
 public:
 	void SetupServer(ECharacterState NewServerState);
 	void SetupClient(ECharacterState NewClientState);
+
+	void CheckSelectedCharacter();
 
 	void ReplaceVaultList(FVector Key, bool Value);
 

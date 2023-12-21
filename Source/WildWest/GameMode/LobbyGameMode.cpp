@@ -15,7 +15,7 @@ void ALobbyGameMode::HandleStartingNewPlayer_Implementation(APlayerController* N
 		ALobbyGameState* LobbyGameState = Cast<ALobbyGameState>(GameState);
 		if (LobbyGameState)
 		{
-			LobbyGameState->SetbIsLobbyFull(true);
+			LobbyGameState->SetLobbyFull(true);
 		}
 	}
 }
