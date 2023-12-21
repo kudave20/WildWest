@@ -4,8 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "WildWest/WildWestTypes/ScreenIndex.h"
 #include "TownPlayerController.generated.h"
+
+enum class EScreenIndex : uint8;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNotifyDelegate);
 
@@ -36,6 +37,9 @@ public:
 	void SetSheriffHUDScreen(int32 ScreenIndex);
 	void SetSheriffHUDViewport(EScreenIndex ScreenIndex, EScreenIndex PreviousScreenIndex);
 	void SetSheriffHUDGauge(float GaugePercent);
+
+	void SetSheriffViewportRendered(EScreenIndex ScreenIndex, bool bRendered);
+	void DrawSheriffViewport(EScreenIndex ScreenIndex);
 
 protected:
 	virtual void BeginPlay() override;

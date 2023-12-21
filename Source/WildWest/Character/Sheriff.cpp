@@ -9,12 +9,12 @@
 #include "WildWest/GameState/TownGameState.h"
 #include "WildWest/GameInstance/WildWestGameInstance.h"
 #include "Kismet/GameplayStatics.h"
-#include "Net/UnrealNetwork.h"
 #include "Blueprint/UserWidget.h"
-#include "EnhancedInput/Public/InputMappingContext.h"
+#include "Components/CapsuleComponent.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
 #include "WildWest/Input/InputConfigData.h"
+#include "WildWest/WildWestTypes/ScreenIndex.h"
 
 ASheriff::ASheriff()
 {
@@ -81,10 +81,19 @@ void ASheriff::Tick(float DeltaTime)
 		}
 	}
 
-	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(Controller) : TownPlayerController;
-	if (TownPlayerController)
+	TownPlayerController = TownPlayerController == nullptr ? Cast<ATownPlayerController>(GetWorld()->GetFirstPlayerController()) : TownPlayerController;
+	if (TownPlayerController == nullptr) return;
+
+	TownPlayerController->SetSheriffHUDGauge(ControlTimer / InitialControlTimer);
+
+	Gunman = Gunman == nullptr ? Cast<AGunman>(UGameplayStatics::GetActorOfClass(this, AGunman::StaticClass())) : Gunman;
+	if (LineOfSightTo(Gunman))
 	{
-		TownPlayerController->SetSheriffHUDGauge(ControlTimer / InitialControlTimer);
+		TownPlayerController->SetSheriffViewportRendered(SheriffIndex, true);
+	}
+	else
+	{
+		TownPlayerController->SetSheriffViewportRendered(SheriffIndex, false);
 	}
 }
 
@@ -419,6 +428,7 @@ void ASheriff::ChangeHUDProperly(int32 Index, EScreenIndex ScreenIndex, EScreenI
 	{
 		TownPlayerController->SetSheriffHUDScreen(Index);
 		TownPlayerController->SetSheriffHUDViewport(ScreenIndex, PreviousScreenIndex);
+		TownPlayerController->DrawSheriffViewport(PreviousScreenIndex);
 		TownPlayerController->SetCurrentScreenIndex(ScreenIndex);
 	}
 }
@@ -475,12 +485,50 @@ bool ASheriff::TraceTowardGunman()
 		HitResult,
 		Start,
 		End,
-		ECollisionChannel::ECC_Visibility
+		ECC_Visibility
 	);
 
 	if (HitResult.GetActor() == nullptr || !HitResult.GetActor()->IsA(AGunman::StaticClass())) return false;
 
 	return true;
+}
+
+bool ASheriff::LineOfSightTo(AActor* OtherActor)
+{
+	if (OtherActor == nullptr) return false;
+
+	FVector ViewPoint;
+	FRotator ViewRotation;
+	GetActorEyesViewPoint(ViewPoint, ViewRotation);
+
+	FCollisionQueryParams CollisionParms(SCENE_QUERY_STAT(LineOfSight), true, OtherActor);
+	CollisionParms.AddIgnoredActor(this);
+	FVector TargetLocation = OtherActor->GetTargetLocation(this);
+	bool bHit = GetWorld()->LineTraceTestByChannel(ViewPoint, TargetLocation, ECC_Visibility, CollisionParms);
+	if(!bHit)
+	{
+		return true;
+	}
+	
+	if (!Cast<const APawn>(OtherActor) && Cast<UCapsuleComponent>(OtherActor->GetRootComponent()) == NULL)
+	{
+		return false;
+	}
+	float distSq = (OtherActor->GetActorLocation() - ViewPoint).SizeSquared();
+	if ( distSq > FARSIGHTTHRESHOLDSQUARED )
+	{
+		return false;
+	}
+	if ( !Cast<const APawn>(OtherActor) && (distSq > NEARSIGHTTHRESHOLDSQUARED) ) 
+	{
+		return false;
+	}
+
+	float OtherRadius, OtherHeight;
+	OtherActor->GetSimpleCollisionCylinder(OtherRadius, OtherHeight);
+	
+	bHit = GetWorld()->LineTraceTestByChannel(ViewPoint,  OtherActor->GetActorLocation() + FVector(0.f,0.f,OtherHeight), ECC_Visibility, CollisionParms);
+	return !bHit;
 }
 
 void ASheriff::EnterDuel()
@@ -491,7 +539,7 @@ void ASheriff::EnterDuel()
 	TownGameState = TownGameState == nullptr ? World->GetGameState<ATownGameState>() : TownGameState;
 	if (TownGameState == nullptr) return;
 
-	AGunman* Gunman = TownGameState->GetGunman();
+	Gunman = Gunman == nullptr ? TownGameState->GetGunman() : Gunman;
 	TArray<ASheriff*>& SheriffList = TownGameState->GetSheriffList();
 
 	WildWestGameInstance = WildWestGameInstance == nullptr ? GetGameInstance<UWildWestGameInstance>() : WildWestGameInstance;

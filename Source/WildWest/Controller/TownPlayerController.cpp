@@ -13,10 +13,10 @@
 #include "Components/TextBlock.h"
 #include "WildWest/HUD/GameViewportWidget.h"
 #include "Components/Image.h"
-#include "EnhancedInput/Public/InputMappingContext.h"
 #include "EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "EnhancedInput/Public/EnhancedInputComponent.h"
 #include "WildWest/Input/InputConfigData.h"
+#include "WildWest/WildWestTypes/ScreenIndex.h"
 
 void ATownPlayerController::ClientRemovePlayer_Implementation()
 {
@@ -289,6 +289,74 @@ void ATownPlayerController::SetSheriffHUDGauge(float GaugePercent)
 		{
 			GaugeMaterialInstance->SetScalarParameterValue(FName("GaugePercent"), GaugePercent);
 		}
+	}
+}
+
+void ATownPlayerController::SetSheriffViewportRendered(EScreenIndex ScreenIndex, bool bRendered)
+{
+	SheriffHUD = SheriffHUD == nullptr ? Cast<ASheriffHUD>(GetHUD()) : SheriffHUD;
+	if (SheriffHUD == nullptr || SheriffHUD->SheriffOverlay == nullptr) return;
+	
+	switch (ScreenIndex)
+	{
+	case EScreenIndex::ECI_First:
+		if (SheriffHUD->SheriffOverlay->FirstViewport)
+		{
+			SheriffHUD->SheriffOverlay->FirstViewport->SetViewportRendered(bRendered);
+		}
+		break;
+	case EScreenIndex::ECI_Second:
+		if (SheriffHUD->SheriffOverlay->SecondViewport)
+		{
+			SheriffHUD->SheriffOverlay->SecondViewport->SetViewportRendered(bRendered);
+		}
+		break;
+	case EScreenIndex::ECI_Third:
+		if (SheriffHUD->SheriffOverlay->ThirdViewport)
+		{
+			SheriffHUD->SheriffOverlay->ThirdViewport->SetViewportRendered(bRendered);
+		}
+		break;
+	case EScreenIndex::ECI_Fourth:
+		if (SheriffHUD->SheriffOverlay->FourthViewport)
+		{
+			SheriffHUD->SheriffOverlay->FourthViewport->SetViewportRendered(bRendered);
+		}
+		break;
+	}
+}
+
+void ATownPlayerController::DrawSheriffViewport(EScreenIndex ScreenIndex)
+{
+	SheriffHUD = SheriffHUD == nullptr ? Cast<ASheriffHUD>(GetHUD()) : SheriffHUD;
+	if (SheriffHUD == nullptr || SheriffHUD->SheriffOverlay == nullptr) return;
+	
+	switch (ScreenIndex)
+	{
+	case EScreenIndex::ECI_First:
+		if (SheriffHUD->SheriffOverlay->FirstViewport)
+		{
+			SheriffHUD->SheriffOverlay->FirstViewport->Draw();
+		}
+		break;
+	case EScreenIndex::ECI_Second:
+		if (SheriffHUD->SheriffOverlay->SecondViewport)
+		{
+			SheriffHUD->SheriffOverlay->SecondViewport->Draw();
+		}
+		break;
+	case EScreenIndex::ECI_Third:
+		if (SheriffHUD->SheriffOverlay->ThirdViewport)
+		{
+			SheriffHUD->SheriffOverlay->ThirdViewport->Draw();
+		}
+		break;
+	case EScreenIndex::ECI_Fourth:
+		if (SheriffHUD->SheriffOverlay->FourthViewport)
+		{
+			SheriffHUD->SheriffOverlay->FourthViewport->Draw();
+		}
+		break;
 	}
 }
 

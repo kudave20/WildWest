@@ -9,8 +9,10 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
 #include "CanvasTypes.h"
+#include "Toolkits/IToolkit.h"
 
-FCustomGameViewport::FCustomGameViewport(TWeakObjectPtr<UWorld> InWorld, const FPostProcessSettings& InPostProcessSettings) : EngineShowFlags(ESFIM_Game)
+FCustomGameViewport::FCustomGameViewport(TWeakObjectPtr<UWorld> InWorld, const FPostProcessSettings& InPostProcessSettings) 
+	: EngineShowFlags(ESFIM_Game)
 	, World(InWorld)
 	, PostProcessSettings(InPostProcessSettings)
 {
@@ -22,80 +24,19 @@ FCustomGameViewport::~FCustomGameViewport()
 	World.Reset();
 }
 
-FSceneView* FCustomGameViewport::CalcSceneView(FSceneViewFamily* ViewFamily)
-{
-	FSceneViewInitOptions ViewInitOptions;
-
-	const APlayerCameraManager* PCM = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-
-	const FVector& ViewLocation = bUsePlayerCamLocation ? (PCM ? PCM->GetCameraLocation() : FVector::ZeroVector) : CameraLocation;
-	const FRotator& ViewRotation = bUsePlayerCamRotation ? (PCM ? PCM->GetCameraRotation() : FRotator::ZeroRotator) : CameraRotation;
-
-	const FIntPoint ViewportSizeXY = Viewport->GetSizeXY();
-
-	FIntRect ViewRect = FIntRect(0, 0, ViewportSizeXY.X, ViewportSizeXY.Y);
-	ViewInitOptions.SetViewRectangle(ViewRect);
-
-	ViewInitOptions.ViewOrigin = ViewLocation;
-
-	ViewInitOptions.ViewRotationMatrix = FInverseRotationMatrix(ViewRotation);
-	ViewInitOptions.ViewRotationMatrix = ViewInitOptions.ViewRotationMatrix * FMatrix(
-		FPlane(0, 0, 1, 0),
-		FPlane(1, 0, 0, 0),
-		FPlane(0, 1, 0, 0),
-		FPlane(0, 0, 0, 1));
-
-	const EAspectRatioAxisConstraint AspectRatioAxisConstraint = GetDefault<ULocalPlayer>()->AspectRatioAxisConstraint;
-
-	FMinimalViewInfo::CalculateProjectionMatrixGivenView(ViewInfo, AspectRatioAxisConstraint, Viewport, /*inout*/ ViewInitOptions);
-
-	ViewInitOptions.ViewFamily = ViewFamily;
-	ViewInitOptions.SceneViewStateInterface = ViewState.GetReference();
-	ViewInitOptions.ViewElementDrawer = this;
-
-	ViewInitOptions.BackgroundColor = GetBackgroundColor();
-	FSceneView* View = new FSceneView(ViewInitOptions);
-	View->AntiAliasingMethod = AAM_FXAA;
-	ViewFamily->Views.Add(View);
-
-	View->StartFinalPostprocessSettings(ViewLocation);
-	View->OverridePostProcessSettings(PostProcessSettings, 1.f);
-	View->EndFinalPostprocessSettings(ViewInitOptions);
-
-	View->CameraConstrainedViewRect = View->UnscaledViewRect;
-
-	return View;
-}
-
 void FCustomGameViewport::Draw(FViewport* InViewport, FCanvas* Canvas)
 {
 	FViewport* ViewportBackup = Viewport;
 	Viewport = InViewport ? InViewport : Viewport;
-
-	float TimeSeconds;
-	float RealTimeSeconds;
-	float DeltaTimeSeconds;
-
-	constexpr bool bIsRealTime = true;
-	if (bIsRealTime || GetScene() != GetWorld()->Scene)
-	{
-		TimeSeconds = FApp::GetCurrentTime() - GStartTime;
-		RealTimeSeconds = FApp::GetCurrentTime() - GStartTime;
-		DeltaTimeSeconds = FApp::GetDeltaTime();
-	}
-	else
-	{
-		TimeSeconds = GetWorld()->GetTimeSeconds();
-		RealTimeSeconds = GetWorld()->GetRealTimeSeconds();
-		DeltaTimeSeconds = GetWorld()->GetDeltaSeconds();
-	}
+	
+	FGameTime Time = FGameTime::GetTimeSinceAppStart();
 
 	FSceneViewFamilyContext ViewFamily(FSceneViewFamily::ConstructionValues(
 		Canvas->GetRenderTarget(),
 		GetScene(),
 		EngineShowFlags)
-		.SetWorldTimes(TimeSeconds, DeltaTimeSeconds, RealTimeSeconds)
-		.SetRealtimeUpdate(bIsRealTime));
+		.SetTime(Time)
+		.SetRealtimeUpdate(true));
 
 	CalcSceneView(&ViewFamily);
 	
@@ -124,6 +65,51 @@ void FCustomGameViewport::Draw(FViewport* InViewport, FCanvas* Canvas)
 	}
 
 	Viewport = ViewportBackup;
+}
+
+FSceneView* FCustomGameViewport::CalcSceneView(FSceneViewFamily* ViewFamily)
+{
+	FSceneViewInitOptions ViewInitOptions;
+
+	const APlayerCameraManager* PCM = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+
+	const FVector& ViewLocation = bUsePlayerCamLocation ? (PCM ? PCM->GetCameraLocation() : FVector::ZeroVector) : CameraLocation;
+	const FRotator& ViewRotation = bUsePlayerCamRotation ? (PCM ? PCM->GetCameraRotation() : FRotator::ZeroRotator) : CameraRotation;
+
+	const FIntPoint ViewportSizeXY = Viewport->GetSizeXY();
+
+	FIntRect ViewRect = FIntRect(0, 0, ViewportSizeXY.X, ViewportSizeXY.Y);
+	ViewInitOptions.SetViewRectangle(ViewRect);
+
+	ViewInitOptions.ViewOrigin = ViewLocation;
+
+	ViewInitOptions.ViewRotationMatrix = FInverseRotationMatrix(ViewRotation);
+	ViewInitOptions.ViewRotationMatrix = ViewInitOptions.ViewRotationMatrix * FMatrix(
+		FPlane(0, 0, 1, 0),
+		FPlane(1, 0, 0, 0),
+		FPlane(0, 1, 0, 0),
+		FPlane(0, 0, 0, 1));
+
+	const EAspectRatioAxisConstraint AspectRatioAxisConstraint = GetDefault<ULocalPlayer>()->AspectRatioAxisConstraint;
+
+	FMinimalViewInfo::CalculateProjectionMatrixGivenView(ViewInfo, AspectRatioAxisConstraint, Viewport, ViewInitOptions);
+
+	ViewInitOptions.ViewFamily = ViewFamily;
+	ViewInitOptions.SceneViewStateInterface = ViewState.GetReference();
+	ViewInitOptions.ViewElementDrawer = this;
+
+	ViewInitOptions.BackgroundColor = GetBackgroundColor();
+	FSceneView* View = new FSceneView(ViewInitOptions);
+	View->AntiAliasingMethod = AAM_FXAA;
+	ViewFamily->Views.Add(View);
+
+	View->StartFinalPostprocessSettings(ViewLocation);
+	View->OverridePostProcessSettings(PostProcessSettings, 1.f);
+	View->EndFinalPostprocessSettings(ViewInitOptions);
+
+	View->CameraConstrainedViewRect = View->UnscaledViewRect;
+
+	return View;
 }
 
 UWorld* FCustomGameViewport::GetWorld() const
@@ -204,4 +190,14 @@ void UGameViewportWidget::SetCameraLocation(const bool bUsePlayerCameraManagerLo
 void UGameViewportWidget::SetCameraRotation(const bool bUsePlayerCameraManagerRotation /*= true*/, const FRotator InOverrideRotation /*= FRotator::ZeroRotator*/)
 {
 	ViewportWidget->SetCameraRotation(bUsePlayerCameraManagerRotation, InOverrideRotation);
+}
+
+void UGameViewportWidget::SetViewportRendered(const bool bRendered)
+{
+	ViewportWidget->SetCanTick(bRendered);
+}
+
+void UGameViewportWidget::Draw()
+{
+	ViewportWidget->Viewport->Draw();
 }

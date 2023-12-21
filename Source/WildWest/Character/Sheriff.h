@@ -4,11 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "WildWest/WildWestTypes/ScreenIndex.h"
 #include "EnhancedInput/Public/InputActionValue.h"
 #include "Sheriff.generated.h"
 
 #define ARM_LENGTH 150.f
+#define FARSIGHTTHRESHOLDSQUARED 8000.f * 8000.f
+#define NEARSIGHTTHRESHOLDSQUARED 2000.f * 2000.f
+
+enum class EScreenIndex : uint8;
 
 UCLASS()
 class WILDWEST_API ASheriff : public ACharacter
@@ -25,7 +28,6 @@ public:
 	void SetInitialCharacter(int32 CurrentSheriffNum, bool bShouldStun);
 	
 	void StartStunTimer();
-
 	UFUNCTION(Client, Reliable)
 	void ClientStartStunTimer();
 
@@ -102,9 +104,17 @@ private:
 	UPROPERTY()
 	UUserWidget* Stun;
 
+	UPROPERTY()
+	class AGunman* Gunman;
+
 	bool TraceTowardGunman();
+
+	EScreenIndex SheriffIndex;
+
+	bool LineOfSightTo(AActor* OtherActor);
 
 public:
 	FORCEINLINE FRotator GetPreviousDirection() const { return PreviousDirection; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return Camera; }
+	FORCEINLINE void SetSheriffIndex(EScreenIndex NewIndex) { SheriffIndex = NewIndex; }
 };

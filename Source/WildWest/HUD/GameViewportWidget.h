@@ -125,5 +125,8 @@ public:
 
 	void SetCameraLocation(const bool bUsePlayerCameraManagerLocation = true, const FVector InOverrideLocation = FVector::ZeroVector);
 	void SetCameraRotation(const bool bUsePlayerCameraManagerRotation = true, const FRotator InOverrideRotation = FRotator::ZeroRotator);
+
+	void SetViewportRendered(const bool bRendered);
+	void Draw();
 	
 };

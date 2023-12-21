@@ -40,10 +40,14 @@ void ATownGameMode::InitGame(const FString& MapName, const FString& Options, FSt
 
 		TArray<AActor*> PlayerStarts;
 		UGameplayStatics::GetAllActorsOfClass(this, APlayerStart::StaticClass(), PlayerStarts);
-		for (AActor* PlayerStart : PlayerStarts)
+		for (int32 Index = 0; Index < PlayerStarts.Num(); ++Index)
 		{
-			ASheriff* Sheriff = World->SpawnActor<ASheriff>(SheriffClass, PlayerStart->GetActorTransform());
+			ASheriff* Sheriff = World->SpawnActor<ASheriff>(SheriffClass, PlayerStarts[Index]->GetActorTransform());
 			SheriffList.Add(Sheriff);
+			if (Sheriff)
+			{
+				Sheriff->SetSheriffIndex(static_cast<EScreenIndex>(Index));
+			}
 		}
 	}
 	else
