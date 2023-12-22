@@ -9,6 +9,7 @@
 #include "WildWest/Character/Gunman.h"
 #include "WildWest/Character/Sheriff.h"
 #include "WildWest/GameInstance/WildWestGameInstance.h"
+#include "WildWest/Props/Vault.h"
 
 void ATownGameMode::TravelToDuel()
 {
@@ -89,5 +90,48 @@ void ATownGameMode::HandleStartingNewPlayer_Implementation(APlayerController* Ne
 	if (TownPlayerController)
 	{
 		TownPlayerController->InitialPossess();
+	}
+}
+
+void ATownGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
+	if (WildWestGameInstance == nullptr) return;
+
+	if (WildWestGameInstance->IsGameStarted())
+	{
+		for (auto VaultTransform : WildWestGameInstance->GetVaultTransformList())
+		{
+			AVault* Vault = GetWorld()->SpawnActor<AVault>(VaultClass, VaultTransform);
+			if (Vault)
+			{
+				TMap<FVector, bool> VaultList = WildWestGameInstance->GetVaultList();
+				Vault->SetbIsOpened(VaultList[VaultTransform.GetLocation()]);
+				if (VaultList[VaultTransform.GetLocation()])
+				{
+					Vault->OpenDoor();
+				}
+			}
+		}
+	}
+	else
+	{
+		TArray<AActor*> VaultCaseList;
+		UGameplayStatics::GetAllActorsOfClass(this, VaultCaseClass, VaultCaseList);
+		for (int32 Index = 0; Index < NumberOfVault; ++Index)
+		{
+			AActor* VaultCase = VaultCaseList[FMath::RandRange(0, VaultCaseList.Num())];
+			if (VaultCase)
+			{
+				FTransform VaultTransform = VaultCase->GetTransform();
+				GetWorld()->SpawnActor<AActor>(VaultClass, VaultTransform);
+				VaultCaseList.Remove(VaultCase);
+				WildWestGameInstance->GetVaultTransformList().Add(VaultTransform);
+				WildWestGameInstance->GetVaultList().Add(VaultTransform.GetLocation(), false);
+				WildWestGameInstance->StartGame(true);
+			}
+		}
 	}
 }

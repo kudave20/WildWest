@@ -111,61 +111,16 @@ void UReturnToMainMenu::OnDestroySession(bool bWasSuccessful)
 			AGameModeBase* GameMode = World->GetAuthGameMode<AGameModeBase>();
 			if (GameMode)
 			{
-				/*PlayerController = PlayerController == nullptr ? World->GetFirstPlayerController() : PlayerController;
-
-				for (ATownPlayerController* TownPC : TActorRange<ATownPlayerController>(World))
-				{
-					if (TownPC && !TownPC->IsPrimaryPlayer())
-					{
-						if (TownPC->IsLocalPlayerController())
-						{
-							UGameplayStatics::RemovePlayer(TownPC, true);
-						}
-						else
-						{
-							TownPC->ClientRemovePlayer();
-						}
-					}
-				}
-
-				for (ADuelPlayerController* DuelPC : TActorRange<ADuelPlayerController>(World))
-				{
-					if (DuelPC && !DuelPC->IsPrimaryPlayer())
-					{
-						if (DuelPC->IsLocalPlayerController())
-						{
-							UGameplayStatics::RemovePlayer(DuelPC, true);
-						}
-						else
-						{
-							DuelPC->ClientRemovePlayer();
-						}
-					}
-				}*/
-
 				GameMode->ReturnToMainMenuHost();
 			}
 			else
 			{
 				PlayerController = PlayerController == nullptr ? World->GetFirstPlayerController() : PlayerController;
-				/*
-				for (APlayerController* PC : TActorRange<APlayerController>(World))
-				{
-					if (PC && !PC->IsPrimaryPlayer())
-					{
-						UGameplayStatics::RemovePlayer(PC, true);
-					}
-				}
-
 				ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(PlayerController);
 				if (TownPlayerController)
 				{
 					TownPlayerController->ServerNotifyDisconnected();
-				}*/
-
-				if (PlayerController)
-				{
-					PlayerController->ClientReturnToMainMenuWithTextReason(FText());
+					TownPlayerController->ClientReturnToMainMenuWithTextReason(FText());
 				}
 			}
 		}

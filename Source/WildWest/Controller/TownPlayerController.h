@@ -7,8 +7,11 @@
 #include "TownPlayerController.generated.h"
 
 enum class EScreenIndex : uint8;
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNotifyDelegate);
+class UInputMappingContext;
+class UInputConfigData;
+class ASheriffHUD;
+class UReturnToMainMenu;
+class ATownGameState;
 
 /**
  * 
@@ -19,18 +22,12 @@ class WILDWEST_API ATownPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(Client, Reliable)
-	void ClientRemovePlayer();
-
 	UFUNCTION(Server, Reliable)
 	void ServerNotifyDisconnected();
 
-	/*UFUNCTION(Client, Reliable)
-	void ClientDestroySession();*/
-
-	UPROPERTY(BlueprintAssignable)
-	FOnNotifyDelegate NotifyDelegate;
-
+	UFUNCTION(Client, Reliable, BlueprintCallable)
+	void ClientCreateGunmanVictory();
+	
 	void InitialPossess();
 
 	void SheriffHUDSetup(APawn* InPawn);
@@ -48,14 +45,14 @@ protected:
 	void ShowReturnToMainMenu();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
-	class UInputMappingContext* InputMapping;
+	TObjectPtr<UInputMappingContext> InputMapping;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enhanced Input")
-	class UInputConfigData* InputActions;
+	TObjectPtr<UInputConfigData> InputActions;
 
 private:
 	UPROPERTY()
-	class ATownGameState* TownGameState;
+	TObjectPtr<ATownGameState> TownGameState;
 
 	EScreenIndex CurrentScreenIndex;
 
@@ -63,13 +60,19 @@ private:
 	TSubclassOf<AHUD> SheriffHUDClass;
 
 	UPROPERTY()
-	class ASheriffHUD* SheriffHUD;
+	ASheriffHUD* SheriffHUD;
 	
 	UPROPERTY(EditAnywhere, Category = HUD)
-	TSubclassOf<UUserWidget> ReturnToMainMenuWidget;
+	TSubclassOf<UUserWidget> ReturnToMainMenuClass;
 
 	UPROPERTY()
-	class UReturnToMainMenu* ReturnToMainMenu;
+	UReturnToMainMenu* ReturnToMainMenu;
+
+	UPROPERTY(EditAnywhere, Category = HUD)
+	TSubclassOf<UUserWidget> NotifyClass;
+
+	UPROPERTY(EditAnywhere, Category = HUD)
+	TSubclassOf<UUserWidget> GunmanVictoryClass;
 
 	bool bReturnToMainMenuOpen = false;
 

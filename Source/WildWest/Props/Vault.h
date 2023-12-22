@@ -6,8 +6,6 @@
 #include "GameFramework/Actor.h"
 #include "Vault.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOpenDoorDelegate);
-
 UCLASS()
 class WILDWEST_API AVault : public AActor
 {
@@ -15,20 +13,16 @@ class WILDWEST_API AVault : public AActor
 	
 public:	
 	AVault();
-	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(BlueprintAssignable)
-	FOnOpenDoorDelegate OpenDoorDelegate;
-
-protected:
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintImplementableEvent)
+	void OpenDoor();
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Vault Properties")
-	UStaticMeshComponent* VaultMesh;
+	TObjectPtr<UStaticMeshComponent> VaultMesh;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Vault Properties", meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* VaultDoorMesh;
+	TObjectPtr<UStaticMeshComponent> VaultDoorMesh;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Timer")
 	float MaxOpenTimer;

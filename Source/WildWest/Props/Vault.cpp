@@ -2,8 +2,6 @@
 
 
 #include "Vault.h"
-#include "WildWest/Character/Gunman.h"
-#include "WildWest/GameInstance/WildWestGameInstance.h"
 
 AVault::AVault()
 {
@@ -16,16 +14,4 @@ AVault::AVault()
 	VaultDoorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VaultDoorMesh"));
 	VaultDoorMesh->SetupAttachment(RootComponent);
 	VaultDoorMesh->SetIsReplicated(true);
-}
-
-void AVault::BeginPlay()
-{
-	Super::BeginPlay();
-
-}
-
-void AVault::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }

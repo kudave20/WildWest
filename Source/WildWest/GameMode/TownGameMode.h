@@ -6,6 +6,10 @@
 #include "GameFramework/GameMode.h"
 #include "TownGameMode.generated.h"
 
+class AGunman;
+class ASheriff;
+class AVault;
+
 /**
  * 
  */
@@ -19,6 +23,9 @@ public:
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 
+protected:
+	virtual void BeginPlay() override;
+
 private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> GunmanStartClass;
@@ -27,12 +34,21 @@ private:
 	TSubclassOf<AActor> GunmanClass;
 
 	UPROPERTY()
-	class AGunman* Gunman;
+	AGunman* Gunman;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> SheriffClass;
 
 	UPROPERTY()
-	TArray<class ASheriff*> SheriffList;
+	TArray<ASheriff*> SheriffList;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> VaultClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> VaultCaseClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess = "true"))
+	int32 NumberOfVault;
+	
 };

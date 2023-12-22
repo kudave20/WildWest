@@ -232,7 +232,7 @@ void AGunman::OpenVault()
 
 			if (HasAuthority())
 			{
-				TargetVault->OpenDoorDelegate.Broadcast();
+				TargetVault->OpenDoor();
 				WildWestGameInstance->AddVaultOpened(1);
 				WildWestGameInstance->ReplaceVaultList(TargetVault->GetActorLocation(), true);
 			}
@@ -285,7 +285,7 @@ void AGunman::ServerOpenVault_Implementation()
 {
 	if (TargetVault)
 	{
-		TargetVault->OpenDoorDelegate.Broadcast();
+		TargetVault->OpenDoor();
 		UWildWestGameInstance* WildWestGameInstance = GetGameInstance<UWildWestGameInstance>();
 		if (WildWestGameInstance)
 		{

@@ -3,7 +3,6 @@
 
 #include "TownPlayerController.h"
 #include "WildWest/HUD/ReturnToMainMenu.h"
-#include "Kismet/GameplayStatics.h"
 #include "WildWest/GameInstance/WildWestGameInstance.h"
 #include "WildWest/GameState/TownGameState.h"
 #include "WildWest/Character/Gunman.h"
@@ -18,20 +17,48 @@
 #include "WildWest/Input/InputConfigData.h"
 #include "WildWest/WildWestTypes/ScreenIndex.h"
 
-void ATownPlayerController::ClientRemovePlayer_Implementation()
-{
-	UGameplayStatics::RemovePlayer(this, true);
-}
-
 void ATownPlayerController::ServerNotifyDisconnected_Implementation()
 {
-	UWorld* World = GetWorld();
-	if (World)
+	if (NotifyClass)
 	{
-		ATownPlayerController* TownPlayerController = Cast<ATownPlayerController>(World->GetFirstPlayerController());
-		if (TownPlayerController)
+		UUserWidget* Notify = CreateWidget(this, NotifyClass);
+		if (Notify)
 		{
-			TownPlayerController->NotifyDelegate.Broadcast();
+			Notify->AddToViewport();
+		}
+	}
+	if (ReturnToMainMenuClass)
+	{
+		if (ReturnToMainMenu == nullptr)
+		{
+			ReturnToMainMenu = CreateWidget<UReturnToMainMenu>(this, ReturnToMainMenuClass);
+		}
+		if (ReturnToMainMenu)
+		{
+			ReturnToMainMenu->MenuSetup();
+		}
+	}
+}
+
+void ATownPlayerController::ClientCreateGunmanVictory_Implementation()
+{
+	if (GunmanVictoryClass)
+	{
+		UUserWidget* GunmanVictory = CreateWidget(this, GunmanVictoryClass);
+		if (GunmanVictory)
+		{
+			GunmanVictory->AddToViewport();
+		}
+	}
+	if (ReturnToMainMenuClass)
+	{
+		if (ReturnToMainMenu == nullptr)
+		{
+			ReturnToMainMenu = CreateWidget<UReturnToMainMenu>(this, ReturnToMainMenuClass);
+		}
+		if (ReturnToMainMenu)
+		{
+			ReturnToMainMenu->MenuSetup();
 		}
 	}
 }
@@ -389,10 +416,10 @@ void ATownPlayerController::SetupInputComponent()
 
 void ATownPlayerController::ShowReturnToMainMenu()
 {
-	if (ReturnToMainMenuWidget == nullptr) return;
+	if (ReturnToMainMenuClass == nullptr) return;
 	if (ReturnToMainMenu == nullptr)
 	{
-		ReturnToMainMenu = CreateWidget<UReturnToMainMenu>(this, ReturnToMainMenuWidget);
+		ReturnToMainMenu = CreateWidget<UReturnToMainMenu>(this, ReturnToMainMenuClass);
 	}
 	if (ReturnToMainMenu)
 	{

@@ -29,10 +29,8 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
 	ECharacterState ClientCharacterState;
-
-	UPROPERTY(BlueprintReadWrite, Category = "Flag", meta = (AllowPrivateAccess = "true"))
+	
 	bool bIsGameStarted;
-
 	bool bLastChase;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Transform", meta = (AllowPrivateAccess = "true"))
@@ -57,6 +55,7 @@ public:
 	FORCEINLINE ECharacterState GetClientCharacterState() const { return ClientCharacterState; }
 	FORCEINLINE void SetServerCharacterState(ECharacterState NewState) { ServerCharacterState = NewState; }
 	FORCEINLINE void SetClientCharacterState(ECharacterState NewState) { ClientCharacterState = NewState; }
+	FORCEINLINE bool IsGameStarted() const { return bIsGameStarted; }
 	FORCEINLINE void StartGame(bool bIsStarted) { bIsGameStarted = bIsStarted; }
 	FORCEINLINE bool IsLastChase() const { return bLastChase; }
 	FORCEINLINE void ChaseLastly(bool bLast) { bLastChase = bLast; }
